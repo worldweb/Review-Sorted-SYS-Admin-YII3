@@ -1,0 +1,17 @@
+# PHP 8.5 FastCGI configuration (consistent with sys)
+<FilesMatch "\.php$">
+    SetHandler "proxy:fcgi://127.0.0.1:9085/"
+    ProxyFCGISetEnvIf "true" SCRIPT_FILENAME "%{DOCUMENT_ROOT}%{reqenv:SCRIPT_NAME}"
+</FilesMatch>
+
+# Deny access to sensitive files
+<FilesMatch "^\.env|composer\.(json|lock)">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . index.php [L]
+</IfModule>
