@@ -50,7 +50,7 @@ final class SocialPostCreateAction
 
         $fbConfigs = $this->connectionRepo->findFacebookConfigs($context, 100);
         $googleConfigs = $this->connectionRepo->findGoogleConfigs($context, 100);
-        $groups = $this->groupRepo->findAllForAccount($currentUser->getAccountId() ?? 0, $context);
+        $groups = $this->groupRepo->findAll($context, $currentUser->getAccountId(), 1, 100);
 
         if ($request->getMethod() === 'POST') {
             $parsedBody = (array) $request->getParsedBody();

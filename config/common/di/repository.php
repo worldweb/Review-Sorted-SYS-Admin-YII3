@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Domain\Account\AccountRepository;
 use App\Domain\Account\AccountRepositoryInterface;
-use App\Domain\Chat\ChatRepository;
-use App\Domain\Chat\ChatRepositoryInterface;
 use App\Domain\Email\EmailRepository;
 use App\Domain\Email\EmailRepositoryInterface;
 use App\Domain\LocationGroup\LocationGroupRepository;
@@ -54,7 +52,6 @@ return [
     SocialConnectionRepositoryInterface::class => SocialConnectionRepository::class,
     SocialPostRepositoryInterface::class => SocialPostRepository::class,
     SubscriptionRepositoryInterface::class => SubscriptionRepository::class,
-    ChatRepositoryInterface::class => ChatRepository::class,
 
     // Authentication Credential Repository (isolated from domain DTOs)
     UserAuthenticationRepositoryInterface::class => UserAuthenticationRepository::class,

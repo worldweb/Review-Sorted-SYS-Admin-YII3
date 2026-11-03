@@ -2,54 +2,43 @@
 
 declare(strict_types=1);
 
+use Yiisoft\Html\Html;
+
 /**
+ * Create Subscription Plan View (Yii 3 Modern Theme)
+ *
  * @var App\Domain\User\User $currentUser
  * @var Yiisoft\Session\Flash\Flash $flash
  * @var string $csrfToken
+ * @var Yiisoft\View\WebView $this
  */
 
 $this->setTitle('Create New Plan');
+
+$title = 'Create Subscription Plan';
+$description = 'Define a new tier with pricing, seat limits, and platform features.';
+$actions = [
+    '<a href="/sys-yii3/subscription" class="rs-btn rs-btn--outline">← Back to Plans</a>'
+];
+include __DIR__ . '/../../Shared/Components/_page_header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h2 class="h3 font-weight-bold text-gray-800 mb-1">
-                        <i class="bi bi-plus-circle text-primary me-2"></i>Create New Subscription Plan
-                    </h2>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="/sys-yii3/subscription">Subscription Plans</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Create Plan</li>
-                        </ol>
-                    </nav>
-                </div>
-                <div>
-                    <a href="/sys-yii3/subscription" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i> Back to Plans
-                    </a>
-                </div>
-            </div>
+<div class="rs-page">
+    <?php if ($flash->has('error')): ?>
+        <div class="rs-alert rs-alert--danger rs-mb-4" role="alert">
+            <?= Html::encode((string) $flash->get('error')) ?>
+        </div>
+    <?php endif; ?>
 
-            <?php if ($flash->has('error')): ?>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <?= htmlspecialchars((string) $flash->get('error')) ?>
-                </div>
-            <?php endif; ?>
-
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 border-bottom">
-                    <h6 class="m-0 font-weight-bold text-primary">Plan Information</h6>
-                </div>
-                <div class="card-body">
-                    <?= $this->render('_form', [
-                        'model' => null,
-                        'csrfToken' => $csrfToken,
-                    ]) ?>
-                </div>
-            </div>
+    <div class="rs-card" style="max-width: 800px; margin: 0 auto;">
+        <div class="rs-card__header" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
+            <h3 class="rs-card__title" style="margin: 0; font-size: 1.05rem; font-weight: 700;">Plan Properties</h3>
+        </div>
+        <div class="rs-card__body rs-p-6" style="padding: 24px;">
+            <?= $this->render('_form', [
+                'model' => null,
+                'csrfToken' => $csrfToken,
+            ]) ?>
         </div>
     </div>
 </div>

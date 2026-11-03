@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Yiisoft\Html\Html;
+
 /**
  * @var App\Domain\SocialConnection\ServiceConfig $model
  * @var string $csrfToken
@@ -11,82 +13,62 @@ declare(strict_types=1);
 $this->setTitle('Edit Facebook Connection: ' . $model->getDisplayName());
 ?>
 
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2 class="h3 font-weight-bold text-gray-800 mb-1">
-                        <i class="bi bi-pencil-square text-primary me-2"></i>Edit Facebook Connection
-                    </h2>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="/sys-yii3/settings/facebook">Facebook Settings</a></li>
-                            <li class="breadcrumb-item"><a href="/sys-yii3/settings/facebook/view?id=<?= $model->getId() ?>"><?= htmlspecialchars($model->getDisplayName()) ?></a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Edit</li>
-                        </ol>
-                    </nav>
-                </div>
-                <div>
-                    <a href="/sys-yii3/settings/facebook/view?id=<?= $model->getId() ?>" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i> Cancel
-                    </a>
-                </div>
-            </div>
+<div class="rs-container">
+    <?= $this->render('../partials/_header', [
+        'title' => 'Edit Settings: ' . $model->getDisplayName(),
+        'subtitle' => 'Update internal labels and alert notification settings.'
+    ]) ?>
 
-            <?php if ($flash->has('error')): ?>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <?= htmlspecialchars((string) $flash->get('error')) ?>
-                </div>
-            <?php endif; ?>
+    <?php if ($flash->has('error')): ?>
+        <div class="rs-alert rs-alert--danger rs-mb-4" role="alert">
+            <?= Html::encode((string) $flash->get('error')) ?>
         </div>
-    </div>
+    <?php endif; ?>
 
-    <div class="row">
-        <div class="col-lg-3 col-md-4 mb-4">
-            <?= $this->render('../_nav', ['activeTab' => 'facebook']) ?>
-        </div>
+    <div class="rs-card rs-card--shadow" style="background:#fff; border-radius:8px; border:1px solid #e2e8f0; max-width: 700px;">
+        <?= $this->render('../partials/_card_header', [
+            'title' => 'Facebook Connection Configuration',
+            'subtitle' => 'Configure alerts and display preferences'
+        ]) ?>
+        <div class="rs-card__body rs-p-4" style="padding: 1.5rem;">
+            <form method="post" action="/sys-yii3/settings/facebook/update?id=<?= $model->getId() ?>">
+                <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
 
-        <div class="col-lg-9 col-md-8">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 border-bottom">
-                    <h6 class="m-0 font-weight-bold text-primary">Edit Settings for <?= htmlspecialchars($model->getDisplayName()) ?></h6>
+                <div class="rs-form-group rs-mb-4" style="margin-bottom: 1.25rem;">
+                    <label for="label" class="rs-label" style="display:block; font-weight:600; font-size:0.875rem; margin-bottom:0.35rem; color:#1e293b;">
+                        Internal Label <span style="color:#ef4444;">*</span>
+                    </label>
+                    <input type="text" class="rs-input" id="label" name="label" value="<?= Html::encode($model->getLabel()) ?>" required style="width:100%; padding:0.6rem 0.85rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.95rem;">
+                    <div style="font-size:0.75rem; color:#64748b; margin-top:0.3rem;">Custom name to identify this page connection internally.</div>
                 </div>
-                <div class="card-body">
-                    <form method="post" action="/sys-yii3/settings/facebook/update?id=<?= $model->getId() ?>">
-                        <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrfToken) ?>">
 
-                        <div class="mb-3">
-                            <label for="label" class="form-label fw-bold">Internal Label <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="label" name="label" value="<?= htmlspecialchars($model->getLabel()) ?>" required>
-                            <div class="form-text">Custom name to identify this page connection internally.</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="email_low_review" class="form-label fw-bold">Low Rating Notification Email</label>
-                            <input type="email" class="form-control" id="email_low_review" name="email_low_review" value="<?= htmlspecialchars($model->getEmailLowReview() ?? '') ?>" placeholder="manager@example.com">
-                            <div class="form-text">An email address that receives instant notifications when low reviews are received.</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-muted">Remote Facebook Page Name</label>
-                            <input type="text" class="form-control bg-light" value="<?= htmlspecialchars($model->getPageName() ?? 'N/A') ?>" readonly disabled>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-muted">Remote Page ID</label>
-                            <input type="text" class="form-control bg-light font-monospace" value="<?= htmlspecialchars($model->getPageId() ?? 'N/A') ?>" readonly disabled>
-                        </div>
-
-                        <div class="pt-3 border-top d-flex justify-content-end">
-                            <a href="/sys-yii3/settings/facebook" class="btn btn-secondary me-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="bi bi-check-lg me-1"></i> Save Changes
-                            </button>
-                        </div>
-                    </form>
+                <div class="rs-form-group rs-mb-4" style="margin-bottom: 1.25rem;">
+                    <label for="email_low_review" class="rs-label" style="display:block; font-weight:600; font-size:0.875rem; margin-bottom:0.35rem; color:#1e293b;">
+                        Low Rating Notification Email
+                    </label>
+                    <input type="email" class="rs-input" id="email_low_review" name="email_low_review" value="<?= Html::encode($model->getEmailLowReview() ?? '') ?>" placeholder="manager@example.com" style="width:100%; padding:0.6rem 0.85rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.95rem;">
+                    <div style="font-size:0.75rem; color:#64748b; margin-top:0.3rem;">An email address that receives instant notifications when low reviews are received.</div>
                 </div>
-            </div>
+
+                <div class="rs-form-group rs-mb-4" style="margin-bottom: 1.25rem;">
+                    <label class="rs-label" style="display:block; font-weight:600; font-size:0.875rem; margin-bottom:0.35rem; color:#64748b;">
+                        Remote Facebook Page Name
+                    </label>
+                    <input type="text" class="rs-input" value="<?= Html::encode($model->getPageName() ?? 'N/A') ?>" readonly disabled style="width:100%; padding:0.6rem 0.85rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; font-size:0.95rem; color:#64748b;">
+                </div>
+
+                <div class="rs-form-group rs-mb-4" style="margin-bottom: 1.5rem;">
+                    <label class="rs-label" style="display:block; font-weight:600; font-size:0.875rem; margin-bottom:0.35rem; color:#64748b;">
+                        Remote Page ID
+                    </label>
+                    <input type="text" class="rs-input" value="<?= Html::encode($model->getPageId() ?? 'N/A') ?>" readonly disabled style="width:100%; padding:0.6rem 0.85rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; font-family:monospace; font-size:0.95rem; color:#64748b;">
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:0.5rem; padding-top:1rem; border-top:1px solid #e2e8f0;">
+                    <a href="/sys-yii3/settings/facebook" class="rs-btn rs-btn--secondary">Cancel</a>
+                    <button type="submit" class="rs-btn rs-btn--primary">Save Changes</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

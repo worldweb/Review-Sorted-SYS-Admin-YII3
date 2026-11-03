@@ -351,17 +351,6 @@ return [
                 ->action(Web\GlobalSettings\Action\GlobalSettingsIndexAction::class)
                 ->name('global_settings_index_alias'),
 
-            // Chat & Customer Inbox Routes
-            Route::get('/chats')
-                ->action(Web\Chat\Action\ChatIndexAction::class)
-                ->name('chats_index'),
-            Route::get('/chats/index')
-                ->action(Web\Chat\Action\ChatIndexAction::class)
-                ->name('chats_index_alias'),
-            Route::methods(['GET', 'POST'], '/chats/view')
-                ->action(Web\Chat\Action\ChatViewAction::class)
-                ->name('chats_view'),
-
             // API & External Webhooks
             Route::get('/accountapi')
                 ->action(Web\Api\Action\AccountApiAction::class)
@@ -660,17 +649,6 @@ return [
     Route::methods(['GET', 'POST'], '/global-settings/index')
         ->action(Web\GlobalSettings\Action\GlobalSettingsIndexAction::class)
         ->name('root_global_settings_index_alias'),
-
-    // Root Chat & Customer Inbox Routes
-    Route::get('/chats')
-        ->action(Web\Chat\Action\ChatIndexAction::class)
-        ->name('root_chats_index'),
-    Route::get('/chats/index')
-        ->action(Web\Chat\Action\ChatIndexAction::class)
-        ->name('root_chats_index_alias'),
-    Route::methods(['GET', 'POST'], '/chats/view')
-        ->action(Web\Chat\Action\ChatViewAction::class)
-        ->name('root_chats_view'),
 
     // Root API & External Webhooks
     Route::get('/accountapi')

@@ -2,176 +2,169 @@
 
 declare(strict_types=1);
 
+use Yiisoft\Html\Html;
+
 /**
+ * Subscription Plans & Recurring Billing View (Yii 3 Modern Theme)
+ *
  * @var array<int, App\Domain\Subscription\Plan> $plans
  * @var array<int, App\Domain\Subscription\Subscription> $subscriptions
  * @var array<int, App\Domain\Subscription\AccountInvoice> $invoices
  * @var App\Domain\User\User $currentUser
  * @var Yiisoft\Session\Flash\Flash $flash
  * @var string $csrfToken
+ * @var Yiisoft\View\WebView $this
  */
 
-$this->setTitle('Subscriptions & Billing');
+$this->setTitle('Subscription Plans');
+
+$actions = [];
+if ($currentUser->isAdmin()) {
+    $actions[] = '<a href="/sys-yii3/subscription/create" class="rs-btn rs-btn--primary rs-d-flex rs-align-items-center rs-gap-2">'
+        . '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Create New Plan</a>';
+}
+
+$title = 'Subscription Plans';
+$description = 'Manage platform subscription plans, limits, active memberships, and recurring billing.';
+include __DIR__ . '/../../Shared/Components/_page_header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h2 class="h3 font-weight-bold text-gray-800 mb-1">
-                        <i class="bi bi-credit-card text-primary me-2"></i>Subscriptions &amp; Billing
-                    </h2>
-                    <p class="text-muted mb-0">Manage platform subscription plans, active recurring memberships, and billing invoices.</p>
+<div class="rs-page">
+    <?php if ($flash->has('success')): ?>
+        <div class="rs-alert rs-alert--success rs-mb-4" role="alert">
+            <?= Html::encode((string) $flash->get('success')) ?>
+        </div>
+    <?php endif; ?>
+    <?php if ($flash->has('error')): ?>
+        <div class="rs-alert rs-alert--danger rs-mb-4" role="alert">
+            <?= Html::encode((string) $flash->get('error')) ?>
+        </div>
+    <?php endif; ?>
+
+    <!-- Pricing Comparison Cards Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 28px;">
+        <?php foreach ($plans as $p): ?>
+            <div class="rs-card" style="margin-bottom: 0; display: flex; flex-direction: column; <?= $p->isActive() ? 'border-top: 3px solid var(--rs-primary, #059669);' : 'opacity: 0.8;' ?>">
+                <div class="rs-card__header rs-d-flex rs-justify-content-between rs-align-items-center" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
+                    <h3 class="rs-card__title" style="margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--rs-text-main, #0F172A);">
+                        <?= Html::encode($p->getPlanName()) ?>
+                    </h3>
+                    <span class="rs-badge <?= $p->isActive() ? 'rs-badge--success' : 'rs-badge--default' ?>">
+                        <?= $p->isActive() ? 'Active' : 'Inactive' ?>
+                    </span>
+                </div>
+                <div class="rs-card__body rs-p-5" style="padding: 24px; flex-grow: 1;">
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--rs-primary, #059669); line-height: 1; margin-bottom: 8px;">
+                        <?= Html::encode($p->getFormattedPrice()) ?><span style="font-size: 0.875rem; font-weight: 500; color: var(--rs-text-muted, #64748B);">/mo</span>
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--rs-text-muted, #64748B); margin-bottom: 16px;">
+                        Up to <strong><?= Html::encode($p->getPlanLimit()) ?></strong> location slots
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; font-size: 0.875rem;">
+                        <?php foreach ($p->getFeaturesList() as $feat): ?>
+                            <li style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--rs-text-main, #0F172A);">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="rs-text-success"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <span><?= Html::encode($feat) ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
                 </div>
                 <?php if ($currentUser->isAdmin()): ?>
-                    <div>
-                        <a href="/sys-yii3/subscription/create" class="btn btn-primary">
-                            <i class="bi bi-plus-lg me-1"></i> Add New Plan
-                        </a>
+                    <div class="rs-card__footer rs-d-flex rs-justify-content-end rs-gap-2" style="padding: 12px 20px; border-top: 1px solid var(--rs-border, #E2E8F0); background: #f8fafc;">
+                        <a href="/sys-yii3/subscription/update?id=<?= $p->getId() ?>" class="rs-btn rs-btn--sm rs-btn--outline">Edit</a>
+                        <a href="/sys-yii3/subscription/delete?id=<?= $p->getId() ?>" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-danger" onclick="return confirm('Delete this subscription plan?');">Delete</a>
                     </div>
                 <?php endif; ?>
             </div>
+        <?php endforeach; ?>
+    </div>
 
-            <?php if ($flash->has('success')): ?>
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <?= htmlspecialchars((string) $flash->get('success')) ?>
-                </div>
-            <?php endif; ?>
-            <?php if ($flash->has('error')): ?>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <?= htmlspecialchars((string) $flash->get('error')) ?>
-                </div>
-            <?php endif; ?>
-
-            <!-- Available Plans Pricing Grid -->
-            <div class="row row-cols-1 row-cols-md-3 mb-4 text-center">
-                <?php foreach ($plans as $p): ?>
-                    <div class="col mb-4">
-                        <div class="card shadow-sm border-0 h-100 <?= $p->isActive() ? 'border-primary' : 'opacity-75' ?>">
-                            <div class="card-header py-3 bg-white border-bottom">
-                                <h4 class="my-0 fw-normal text-primary"><?= htmlspecialchars($p->getPlanName()) ?></h4>
-                            </div>
-                            <div class="card-body d-flex flex-column">
-                                <h1 class="card-title pricing-card-title"><?= $p->getFormattedPrice() ?><small class="text-muted fw-light">/mo</small></h1>
-                                <p class="text-muted small">Up to <strong><?= htmlspecialchars($p->getPlanLimit()) ?></strong> locations</p>
-                                <ul class="list-unstyled mt-3 mb-4 text-start small">
-                                    <?php foreach ($p->getFeaturesList() as $feat): ?>
-                                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><?= htmlspecialchars($feat) ?></li>
-                                    <?php endforeach; ?>
-                                </ul>
-                                <?php if ($currentUser->isAdmin()): ?>
-                                    <div class="mt-auto d-flex justify-content-center gap-2">
-                                        <a href="/sys-yii3/subscription/update?id=<?= $p->getId() ?>" class="btn btn-outline-primary btn-sm">
-                                            <i class="bi bi-pencil me-1"></i> Edit Plan
-                                        </a>
-                                        <a href="/sys-yii3/subscription/delete?id=<?= $p->getId() ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this plan?');">
-                                            <i class="bi bi-trash me-1"></i> Delete
-                                        </a>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-
-            <!-- Active Subscriptions Table -->
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Active Subscriptions</h6>
-                    <span class="badge bg-secondary"><?= count($subscriptions) ?> Memberships</span>
-                </div>
-                <div class="card-body p-0">
+    <!-- Active Subscriptions Table -->
+    <div class="rs-card rs-mb-6">
+        <div class="rs-card__header rs-d-flex rs-justify-content-between rs-align-items-center" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
+            <h3 class="rs-card__title" style="margin: 0; font-size: 1rem; font-weight: 700;">Active Account Subscriptions</h3>
+            <span class="rs-badge rs-badge--default"><?= count($subscriptions) ?> Memberships</span>
+        </div>
+        <div class="rs-table-wrapper" style="overflow-x: auto;">
+            <table class="rs-table rs-table--hover rs-table--modern" style="width: 100%; margin-bottom: 0;">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th>Subscriber / Account</th>
+                        <th>Plan Tier</th>
+                        <th>Billing Cycle Ends</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
                     <?php if (empty($subscriptions)): ?>
-                        <div class="p-4 text-center text-muted">
-                            <p class="mb-0">No active customer subscriptions on record.</p>
-                        </div>
+                        <tr>
+                            <td colspan="5" class="rs-text-center rs-p-6 rs-text-muted" style="padding: 32px 16px;">
+                                No active customer subscriptions found.
+                            </td>
+                        </tr>
                     <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Customer</th>
-                                        <th>Email</th>
-                                        <th>Stripe Subscription ID</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th>Renews / Expires</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($subscriptions as $sub): ?>
-                                        <tr>
-                                            <td class="text-muted"><?= $sub->getId() ?></td>
-                                            <td class="fw-bold"><?= htmlspecialchars($sub->getCustomerName() ?? 'N/A') ?></td>
-                                            <td><?= htmlspecialchars($sub->getCustomerEmail() ?? 'N/A') ?></td>
-                                            <td><code><?= htmlspecialchars($sub->getStripeSubscriptionId() ?? 'N/A') ?></code></td>
-                                            <td><?= !empty($sub->getPaidAmount()) ? '$' . number_format((float) $sub->getPaidAmount(), 2) : 'Free' ?></td>
-                                            <td>
-                                                <?php if ($sub->isActive()): ?>
-                                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Active</span>
-                                                <?php else: ?>
-                                                    <span class="badge bg-secondary"><?= htmlspecialchars($sub->getStatus() ?? 'Inactive') ?></span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="small text-muted"><?= htmlspecialchars($sub->getPlanPeriodEnd() ?? 'N/A') ?></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                        <?php foreach ($subscriptions as $sub): ?>
+                            <tr>
+                                <td class="rs-text-monospace rs-text-muted">#<?= $sub->getId() ?></td>
+                                <td class="rs-font-semibold rs-text-main">User #<?= $sub->getUserId() ?></td>
+                                <td>Plan #<?= $sub->getPlanId() ?></td>
+                                <td class="rs-text-muted"><?= Html::encode($sub->getPlanPeriodEnd() ?? '—') ?></td>
+                                <td>
+                                    <?php $statusStr = strtolower((string) $sub->getStatus()); ?>
+                                    <span class="rs-badge <?= in_array($statusStr, ['active', 'succeeded', '1'], true) ? 'rs-badge--success' : 'rs-badge--default' ?>">
+                                        <?= Html::encode(ucfirst($statusStr)) ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                     <?php endif; ?>
-                </div>
-            </div>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-            <!-- Recent Invoices Table -->
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 border-bottom">
-                    <h6 class="m-0 font-weight-bold text-primary">Invoices &amp; Receipts</h6>
-                </div>
-                <div class="card-body p-0">
+    <!-- Billing Invoices Table -->
+    <div class="rs-card">
+        <div class="rs-card__header rs-d-flex rs-justify-content-between rs-align-items-center" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
+            <h3 class="rs-card__title" style="margin: 0; font-size: 1rem; font-weight: 700;">Recent Invoices</h3>
+            <span class="rs-badge rs-badge--default"><?= count($invoices) ?> Invoices</span>
+        </div>
+        <div class="rs-table-wrapper" style="overflow-x: auto;">
+            <table class="rs-table rs-table--hover rs-table--modern" style="width: 100%; margin-bottom: 0;">
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">Invoice #</th>
+                        <th>Workspace / Account</th>
+                        <th>Total Amount</th>
+                        <th>Invoice Date</th>
+                        <th>Payment Status</th>
+                    </tr>
+                </thead>
+                <tbody>
                     <?php if (empty($invoices)): ?>
-                        <div class="p-4 text-center text-muted">
-                            <p class="mb-0">No invoices generated yet.</p>
-                        </div>
+                        <tr>
+                            <td colspan="5" class="rs-text-center rs-p-6 rs-text-muted" style="padding: 32px 16px;">
+                                No invoice history available.
+                            </td>
+                        </tr>
                     <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Invoice #</th>
-                                        <th>Amount</th>
-                                        <th>Currency</th>
-                                        <th>Status</th>
-                                        <th>Paid Date</th>
-                                        <th class="text-end">Receipt</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($invoices as $inv): ?>
-                                        <tr>
-                                            <td><code><?= htmlspecialchars($inv->getInvoiceNumber() ?? $inv->getStripeInvoiceId()) ?></code></td>
-                                            <td class="fw-bold"><?= $inv->getFormattedAmount() ?></td>
-                                            <td><?= $inv->getCurrency() ?></td>
-                                            <td><span class="badge bg-success"><?= htmlspecialchars(strtoupper($inv->getStatus())) ?></span></td>
-                                            <td class="small text-muted"><?= $inv->getPaidAt() ? date('M d, Y', $inv->getPaidAt()) : 'N/A' ?></td>
-                                            <td class="text-end">
-                                                <?php if (!empty($inv->getHostedInvoiceUrl())): ?>
-                                                    <a href="<?= htmlspecialchars($inv->getHostedInvoiceUrl()) ?>" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                        <i class="bi bi-box-arrow-up-right me-1"></i> View Receipt
-                                                    </a>
-                                                <?php endif; ?>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                        <?php foreach ($invoices as $inv): ?>
+                            <tr>
+                                <td class="rs-text-monospace rs-font-semibold"><?= Html::encode($inv->getInvoiceNumber() ?? '#' . $inv->getId()) ?></td>
+                                <td>Account #<?= $inv->getAccountId() ?></td>
+                                <td class="rs-font-semibold">$<?= number_format(((float) $inv->getAmount()) / 100, 2) ?></td>
+                                <td class="rs-text-muted"><?= Html::encode($inv->getInvoiceDate() ?? '—') ?></td>
+                                <td>
+                                    <span class="rs-badge <?= $inv->getStatus() === 'paid' ? 'rs-badge--success' : 'rs-badge--warning' ?>">
+                                        <?= Html::encode(ucfirst((string) $inv->getStatus())) ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                     <?php endif; ?>
-                </div>
-            </div>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

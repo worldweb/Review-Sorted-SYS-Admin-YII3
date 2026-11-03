@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Yiisoft\Html\Html;
+
 /**
  * @var App\Domain\User\User $currentUser
  * @var array<int, App\Domain\SocialConnection\ServiceConfig> $fbConfigs
@@ -12,271 +14,235 @@ declare(strict_types=1);
  */
 
 $this->setTitle('Create Social Post');
+
+$totalFb = count($fbConfigs);
+$totalGoogle = count($googleConfigs);
+$totalDestinations = $totalFb + $totalGoogle;
 ?>
 
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h2 class="h3 font-weight-bold text-gray-800 mb-1">
-                        <i class="bi bi-pencil-square text-success me-2"></i>Compose New Social Post
-                    </h2>
-                    <p class="text-muted mb-0">Craft your content and broadcast it across multiple connected social networks simultaneously.</p>
+<div class="rs-social-post-create">
+    <div class="rs-d-flex rs-justify-content-between rs-align-items-center rs-mb-5" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1 class="rs-h1 rs-m-0" style="font-size: 1.75rem; font-weight: 700; color: #0f172a; margin: 0;">Create Social Post</h1>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="/sys-yii3/social-post" class="rs-btn rs-btn--secondary">
+                &larr; Back to Publishing History
+            </a>
+        </div>
+    </div>
+
+    <?php if ($flash->has('error')): ?>
+        <div class="rs-alert rs-alert--danger rs-mb-4" role="alert">
+            <?= Html::encode((string) $flash->get('error')) ?>
+        </div>
+    <?php endif; ?>
+
+    <form method="post" action="/sys-yii3/social-post/create" id="social-post-create-form" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
+
+        <div style="display: grid; grid-template-columns: 1fr 420px; gap: 1.5rem; align-items: start;">
+            <!-- Left Column: Composer Controls -->
+            <div>
+                <!-- Card 1: Post Content & Media -->
+                <div class="rs-card rs-mb-4" style="background:#fff; border-radius:8px; border:1px solid #e2e8f0; margin-bottom: 1.5rem;">
+                    <div class="rs-card__header" style="padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0;">
+                        <h3 class="rs-card__title" style="font-size: 1.125rem; font-weight: 600; margin: 0; color: #0f172a;">Post Content &amp; Media</h3>
+                    </div>
+                    <div class="rs-card__body" style="padding: 1.5rem;">
+                        <div class="rs-form-group rs-mb-4" style="margin-bottom: 1.25rem;">
+                            <label for="post-content-textarea" class="rs-label" style="display:block; font-weight:600; font-size:0.875rem; margin-bottom:0.35rem; color:#1e293b;">
+                                Post Message <span style="color:#ef4444;">*</span>
+                            </label>
+                            <textarea id="post-content-textarea" name="content" class="rs-textarea" rows="5" placeholder="Write your social post content here..." required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; font-family: inherit; line-height: 1.5;"></textarea>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                <span id="char-counter-display" style="font-size: 0.8rem; font-weight: 600; color: #64748b;"><span id="char-count">0</span> / 63,206 characters</span>
+                                <span style="font-size: 0.75rem; color: #94a3b8;">Supports hashtags &amp; emojis</span>
+                            </div>
+                        </div>
+
+                        <div class="rs-form-group rs-mb-0">
+                            <label class="rs-label" style="display:block; font-weight:600; font-size:0.875rem; margin-bottom:0.35rem; color:#1e293b;">
+                                Image or Video Attachment (Optional)
+                            </label>
+                            <input type="file" name="media_file" id="social-media-file-input" class="rs-input" accept="image/png, image/jpeg, video/mp4, video/quicktime" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px;">
+                            <span class="rs-help-block" style="display:block; font-size: 0.75rem; color: #64748b; margin-top: 0.35rem;">Supported formats: JPG, PNG, MP4, MOV (Max 50MB). Instagram requires media.</span>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <a href="/sys-yii3/social-post" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i> Back to Posts
-                    </a>
+
+                <!-- Card 2: Target Locations & Location Groups -->
+                <div class="rs-card rs-mb-4" style="background:#fff; border-radius:8px; border:1px solid #e2e8f0; margin-bottom: 1.5rem;">
+                    <div class="rs-card__header" style="padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0;">
+                        <h3 class="rs-card__title" style="font-size: 1.125rem; font-weight: 600; margin: 0; color: #0f172a;">Target Locations &amp; Groups</h3>
+                    </div>
+                    <div class="rs-card__body" style="padding: 1.5rem;">
+                        <?php if (!empty($groups)): ?>
+                            <div class="rs-form-group rs-mb-4" style="margin-bottom: 1.5rem;">
+                                <label class="rs-label" style="display:block; font-weight:600; font-size:0.875rem; margin-bottom:0.5rem; color:#1e293b;">
+                                    📁 Target Location Groups (Optional)
+                                </label>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.75rem;">
+                                    <?php foreach ($groups as $grp): ?>
+                                        <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.65rem 0.85rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer;">
+                                            <input type="checkbox" name="destinations[]" value="group:<?= $grp->getId() ?>">
+                                            <div>
+                                                <div style="font-weight: 600; font-size: 0.875rem; color: #0f172a;"><?= Html::encode($grp->getName()) ?></div>
+                                                <div style="font-size: 0.75rem; color: #64748b;"><?= $grp->getDestinationCount() ?? count($grp->getDestinations()) ?> locations</div>
+                                            </div>
+                                        </label>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 1.5rem 0;" />
+                        <?php endif; ?>
+
+                        <!-- Individual Destinations -->
+                        <div class="rs-form-group rs-mb-0">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                <label class="rs-label" style="font-weight:600; font-size:0.875rem; margin:0; color:#1e293b;">
+                                    📍 Target Individual Locations (<?= $totalDestinations ?> Available)
+                                </label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button type="button" class="rs-btn rs-btn--sm rs-btn--secondary" onclick="toggleAllDestinations(true)">Select All</button>
+                                    <button type="button" class="rs-btn rs-btn--sm rs-btn--secondary" onclick="toggleAllDestinations(false)">Deselect All</button>
+                                </div>
+                            </div>
+
+                            <div style="max-height: 280px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.75rem; background: #fafafa;">
+                                <!-- Facebook Pages -->
+                                <?php if (!empty($fbConfigs)): ?>
+                                    <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #1877F2; margin-bottom: 0.4rem;">Facebook Pages &amp; Instagram</div>
+                                    <?php foreach ($fbConfigs as $fb): ?>
+                                        <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.5rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 0.4rem; cursor: pointer;">
+                                            <input type="checkbox" name="destinations[]" class="dest-checkbox" value="facebook:<?= $fb->getId() ?>">
+                                            <span style="font-size: 0.85rem; font-weight: 600; color: #0f172a;"><?= Html::encode($fb->getDisplayName()) ?></span>
+                                            <span style="font-size: 0.75rem; color: #64748b; margin-left: auto;">Facebook</span>
+                                        </label>
+                                        <?php foreach ($fb->getSubServices() as $sub): ?>
+                                            <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.5rem 0.4rem 1.5rem; background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 4px; margin-bottom: 0.4rem; cursor: pointer;">
+                                                <input type="checkbox" name="destinations[]" class="dest-checkbox" value="instagram:<?= $sub->getId() ?>">
+                                                <span style="font-size: 0.85rem; font-weight: 600; color: #be185d;">📷 <?= Html::encode($sub->getName()) ?></span>
+                                                <span style="font-size: 0.75rem; color: #be185d; margin-left: auto;">Instagram</span>
+                                            </label>
+                                        <?php endforeach; ?>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+
+                                <!-- Google Locations -->
+                                <?php if (!empty($googleConfigs)): ?>
+                                    <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #ea4335; margin: 0.75rem 0 0.4rem;">Google Business Profiles</div>
+                                    <?php foreach ($googleConfigs as $gc): ?>
+                                        <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.5rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 0.4rem; cursor: pointer;">
+                                            <input type="checkbox" name="destinations[]" class="dest-checkbox" value="google:<?= $gc->getId() ?>">
+                                            <span style="font-size: 0.85rem; font-weight: 600; color: #0f172a;"><?= Html::encode($gc->getDisplayName()) ?></span>
+                                            <span style="font-size: 0.75rem; color: #64748b; margin-left: auto;">Google</span>
+                                        </label>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Publishing Schedule -->
+                <div class="rs-card" style="background:#fff; border-radius:8px; border:1px solid #e2e8f0; margin-bottom: 1.5rem;">
+                    <div class="rs-card__header" style="padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0;">
+                        <h3 class="rs-card__title" style="font-size: 1.125rem; font-weight: 600; margin: 0; color: #0f172a;">Publishing Schedule</h3>
+                    </div>
+                    <div class="rs-card__body" style="padding: 1.5rem;">
+                        <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; cursor: pointer;">
+                                <input type="radio" name="post_type" value="immediate" checked onchange="toggleSchedule(false)">
+                                ⚡ Publish Immediately
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; cursor: pointer;">
+                                <input type="radio" name="post_type" value="scheduled" onchange="toggleSchedule(true)">
+                                ⏰ Schedule for Later
+                            </label>
+                        </div>
+
+                        <div id="schedule-box" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; margin-top: 1rem;">
+                            <label class="rs-label" style="display:block; font-weight:600; font-size:0.875rem; margin-bottom:0.35rem; color:#1e293b;">Target Delivery Date &amp; Time</label>
+                            <input type="datetime-local" name="scheduled_at" class="rs-input" value="<?= date('Y-m-d\TH:i', strtotime('+1 hour')) ?>" style="width:100%; max-width: 320px; padding:0.5rem; border:1px solid #cbd5e1; border-radius:6px;">
+                            <div style="font-size:0.75rem; color:#64748b; margin-top:0.3rem;">The background worker will automatically dispatch this post at the configured time.</div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                            <button type="submit" class="rs-btn rs-btn--primary" style="padding: 0.75rem 2rem; font-size: 1rem; font-weight: 600;">
+                                Submit Post &rarr;
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <?php if ($flash->has('error')): ?>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <?= htmlspecialchars((string) $flash->get('error')) ?>
-                </div>
-            <?php endif; ?>
-
-            <form method="post" action="/sys-yii3/social-post/create" id="postComposerForm">
-                <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrfToken) ?>">
-
-                <div class="row">
-                    <!-- Left: Composer Form -->
-                    <div class="col-lg-7 mb-4">
-                        <div class="card shadow-sm border-0 mb-4">
-                            <div class="card-header bg-white py-3 border-bottom">
-                                <h6 class="m-0 font-weight-bold text-primary">1. Post Content</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label for="postContent" class="form-label fw-bold">Message Text <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="postContent" name="content" rows="6" placeholder="What's happening? Share updates, promotions, announcements..." required></textarea>
-                                    <div class="d-flex justify-content-between align-items-center mt-1">
-                                        <small class="text-muted">Character count: <span id="charCount">0</span></small>
-                                        <small class="text-muted">Supports hashtags and emojis</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 2. Destination Selection -->
-                        <div class="card shadow-sm border-0 mb-4">
-                            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                                <h6 class="m-0 font-weight-bold text-primary">2. Select Social Destinations</h6>
-                                <span class="text-muted small">Choose accounts or location groups</span>
-                            </div>
-                            <div class="card-body">
-                                <!-- Location Groups -->
-                                <?php if (!empty($groups)): ?>
-                                    <div class="mb-4">
-                                        <label class="form-label fw-bold text-secondary text-uppercase small">Location Groups (Clusters)</label>
-                                        <div class="list-group">
-                                            <?php foreach ($groups as $grp): ?>
-                                                <label class="list-group-item d-flex align-items-center cursor-pointer">
-                                                    <input class="form-check-input me-3" type="checkbox" name="destinations[]" value="group:<?= $grp->getId() ?>">
-                                                    <div>
-                                                        <strong><i class="bi bi-diagram-3 text-info me-1"></i><?= htmlspecialchars($grp->getName()) ?></strong>
-                                                        <span class="badge bg-secondary ms-2"><?= $grp->getDestinationCount() ?? count($grp->getDestinations()) ?> destinations</span>
-                                                        <?php if (!empty($grp->getDescription())): ?>
-                                                            <div class="small text-muted"><?= htmlspecialchars($grp->getDescription()) ?></div>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </label>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
-
-                                <!-- Facebook Pages -->
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold text-secondary text-uppercase small"><i class="bi bi-facebook text-primary me-1"></i>Facebook Pages</label>
-                                    <?php if (empty($fbConfigs)): ?>
-                                        <p class="text-muted small mb-0">No Facebook pages connected. <a href="/sys-yii3/settings/facebook">Connect one now</a>.</p>
-                                    <?php else: ?>
-                                        <div class="list-group">
-                                            <?php foreach ($fbConfigs as $fb): ?>
-                                                <label class="list-group-item d-flex align-items-center">
-                                                    <input class="form-check-input me-3" type="checkbox" name="destinations[]" value="facebook:<?= $fb->getId() ?>">
-                                                    <div>
-                                                        <strong><?= htmlspecialchars($fb->getDisplayName()) ?></strong>
-                                                        <code class="small text-muted ms-1">(Page ID: <?= htmlspecialchars($fb->getPageId() ?? '') ?>)</code>
-                                                    </div>
-                                                </label>
-
-                                                <?php foreach ($fb->getSubServices() as $sub): ?>
-                                                    <label class="list-group-item d-flex align-items-center ps-5 bg-light">
-                                                        <input class="form-check-input me-3" type="checkbox" name="destinations[]" value="instagram:<?= $sub->getId() ?>">
-                                                        <div>
-                                                            <i class="bi bi-instagram text-danger me-1"></i>
-                                                            <strong><?= htmlspecialchars($sub->getName()) ?></strong>
-                                                            <span class="badge bg-light text-dark border ms-1">Instagram</span>
-                                                        </div>
-                                                    </label>
-                                                <?php endforeach; ?>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-
-                                <!-- Google Business Profiles -->
-                                <div class="mb-2">
-                                    <label class="form-label fw-bold text-secondary text-uppercase small"><i class="bi bi-google text-danger me-1"></i>Google Business Profiles</label>
-                                    <?php if (empty($googleConfigs)): ?>
-                                        <p class="text-muted small mb-0">No Google locations connected. <a href="/sys-yii3/settings/google">Connect one now</a>.</p>
-                                    <?php else: ?>
-                                        <div class="list-group">
-                                            <?php foreach ($googleConfigs as $gc): ?>
-                                                <label class="list-group-item d-flex align-items-center">
-                                                    <input class="form-check-input me-3" type="checkbox" name="destinations[]" value="google:<?= $gc->getId() ?>">
-                                                    <div>
-                                                        <strong><?= htmlspecialchars($gc->getDisplayName()) ?></strong>
-                                                        <code class="small text-muted ms-1">(Location ID: <?= htmlspecialchars($gc->getPageId() ?? '') ?>)</code>
-                                                    </div>
-                                                </label>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 3. Scheduling & Publish -->
-                        <div class="card shadow-sm border-0 mb-4">
-                            <div class="card-header bg-white py-3 border-bottom">
-                                <h6 class="m-0 font-weight-bold text-primary">3. Publishing Schedule</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="post_type" id="typeImmediate" value="immediate" checked onchange="toggleScheduleBox(false)">
-                                    <label class="form-check-label fw-bold" for="typeImmediate">
-                                        <i class="bi bi-lightning-charge text-warning me-1"></i> Publish Immediately
-                                    </label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="post_type" id="typeScheduled" value="scheduled" onchange="toggleScheduleBox(true)">
-                                    <label class="form-check-label fw-bold" for="typeScheduled">
-                                        <i class="bi bi-clock text-primary me-1"></i> Schedule for Later
-                                    </label>
-                                </div>
-
-                                <div id="scheduleBox" class="mt-3 p-3 bg-light rounded border d-none">
-                                    <label for="scheduled_at" class="form-label fw-bold">Select Date &amp; Time</label>
-                                    <input type="datetime-local" class="form-control" id="scheduled_at" name="scheduled_at" value="<?= date('Y-m-d\TH:i', strtotime('+1 hour')) ?>">
-                                    <div class="form-text">Scheduled posts are dispatched automatically by the background worker.</div>
-                                </div>
-
-                                <div class="pt-3 border-top d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-success px-5 py-2">
-                                        <i class="bi bi-send me-1"></i> Submit Post
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Right Column: Live Previews -->
+            <div style="position: sticky; top: 20px;">
+                <div class="rs-card" style="background:#fff; border-radius:8px; border:1px solid #e2e8f0; overflow:hidden;">
+                    <div class="rs-card__header" style="padding: 1rem 1.25rem; border-bottom: 1px solid #e2e8f0;">
+                        <h3 class="rs-card__title" style="font-size: 1rem; font-weight: 600; margin: 0; color: #0f172a;">Live Platform Previews</h3>
                     </div>
-
-                    <!-- Right: Live Social Media Previews -->
-                    <div class="col-lg-5">
-                        <div class="card shadow-sm border-0 mb-4 sticky-top" style="top: 20px;">
-                            <div class="card-header bg-white py-3 border-bottom">
-                                <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-eye me-1"></i>Live Platform Previews</h6>
-                            </div>
-                            <div class="card-body">
-                                <ul class="nav nav-tabs mb-3" id="previewTabs" role="tablist">
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link active" id="fb-tab" data-bs-toggle="tab" data-bs-target="#fb-prev" type="button" role="tab"><i class="bi bi-facebook text-primary me-1"></i>Facebook</button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link" id="ig-tab" data-bs-toggle="tab" data-bs-target="#ig-prev" type="button" role="tab"><i class="bi bi-instagram text-danger me-1"></i>Instagram</button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link" id="google-tab" data-bs-toggle="tab" data-bs-target="#google-prev" type="button" role="tab"><i class="bi bi-google text-danger me-1"></i>Google</button>
-                                    </li>
-                                </ul>
-
-                                <div class="tab-content" id="previewTabsContent">
-                                    <!-- Facebook Card Preview -->
-                                    <div class="tab-pane fade show active" id="fb-prev" role="tabpanel">
-                                        <div class="border rounded p-3 bg-white shadow-sm">
-                                            <div class="d-flex align-items-center mb-2">
-                                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
-                                                    <i class="bi bi-facebook"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold small">Your Business Page</div>
-                                                    <div class="text-muted" style="font-size: 11px;">Just now &bull; <i class="bi bi-globe"></i></div>
-                                                </div>
-                                            </div>
-                                            <div id="fbPreviewContent" class="text-break py-2 text-dark" style="font-size: 14px; white-space: pre-wrap;">Your post content will appear here...</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Instagram Preview -->
-                                    <div class="tab-pane fade" id="ig-prev" role="tabpanel">
-                                        <div class="border rounded p-3 bg-white shadow-sm">
-                                            <div class="d-flex align-items-center mb-2">
-                                                <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 38px; height: 38px;">
-                                                    <i class="bi bi-instagram"></i>
-                                                </div>
-                                                <div class="fw-bold small">@your_handle</div>
-                                            </div>
-                                            <div class="bg-light text-center py-4 rounded mb-2 text-muted small">
-                                                <i class="bi bi-image display-6 d-block mb-1"></i>(Instagram Post Media)
-                                            </div>
-                                            <div class="small">
-                                                <strong>your_handle</strong> <span id="igPreviewContent" class="text-muted">Your caption preview will display here...</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Google Business Profile Preview -->
-                                    <div class="tab-pane fade" id="google-prev" role="tabpanel">
-                                        <div class="border rounded p-3 bg-white shadow-sm">
-                                            <div class="d-flex align-items-center mb-2">
-                                                <div class="bg-white border rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 38px; height: 38px;">
-                                                    <i class="bi bi-google text-danger"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold small">Google Search &amp; Maps Post</div>
-                                                    <div class="text-muted" style="font-size: 11px;">Update from store</div>
-                                                </div>
-                                            </div>
-                                            <div id="googlePreviewContent" class="text-break py-2 text-dark" style="font-size: 13px; white-space: pre-wrap;">Your Google Business update will appear here...</div>
-                                        </div>
-                                    </div>
+                    <div class="rs-card__body" style="padding: 1.25rem;">
+                        <!-- Facebook Preview -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem; background: #ffffff;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <div style="width: 36px; height: 36px; border-radius: 50%; background: #1877F2; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">f</div>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.875rem; color: #0f172a;">Your Business Page</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">Just now &bull; 🌐</div>
                                 </div>
+                            </div>
+                            <div id="preview-fb-text" style="font-size: 0.875rem; color: #1e293b; line-height: 1.45; white-space: pre-wrap; min-height: 48px;">
+                                Your post preview will display here...
+                            </div>
+                        </div>
+
+                        <!-- Instagram Preview -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; background: #ffffff;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px;">📷</div>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.875rem; color: #0f172a;">your_brand</div>
+                                </div>
+                            </div>
+                            <div style="background: #f1f5f9; border-radius: 6px; padding: 2rem; text-align: center; color: #94a3b8; font-size: 0.8rem; margin-bottom: 0.75rem;">
+                                Attached Media Preview
+                            </div>
+                            <div style="font-size: 0.85rem; color: #1e293b; line-height: 1.4;">
+                                <strong>your_brand</strong> <span id="preview-ig-text" style="color: #475569;">Caption will appear here...</span>
                             </div>
                         </div>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
+    </form>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    var contentArea = document.getElementById('postContent');
-    var charCount = document.getElementById('charCount');
-    var fbPrev = document.getElementById('fbPreviewContent');
-    var igPrev = document.getElementById('igPreviewContent');
-    var googlePrev = document.getElementById('googlePreviewContent');
+    var textarea = document.getElementById('post-content-textarea');
+    var charCount = document.getElementById('char-count');
+    var fbText = document.getElementById('preview-fb-text');
+    var igText = document.getElementById('preview-ig-text');
 
-    contentArea.addEventListener('input', function() {
-        var text = contentArea.value;
-        charCount.innerText = text.length;
-        var placeholder = 'Your post content will appear here...';
-        fbPrev.innerText = text || placeholder;
-        igPrev.innerText = text || placeholder;
-        googlePrev.innerText = text || placeholder;
+    textarea.addEventListener('input', function() {
+        var val = textarea.value;
+        charCount.innerText = val.length;
+        var placeholder = 'Your post preview will display here...';
+        fbText.innerText = val || placeholder;
+        igText.innerText = val || 'Caption will appear here...';
     });
 });
 
-function toggleScheduleBox(show) {
-    var box = document.getElementById('scheduleBox');
-    if (show) {
-        box.classList.remove('d-none');
-    } else {
-        box.classList.add('d-none');
-    }
+function toggleSchedule(show) {
+    document.getElementById('schedule-box').style.display = show ? 'block' : 'none';
+}
+
+function toggleAllDestinations(checked) {
+    var cbs = document.querySelectorAll('.dest-checkbox');
+    cbs.forEach(function(cb) {
+        cb.checked = checked;
+    });
 }
 </script>

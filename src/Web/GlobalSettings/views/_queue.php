@@ -2,27 +2,29 @@
 
 declare(strict_types=1);
 
+use Yiisoft\Html\Html;
+
 /**
  * @var array<string, ?string> $settings
  */
 ?>
 
-<div class="mb-3">
-    <label for="email_batch_size" class="form-label fw-bold">Email Queue Worker Batch Size</label>
-    <input type="number" class="form-control" id="email_batch_size" name="settings[queue.email_batch_size]" value="<?= htmlspecialchars($settings['queue.email_batch_size'] ?? '50') ?>">
+<div class="rs-form-group rs-mb-4">
+    <label for="email_batch_size" class="rs-label">Email Queue Worker Batch Size</label>
+    <input type="number" class="rs-input" id="email_batch_size" name="settings[queue.email_batch_size]" value="<?= Html::encode($settings['queue.email_batch_size'] ?? '50') ?>">
 </div>
 
-<div class="mb-3">
-    <label for="whatsapp_batch_size" class="form-label fw-bold">WhatsApp Queue Worker Batch Size</label>
-    <input type="number" class="form-control" id="whatsapp_batch_size" name="settings[queue.whatsapp_batch_size]" value="<?= htmlspecialchars($settings['queue.whatsapp_batch_size'] ?? '50') ?>">
+<div class="rs-form-group rs-mb-4">
+    <label for="whatsapp_batch_size" class="rs-label">WhatsApp Queue Worker Batch Size</label>
+    <input type="number" class="rs-input" id="whatsapp_batch_size" name="settings[queue.whatsapp_batch_size]" value="<?= Html::encode($settings['queue.whatsapp_batch_size'] ?? '50') ?>">
 </div>
 
-<div class="mb-3">
-    <label for="social_post_batch_size" class="form-label fw-bold">Social Post Queue Worker Batch Size</label>
-    <input type="number" class="form-control" id="social_post_batch_size" name="settings[queue.social_post_batch_size]" value="<?= htmlspecialchars($settings['queue.social_post_batch_size'] ?? '25') ?>">
+<div class="rs-form-group rs-mb-4">
+    <label for="social_post_batch_size" class="rs-label">Social Post Queue Worker Batch Size</label>
+    <input type="number" class="rs-input" id="social_post_batch_size" name="settings[queue.social_post_batch_size]" value="<?= Html::encode($settings['queue.social_post_batch_size'] ?? '25') ?>">
 </div>
 
-<div class="mb-3">
-    <label for="worker_max_retries" class="form-label fw-bold">Maximum Worker Auto-Retries on Failure</label>
-    <input type="number" class="form-control" id="worker_max_retries" name="settings[queue.max_retries]" value="<?= htmlspecialchars($settings['queue.max_retries'] ?? '3') ?>">
+<div class="rs-form-group rs-mb-4">
+    <label for="worker_max_retries" class="rs-label">Maximum Worker Auto-Retries on Failure</label>
+    <input type="number" class="rs-input" id="worker_max_retries" name="settings[queue.max_retries]" value="<?= Html::encode($settings['queue.max_retries'] ?? '3') ?>">
 </div>

@@ -144,17 +144,7 @@ final class NavigationMenuProvider
             ];
         }
 
-        // 11. Customer Chats & Messages
-        if ($isAdmin || $isAccountAdmin || $this->rbac->can($userId, '/chats/*')) {
-            $items[] = [
-                'label' => 'Customer Chats',
-                'url' => '/sys-yii3/chats',
-                'icon' => '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>',
-                'active' => str_starts_with($currentPath, '/sys-yii3/chats'),
-            ];
-        }
-
-        // 12. Subscriptions (Platform Admins only)
+        // 11. Subscriptions (Platform Admins only)
         if ($isAdmin) {
             $items[] = [
                 'label' => 'Subscriptions',
