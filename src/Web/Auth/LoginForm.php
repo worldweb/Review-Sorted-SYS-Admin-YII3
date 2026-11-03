@@ -6,6 +6,8 @@ namespace App\Web\Auth;
 
 use App\Domain\Account\Account;
 use App\Domain\Account\AccountRepositoryInterface;
+use App\Domain\User\UserRepositoryInterface;
+use App\Security\TenantContext;
 use App\Security\UserAuthIdentity;
 use App\Security\UserAuthenticationRepositoryInterface;
 
@@ -51,7 +53,8 @@ final class LoginForm
      */
     public function validate(
         UserAuthenticationRepositoryInterface $authRepo,
-        AccountRepositoryInterface $accountRepo
+        AccountRepositoryInterface $accountRepo,
+        ?UserRepositoryInterface $userRepo = null,
     ): bool {
         $this->errors = [];
         $this->identity = null;
@@ -83,15 +86,18 @@ final class LoginForm
         $role = $identity->getRole();
         if ($role === 'account_admin' || $role === 'worker') {
             $accountId = $identity->getAccountId();
-            if ($accountId === null || $accountId <= 0) {
-                $this->errors['general'] = 'Your account is disabled. Please contact support.';
-                return false;
+            if (($accountId === null || $accountId <= 0) && $userRepo !== null && $identity->getOwnerId() !== null && $identity->getOwnerId() > 0) {
+                $owner = $userRepo->findById($identity->getOwnerId(), TenantContext::unrestricted());
+                $accountId = $owner?->getAccountId();
             }
 
-            $account = $accountRepo->findById($accountId);
-            if ($account === null || !$account->isActive()) {
-                $this->errors['general'] = 'Your account is disabled. Please contact support.';
-                return false;
+            if ($accountId !== null && $accountId > 0) {
+                // Must pass unrestricted context during unauthenticated login lookup
+                $account = $accountRepo->findById($accountId, TenantContext::unrestricted());
+                if ($account !== null && !$account->isActive()) {
+                    $this->errors['general'] = 'Your account is disabled. Please contact support.';
+                    return false;
+                }
             }
         }
 

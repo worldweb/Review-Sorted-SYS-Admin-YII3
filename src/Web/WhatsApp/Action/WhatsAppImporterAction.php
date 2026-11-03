@@ -56,7 +56,7 @@ final class WhatsAppImporterAction
             return $this->redirect('/sys-yii3/whatsapp/importer');
         }
 
-        $targetAccountId = $context->getScopedAccountId() ?? $currentUser->getAccountId();
+        $targetAccountId = $context->getScopedAccountId() ?? ($context->getAccountId() ?? $currentUser->getAccountId());
         $parsedBody = (array) $request->getParsedBody();
         if ($context->isUnrestricted() && isset($parsedBody['account_id']) && (int) $parsedBody['account_id'] > 0) {
             $targetAccountId = (int) $parsedBody['account_id'];

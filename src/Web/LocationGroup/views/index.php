@@ -159,7 +159,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                                     <?= date('d M Y', $group->getCreatedAt()) ?>
                                 </span>
                             </td>
-                            <td style="text-align: right;">
+                            <td style="text-align: right; white-space: nowrap;">
                                 <div class="rs-d-flex rs-justify-content-end rs-gap-1">
                                     <a href="/sys-yii3/location-group/view?id=<?= $group->getId() ?>" class="rs-btn rs-btn--xs rs-btn--outline" title="View details">
                                         <i class="fa-solid fa-eye"></i>

@@ -130,7 +130,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                                     <?= Html::encode($createdDate) ?>
                                 </span>
                             </td>
-                            <td style="padding: 14px 16px; text-align: right;">
+                            <td style="padding: 14px 16px; text-align: right; white-space: nowrap;">
                                 <div class="rs-d-flex rs-align-items-center rs-justify-content-end rs-gap-2">
                                     <a href="/sys-yii3/qrcode/view?id=<?= $model->getId() ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="View details and scan analytics">
                                         Analytics

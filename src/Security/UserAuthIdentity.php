@@ -23,6 +23,7 @@ final class UserAuthIdentity
         private int $status = self::STATUS_ACTIVE,
         private ?int $accountId = null,
         private ?string $role = null,
+        private ?int $ownerId = null,
     ) {
     }
 
@@ -37,6 +38,7 @@ final class UserAuthIdentity
             status: (int) ($row['status'] ?? self::STATUS_ACTIVE),
             accountId: isset($row['account_id']) && $row['account_id'] !== null ? (int) $row['account_id'] : null,
             role: $role ?? ($row['role'] ?? null),
+            ownerId: isset($row['owner_id']) && $row['owner_id'] !== null ? (int) $row['owner_id'] : null,
         );
     }
 
@@ -68,6 +70,11 @@ final class UserAuthIdentity
     public function getAccountId(): ?int
     {
         return $this->accountId;
+    }
+
+    public function getOwnerId(): ?int
+    {
+        return $this->ownerId;
     }
 
     public function getRole(): ?string

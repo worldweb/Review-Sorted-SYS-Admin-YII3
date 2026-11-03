@@ -141,7 +141,33 @@ final class ServiceConfig
 
     public function getDisplayName(): string
     {
-        return !empty($this->pageName) ? $this->pageName : $this->label;
+        // 1. If label is set and is a human-readable name, prefer label
+        if (!empty($this->label) && !str_starts_with($this->label, 'locations/') && !str_starts_with($this->label, 'accounts/')) {
+            return $this->label;
+        }
+
+        // 2. If pageName is set and is a human-readable name, use pageName
+        if (!empty($this->pageName) && !str_starts_with($this->pageName, 'locations/') && !str_starts_with($this->pageName, 'accounts/')) {
+            return $this->pageName;
+        }
+
+        // 3. Fallback to label or pageName
+        if (!empty($this->label)) {
+            return $this->label;
+        }
+
+        return !empty($this->pageName) ? $this->pageName : 'Location #' . $this->id;
+    }
+
+    public function getLocationId(): string
+    {
+        if (!empty($this->pageId)) {
+            return $this->pageId;
+        }
+        if (!empty($this->pageName) && (str_starts_with($this->pageName, 'locations/') || str_starts_with($this->pageName, 'accounts/'))) {
+            return $this->pageName;
+        }
+        return 'N/A';
     }
 
     public function getPageToken(): ?string

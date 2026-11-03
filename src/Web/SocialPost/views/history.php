@@ -61,14 +61,26 @@ $this->setTitle('Publishing History');
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="rs-d-flex rs-flex-column rs-gap-1">
-                                            <?php foreach ($p->getDestinations() as $d): ?>
-                                                <div>
-                                                    <span class="rs-badge rs-badge--default">
-                                                        <?= Html::encode(strtoupper($d->getPlatform())) ?>: <?= Html::encode($d->getStatus()) ?>
-                                                    </span>
-                                                </div>
+                                        <?php
+                                            $allDests = $p->getDestinations();
+                                            $destCount = count($allDests);
+                                            $maxVisible = 2;
+                                            $visibleDests = array_slice($allDests, 0, $maxVisible);
+                                            $remainingCount = $destCount - $maxVisible;
+                                            $fullNames = array_map(static fn($d) => strtoupper($d->getPlatform()) . ' (' . ($d->getDestinationName() ?: '#' . $d->getAccountId()) . '): ' . $d->getStatus(), $allDests);
+                                            $tooltipText = implode("\n", $fullNames);
+                                        ?>
+                                        <div class="rs-d-flex rs-gap-1 rs-align-items-center rs-flex-wrap" style="max-width: 240px;" title="<?= Html::encode($tooltipText) ?>">
+                                            <?php foreach ($visibleDests as $d): ?>
+                                                <span class="rs-badge rs-badge--default" style="font-size: 11px; padding: 2px 6px;">
+                                                    <?= Html::encode(strtoupper($d->getPlatform())) ?>: <?= Html::encode($d->getStatus()) ?>
+                                                </span>
                                             <?php endforeach; ?>
+                                            <?php if ($remainingCount > 0): ?>
+                                                <span class="rs-badge rs-badge--secondary" style="font-size: 11px; padding: 2px 6px; cursor: help;" title="<?= Html::encode($tooltipText) ?>">
+                                                    +<?= $remainingCount ?> more
+                                                </span>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                     <td class="rs-text-sm rs-text-muted"><?= $p->getCreatedAt() ? date('Y-m-d H:i', $p->getCreatedAt()) : 'N/A' ?></td>

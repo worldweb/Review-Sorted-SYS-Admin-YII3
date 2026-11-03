@@ -56,7 +56,7 @@ final class LoginAction
             $data = is_array($parsedBody) ? $parsedBody : [];
 
             $form = new LoginForm($data);
-            if ($form->validate($this->authRepo, $this->accountRepo)) {
+            if ($form->validate($this->authRepo, $this->accountRepo, $this->userRepo)) {
                 $identity = $form->getIdentity();
                 if ($identity !== null) {
                     // Prevent session fixation

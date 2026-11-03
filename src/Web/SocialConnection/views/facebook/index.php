@@ -133,15 +133,15 @@ $isPlatformAdmin = $currentUser->isAdmin();
                     'subtitle' => 'Pages and linked Instagram accounts currently managed by your account'
                 ]) ?>
                 <div class="rs-table-wrapper" style="overflow-x: auto;">
-                    <table class="rs-table rs-table--hover" style="width: 100%; border-collapse: collapse;">
+                    <table class="rs-table rs-table--hover" style="width: 100%; min-width: 780px; border-collapse: collapse;">
                         <thead>
                             <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-                                <th style="padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Label / Page Name</th>
-                                <th style="padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Page ID</th>
-                                <th style="padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Instagram Accounts</th>
-                                <th style="padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Status</th>
-                                <th style="padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Connected On</th>
-                                <th style="padding: 12px 16px; text-align: right; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Actions</th>
+                                <th style="padding: 12px 16px; width: 28%; min-width: 180px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Label / Page Name</th>
+                                <th style="padding: 12px 16px; width: 20%; min-width: 140px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Page ID</th>
+                                <th style="padding: 12px 16px; width: 22%; min-width: 150px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Instagram Accounts</th>
+                                <th style="padding: 12px 16px; width: 10%; min-width: 90px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Status</th>
+                                <th style="padding: 12px 16px; width: 10%; min-width: 95px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Connected On</th>
+                                <th style="padding: 12px 16px; width: 18%; min-width: 170px; text-align: right; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -177,8 +177,8 @@ $isPlatformAdmin = $currentUser->isAdmin();
                                     <td style="padding: 14px 16px; font-size: 0.85rem; color: #64748b;">
                                         <?= $cfg->getCreatedAt() ? date('M d, Y', $cfg->getCreatedAt()) : 'N/A' ?>
                                     </td>
-                                    <td style="padding: 14px 16px; text-align: right;">
-                                        <div style="display: inline-flex; gap: 6px;">
+                                    <td style="padding: 14px 16px; text-align: right; white-space: nowrap;">
+                                        <div style="display: inline-flex; gap: 6px; justify-content: flex-end;">
                                             <a href="/sys-yii3/settings/facebook/view?id=<?= $cfg->getId() ?>" class="rs-btn rs-btn--sm rs-btn--secondary" title="View Details">
                                                 View
                                             </a>

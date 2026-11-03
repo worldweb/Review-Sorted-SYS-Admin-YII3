@@ -53,7 +53,7 @@ final class QrCreateAction
 
         // Feature Gating: account.qr_code == 1
         if (!$currentUser->isAdmin()) {
-            $accountId = $currentUser->getAccountId();
+            $accountId = $context->getAccountId() ?? ($currentUser->getAccountId() ?? $currentUser->getOwnerId());
             if ($accountId === null || $accountId <= 0) {
                 $response = $this->responseFactory->createResponse(403);
                 $response->getBody()->write('Forbidden: No tenant account is associated with your user.');

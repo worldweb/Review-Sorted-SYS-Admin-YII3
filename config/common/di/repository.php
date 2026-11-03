@@ -66,6 +66,7 @@ return [
     \App\Security\Authorization\RbacInterface::class => \App\Security\Authorization\DatabaseRbacManager::class,
     \App\Security\Authorization\DatabaseRbacManager::class => \App\Security\Authorization\DatabaseRbacManager::class,
     \App\Security\Authorization\AccessDecisionManager::class => \App\Security\Authorization\AccessDecisionManager::class,
+    \App\Security\Authorization\RolePermissionService::class => \App\Security\Authorization\RolePermissionService::class,
 
     // Review Reply and Channel Dispatcher Services
     \App\Domain\Review\Channel\GoogleReplyClientInterface::class => \App\Domain\Review\Channel\GoogleReplyClient::class,

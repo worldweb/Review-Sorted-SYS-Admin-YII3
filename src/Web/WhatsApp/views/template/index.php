@@ -109,7 +109,7 @@ $this->setTitle('WhatsApp Templates');
                                         <?= $tpl->isActive() ? 'Active' : 'Disabled' ?>
                                     </span>
                                 </td>
-                                <td style="text-align: right;">
+                                <td style="text-align: right; white-space: nowrap;">
                                     <div class="rs-d-inline-flex rs-align-items-center rs-gap-1">
                                         <a href="/sys-yii3/whatsapp/template/view?id=<?= $tpl->getId() ?>" class="rs-btn rs-btn--sm rs-btn--ghost" title="View details">
                                             View

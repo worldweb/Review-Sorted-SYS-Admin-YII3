@@ -51,13 +51,12 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
     <?php endif; ?>
 
     <!-- Horizontal Modern Settings Navigation Tabs -->
-    <div class="rs-settings-nav-tabs rs-d-flex rs-flex-wrap rs-gap-2 rs-mb-6 rs-border-bottom" style="border-bottom: 2px solid var(--rs-border, #E2E8F0); padding-bottom: 4px;">
+    <div class="rs-settings-nav-tabs">
         <?php foreach ($sections as $sKey => $sInfo): ?>
             <?php $isActive = $section === $sKey; ?>
             <a
                 href="/sys-yii3/global-settings?section=<?= urlencode($sKey) ?>"
-                class="rs-btn <?= $isActive ? 'rs-btn--primary' : 'rs-btn--ghost rs-text-muted' ?>"
-                style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px; padding: 8px 16px;"
+                class="rs-settings-tab-btn <?= $isActive ? 'active' : '' ?>"
             >
                 <span><?= $sInfo['icon'] ?></span>
                 <span><?= Html::encode($sInfo['label']) ?></span>
@@ -67,6 +66,13 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
 
     <?php if ($section === 'database_migration'): ?>
         <?= $this->render('_database_migration') ?>
+    <?php elseif ($section === 'roles'): ?>
+        <?= $this->render('_roles', [
+            'roleMatrix' => $roleMatrix ?? [],
+            'targetRole' => $targetRole ?? 'account_admin',
+            'roleOptions' => $roleOptions ?? [],
+            'csrfToken' => $csrfToken,
+        ]) ?>
     <?php else: ?>
         <!-- Active Settings Tab Card -->
         <div class="rs-card" style="max-width: 900px;">

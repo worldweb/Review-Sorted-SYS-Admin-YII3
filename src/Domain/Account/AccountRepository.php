@@ -43,8 +43,8 @@ final class AccountRepository implements AccountRepositoryInterface
     {
         $ctx = $context ?? $this->tenantContextProvider?->get();
 
-        // Enforce tenant boundary: if context is present and user cannot access account, fail safe
-        if ($ctx !== null && !$ctx->canAccessAccount($id)) {
+        // Enforce tenant boundary: if context is present and caller cannot access account, fail safe
+        if ($ctx !== null && !$ctx->isUnrestricted() && !$ctx->canAccessAccount($id)) {
             return null;
         }
 

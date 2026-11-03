@@ -51,16 +51,21 @@ final class TenantContext implements TenantContextInterface
         }
 
         // Standard tenant user (account_admin or worker)
+        $resolvedAccountId = $scopedAccountId ?? ($primaryAccountId ?? $user->getOwnerId());
         $accessible = [];
-        if ($primaryAccountId !== null && $primaryAccountId > 0) {
-            $accessible = [$primaryAccountId];
+        if ($resolvedAccountId !== null && $resolvedAccountId > 0) {
+            $accessible[] = $resolvedAccountId;
         }
+        if ($primaryAccountId !== null && $primaryAccountId > 0) {
+            $accessible[] = $primaryAccountId;
+        }
+        $accessible = array_values(array_unique($accessible));
 
         return new self(
             userId: $userId,
             role: $role,
-            primaryAccountId: $primaryAccountId,
-            scopedAccountId: null,
+            primaryAccountId: $resolvedAccountId,
+            scopedAccountId: $scopedAccountId,
             accessibleAccountIds: $accessible,
         );
     }
@@ -102,6 +107,21 @@ final class TenantContext implements TenantContextInterface
     public function isSuperAdmin(): bool
     {
         return $this->role === User::ROLE_SUPER;
+    }
+
+    public function isAccountAdmin(): bool
+    {
+        return $this->role === User::ROLE_ACCOUNT_ADMIN;
+    }
+
+    public function isWorker(): bool
+    {
+        return $this->role === User::ROLE_WORKER;
+    }
+
+    public function getAccountId(): ?int
+    {
+        return $this->getPrimaryAccountId();
     }
 
     public function isUnrestricted(): bool

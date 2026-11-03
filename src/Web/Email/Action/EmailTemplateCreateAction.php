@@ -57,7 +57,7 @@ final class EmailTemplateCreateAction
         $name = '';
         $text = '';
         $status = EmailTemplate::STATUS_ACTIVE;
-        $targetAccountId = $context->getScopedAccountId() ?? $currentUser->getAccountId();
+        $targetAccountId = $context->getScopedAccountId() ?? ($context->getAccountId() ?? $currentUser->getAccountId());
 
         if ($request->getMethod() === 'POST') {
             $body = (array) $request->getParsedBody();

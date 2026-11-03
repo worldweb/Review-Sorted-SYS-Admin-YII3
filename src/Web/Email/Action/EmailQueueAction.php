@@ -54,7 +54,7 @@ final class EmailQueueAction
         $page = max(1, (int) ($queryParams['page'] ?? 1));
         $pageSize = 20;
 
-        $accountId = $context->getScopedAccountId() ?? $currentUser->getAccountId();
+        $accountId = $context->getScopedAccountId() ?? ($context->getAccountId() ?? $currentUser->getAccountId());
         if ($context->isUnrestricted() && isset($queryParams['account_id']) && (int) $queryParams['account_id'] > 0) {
             $accountId = (int) $queryParams['account_id'];
         }

@@ -33,6 +33,21 @@ interface TenantContextInterface
     public function isSuperAdmin(): bool;
 
     /**
+     * Check whether the context has account administrator privileges.
+     */
+    public function isAccountAdmin(): bool;
+
+    /**
+     * Check whether the context has worker (standard user) privileges.
+     */
+    public function isWorker(): bool;
+
+    /**
+     * Get the active or primary account ID for the current context.
+     */
+    public function getAccountId(): ?int;
+
+    /**
      * Check whether the context is an unrestricted administrator (not scoped to an individual account).
      */
     public function isUnrestricted(): bool;

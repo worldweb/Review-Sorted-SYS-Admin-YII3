@@ -6,6 +6,7 @@ namespace App\Web\GlobalSettings\Action;
 
 use App\Domain\Setting\SettingRepositoryInterface;
 use App\Domain\User\UserRepositoryInterface;
+use App\Security\Authorization\RolePermissionService;
 use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -20,6 +21,7 @@ final class GlobalSettingsIndexAction
     public function __construct(
         private SettingRepositoryInterface $settingRepo,
         private UserRepositoryInterface $userRepo,
+        private RolePermissionService $rolePermissionService,
         private TenantContextProviderInterface $tenantContextProvider,
         private SessionInterface $session,
         private WebViewRenderer $viewRenderer,
@@ -50,10 +52,36 @@ final class GlobalSettingsIndexAction
             $section = 'general';
         }
 
+        // Selected role for Role Permissions tab
+        $targetRole = (string) ($queryParams['target_role'] ?? 'account_admin');
+        if (!in_array($targetRole, ['account_admin', 'worker', 'admin'], true)) {
+            $targetRole = 'account_admin';
+        }
+
         if ($request->getMethod() === 'POST') {
             $post = (array) $request->getParsedBody();
-            $settingsData = (array) ($post['settings'] ?? []);
 
+            // Handle Role Permissions Save
+            if (isset($post['RolePermissionsForm'])) {
+                $roleFormData = (array) $post['RolePermissionsForm'];
+                $submittedRole = (string) ($roleFormData['target_role'] ?? $targetRole);
+                if (in_array($submittedRole, ['account_admin', 'worker', 'admin'], true)) {
+                    $targetRole = $submittedRole;
+                }
+                $selectedFeatures = (array) ($roleFormData['selected_features'] ?? []);
+                $result = $this->rolePermissionService->updateRolePermissions($targetRole, $selectedFeatures, $currentUser);
+
+                if (!empty($result['success'])) {
+                    $flash->set('success', $result['message']);
+                } else {
+                    $flash->set('info', $result['message']);
+                }
+
+                return $this->redirect('/sys-yii3/global-settings?section=roles&target_role=' . urlencode($targetRole));
+            }
+
+            // Handle General/Security Settings Save
+            $settingsData = (array) ($post['settings'] ?? []);
             $allSuccess = true;
             foreach ($settingsData as $key => $val) {
                 if (!$this->settingRepo->set((string) $key, (string) $val)) {
@@ -71,12 +99,17 @@ final class GlobalSettingsIndexAction
         }
 
         $allSettings = $this->settingRepo->getAll();
+        $roleMatrix = $this->rolePermissionService->getRoleMatrix($targetRole);
+        $roleOptions = RolePermissionService::getEditableRoleOptions();
 
         return $this->viewRenderer
             ->withViewPath('@src/Web/GlobalSettings/views')
             ->render('index', [
                 'section' => $section,
                 'settings' => $allSettings,
+                'targetRole' => $targetRole,
+                'roleMatrix' => $roleMatrix,
+                'roleOptions' => $roleOptions,
                 'currentUser' => $currentUser,
                 'flash' => $flash,
                 'csrfToken' => $this->csrfToken?->getValue() ?? '',

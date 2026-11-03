@@ -94,7 +94,7 @@ final class NavigationMenuProvider
                     'url' => '/sys-yii3/settings/facebook',
                     'active' => $isFbActive,
                 ];
-                if ($isAdmin || $currentUser->getRoleName() === 'super') {
+                if ($isAdmin || $currentUser->isSuperAdmin()) {
                     $items[] = [
                         'type' => 'subitem',
                         'label' => 'Facebook Apps',
@@ -110,7 +110,7 @@ final class NavigationMenuProvider
                     'url' => '/sys-yii3/settings/google',
                     'active' => $isGoogleActive,
                 ];
-                if ($isAdmin || $currentUser->getRoleName() === 'super') {
+                if ($isAdmin || $currentUser->isSuperAdmin()) {
                     $items[] = [
                         'type' => 'subitem',
                         'label' => 'Google Projects',

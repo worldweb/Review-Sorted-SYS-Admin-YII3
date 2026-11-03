@@ -136,16 +136,30 @@ $this->setTitle('Social Publishing History');
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="rs-d-flex rs-gap-1 rs-flex-wrap">
-                                            <?php foreach ($p->getDestinations() as $dest): ?>
+                                        <?php
+                                            $allDests = $p->getDestinations();
+                                            $destCount = count($allDests);
+                                            $maxVisible = 3;
+                                            $visibleDests = array_slice($allDests, 0, $maxVisible);
+                                            $remainingCount = $destCount - $maxVisible;
+                                            $fullNames = array_map(static fn($d) => strtoupper($d->getPlatform()) . ' (' . ($d->getDestinationName() ?: '#' . $d->getAccountId()) . '): ' . $d->getStatus(), $allDests);
+                                            $tooltipText = implode("\n", $fullNames);
+                                        ?>
+                                        <div class="rs-d-flex rs-gap-1 rs-align-items-center rs-flex-wrap" style="max-width: 220px;" title="<?= Html::encode($tooltipText) ?>">
+                                            <?php foreach ($visibleDests as $dest): ?>
                                                 <?php if ($dest->getPlatform() === 'facebook'): ?>
-                                                    <span class="rs-badge rs-badge--primary">FB</span>
+                                                    <span class="rs-badge rs-badge--primary" style="font-size: 11px; padding: 2px 6px;">FB</span>
                                                 <?php elseif ($dest->getPlatform() === 'instagram'): ?>
-                                                    <span class="rs-badge rs-badge--warning">IG</span>
+                                                    <span class="rs-badge rs-badge--warning" style="font-size: 11px; padding: 2px 6px;">IG</span>
                                                 <?php elseif ($dest->getPlatform() === 'google'): ?>
-                                                    <span class="rs-badge rs-badge--default">Google</span>
+                                                    <span class="rs-badge rs-badge--default" style="font-size: 11px; padding: 2px 6px;">Google</span>
                                                 <?php endif; ?>
                                             <?php endforeach; ?>
+                                            <?php if ($remainingCount > 0): ?>
+                                                <span class="rs-badge rs-badge--secondary" style="font-size: 11px; padding: 2px 6px; cursor: help;" title="<?= Html::encode($tooltipText) ?>">
+                                                    +<?= $remainingCount ?> more
+                                                </span>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                     <td class="rs-text-sm">

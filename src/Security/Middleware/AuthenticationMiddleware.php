@@ -86,13 +86,16 @@ final class AuthenticationMiddleware implements MiddlewareInterface
             // Verify tenant account is active for non-admin roles
             if ($role === 'account_admin' || $role === 'worker') {
                 $accountId = $identity->getAccountId();
+                if (($accountId === null || $accountId <= 0) && $identity->getOwnerId() !== null && $identity->getOwnerId() > 0) {
+                    $owner = $this->userRepo->findById($identity->getOwnerId(), TenantContext::unrestricted());
+                    $accountId = $owner?->getAccountId();
+                }
+
                 if ($accountId !== null && $accountId > 0) {
-                    $account = $this->accountRepo->findById($accountId);
+                    $account = $this->accountRepo->findById($accountId, TenantContext::unrestricted());
                     if ($account === null || !$account->isActive()) {
                         $accountActive = false;
                     }
-                } else {
-                    $accountActive = false;
                 }
             }
 

@@ -70,10 +70,15 @@ final class UserListAction
         $canAddAccountAdmin = $currentUser->isAdmin();
 
         $canAddWorker = false;
-        if ($currentUser->isAccountAdmin() && $currentUser->getAccountId() !== null) {
-            $account = $this->accountRepo->findById($currentUser->getAccountId(), $context);
-            if ($account !== null && $account->getMaxUsers() > $total) {
-                $canAddWorker = true;
+        if ($currentUser->isAdmin()) {
+            $canAddWorker = true;
+        } elseif ($currentUser->isAccountAdmin()) {
+            $accId = $context->getAccountId() ?? $currentUser->getAccountId();
+            if ($accId !== null) {
+                $account = $this->accountRepo->findById($accId, $context);
+                if ($account !== null && $account->getMaxUsers() > $total) {
+                    $canAddWorker = true;
+                }
             }
         }
 

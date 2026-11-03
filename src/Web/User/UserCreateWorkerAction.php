@@ -47,7 +47,7 @@ final class UserCreateWorkerAction
             return $response;
         }
 
-        $accountId = $currentUser->getAccountId();
+        $accountId = $context->getScopedAccountId() ?? ($context->getAccountId() ?? ($currentUser->getAccountId() ?? $currentUser->getOwnerId()));
         if ($accountId === null || $accountId <= 0) {
             $response = $this->responseFactory->createResponse(400);
             $response->getBody()->write('Bad Request: User does not belong to a valid tenant account.');

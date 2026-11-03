@@ -57,7 +57,7 @@ final class WhatsAppTemplateCreateAction
         $name = '';
         $text = '';
         $status = WhatsAppTemplate::STATUS_ACTIVE;
-        $targetAccountId = $context->getScopedAccountId() ?? $currentUser->getAccountId();
+        $targetAccountId = $context->getScopedAccountId() ?? ($context->getAccountId() ?? $currentUser->getAccountId());
 
         if ($request->getMethod() === 'POST') {
             $body = (array) $request->getParsedBody();

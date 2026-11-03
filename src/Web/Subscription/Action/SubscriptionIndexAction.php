@@ -36,8 +36,10 @@ final class SubscriptionIndexAction
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
-        if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+        if ($currentUser === null || !$currentUser->isAdmin()) {
+            $response = $this->responseFactory->createResponse(403);
+            $response->getBody()->write('Forbidden: Only platform administrators can manage subscription plans.');
+            return $response;
         }
 
         $plans = $this->subRepo->findAllPlans();

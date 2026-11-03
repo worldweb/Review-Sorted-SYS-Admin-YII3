@@ -95,11 +95,8 @@ $renderStars = static function (?float $rawRate): string {
 
     <!-- Header Section with KPI Metric Cards -->
     <div class="reviews-header rs-mb-6">
-        <div class="rs-d-flex rs-justify-content-between rs-align-items-center rs-flex-wrap rs-gap-3 rs-mb-4">
-            <div>
-                <h1 class="rs-page-title rs-m-0">Reviews & Mentions</h1>
-                <p class="rs-text-muted rs-m-0 rs-mt-1">Manage and inspect customer feedback across all connected channels.</p>
-            </div>
+        <div class="rs-d-flex rs-align-items-center rs-justify-content-between rs-w-100 rs-mb-2">
+            <h1 class="rs-page-title rs-m-0">Reviews & Mentions</h1>
             <div class="rs-page-header__actions rs-d-flex rs-align-items-center rs-gap-3">
                 <?php if ($isGoogleOrFacebookChannel): ?>
                     <button type="button" class="rs-btn rs-btn--primary btn-reply-all" onclick="submitBulkReply();">
@@ -115,6 +112,7 @@ $renderStars = static function (?float $rawRate): string {
                 </a>
             </div>
         </div>
+        <p class="rs-text-muted rs-mb-5">Manage and reply to customer feedback across all channels.</p>
 
         <!-- KPI Metric Cards matching Yii 2 Dashboard Group -->
         <div class="rs-d-flex rs-gap-4 rs-flex-wrap rs-w-100">
@@ -157,11 +155,10 @@ $renderStars = static function (?float $rawRate): string {
                             <th style="width: 14%; min-width: 120px;">Alias</th>
                             <th style="width: 9%; min-width: 75px;">Channel</th>
                             <th style="width: 11%; min-width: 95px;">Rate</th>
-                            <th style="width: 7%; min-width: 70px;">Risk</th>
-                            <th style="width: <?= $isGoogleOrFacebookChannel ? '26%' : '30%' ?>; min-width: 160px;">Review Text</th>
-                            <th style="width: 10%; min-width: 105px;">Date</th>
-                            <th style="width: 8%; min-width: 75px;">Status</th>
-                            <th class="rs-text-center" style="width: 110px; min-width: 110px;">Action</th>
+                            <th style="width: <?= $isGoogleOrFacebookChannel ? '33%' : '37%' ?>; min-width: 180px;">Review Text</th>
+                            <th style="width: 12%; min-width: 105px;">Date</th>
+                            <th style="width: 10%; min-width: 75px;">Status</th>
+                            <th class="rs-text-center" style="width: 120px; min-width: 120px;">Action</th>
                         </tr>
                         <tr class="rs-table__filter-row" style="background: #f8fafc;">
                             <?php if ($isGoogleOrFacebookChannel): ?>
@@ -184,7 +181,6 @@ $renderStars = static function (?float $rawRate): string {
                                 </select>
                             </td>
                             <td></td>
-                            <td></td>
                             <td>
                                 <input type="text" name="review_text" class="rs-input rs-w-100" style="font-size: 12px; padding: 4px 8px;" placeholder="Search text..." value="<?= Html::encode($filter->getReviewText() ?? '') ?>" onkeydown="if(event.key==='Enter') this.form.submit();">
                             </td>
@@ -205,7 +201,7 @@ $renderStars = static function (?float $rawRate): string {
                 <tbody>
                     <?php if (empty($reviews)): ?>
                         <tr>
-                            <td colspan="<?= $isGoogleOrFacebookChannel ? 9 : 8 ?>" class="rs-text-center rs-py-6 rs-text-muted">
+                            <td colspan="<?= $isGoogleOrFacebookChannel ? 8 : 7 ?>" class="rs-text-center rs-py-6 rs-text-muted">
                                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
                                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                                     <span>No reviews found matching the selected filter criteria.</span>
@@ -255,15 +251,6 @@ $renderStars = static function (?float $rawRate): string {
                                 </td>
                                 <td>
                                     <?= $renderStars($item->getReviewRate()) ?>
-                                </td>
-                                <td>
-                                    <?php if ($item->getSpamStatus() === Review::SPAM_HIGH_RISK): ?>
-                                        <span class="rs-badge rs-badge--danger">High Risk</span>
-                                    <?php elseif ($item->getSpamStatus() === Review::SPAM_SUSPICIOUS): ?>
-                                        <span class="rs-badge rs-badge--warning">Suspicious</span>
-                                    <?php else: ?>
-                                        <span class="rs-text-muted rs-text-xs">-</span>
-                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <div class="rs-text-sm <?= $textClass ?>" style="max-height: 4.5em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">

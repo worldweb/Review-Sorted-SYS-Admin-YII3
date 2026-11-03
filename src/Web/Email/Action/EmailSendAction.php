@@ -53,7 +53,7 @@ final class EmailSendAction
         }
 
         $flash = new Flash($this->session);
-        $accountId = $context->getScopedAccountId() ?? $currentUser->getAccountId();
+        $accountId = $context->getScopedAccountId() ?? ($context->getAccountId() ?? $currentUser->getAccountId());
         $errors = [];
 
         // Load templates and contacts for the account

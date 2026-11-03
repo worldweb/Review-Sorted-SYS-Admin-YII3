@@ -79,21 +79,31 @@ $this->setTitle('Google Accounts');
                     'subtitle' => 'Profiles and locations currently integrated with your account'
                 ]) ?>
                 <div class="rs-table-wrapper" style="overflow-x: auto;">
-                    <table class="rs-table rs-table--hover" style="width: 100%; border-collapse: collapse;">
+                    <table class="rs-table rs-table--hover" style="width: 100%; min-width: 720px; border-collapse: collapse;">
                         <thead>
                             <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-                                <th style="padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Label / Location</th>
-                                <th style="padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Google Location ID</th>
-                                <th style="padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Status</th>
-                                <th style="padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Connected On</th>
-                                <th style="padding: 12px 16px; text-align: right; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Actions</th>
+                                <th style="padding: 12px 16px; width: 30%; min-width: 180px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Business / Location Name</th>
+                                <th style="padding: 12px 16px; width: 28%; min-width: 180px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Google Location ID</th>
+                                <th style="padding: 12px 16px; width: 12%; min-width: 90px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Status</th>
+                                <th style="padding: 12px 16px; width: 12%; min-width: 100px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Connected On</th>
+                                <th style="padding: 12px 16px; width: 18%; min-width: 170px; text-align: right; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($configs as $cfg): ?>
+                                <?php
+                                    $displayName = $cfg->getDisplayName();
+                                    $label = $cfg->getLabel();
+                                    $locationId = $cfg->getLocationId();
+                                ?>
                                 <tr style="border-bottom: 1px solid #f1f5f9;">
                                     <td style="padding: 14px 16px;">
-                                        <div style="font-weight: 600; color: #0f172a; font-size: 0.95rem;"><?= Html::encode($cfg->getDisplayName()) ?></div>
+                                        <div style="font-weight: 600; color: #0f172a; font-size: 0.95rem;"><?= Html::encode($displayName) ?></div>
+                                        <?php if (!empty($label) && $label !== $displayName): ?>
+                                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+                                                Label: <?= Html::encode($label) ?>
+                                            </div>
+                                        <?php endif; ?>
                                         <?php if (!empty($cfg->getEmailLowReview())): ?>
                                             <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
                                                 Alert Email: <?= Html::encode($cfg->getEmailLowReview()) ?>
@@ -101,7 +111,7 @@ $this->setTitle('Google Accounts');
                                         <?php endif; ?>
                                     </td>
                                     <td style="padding: 14px 16px; font-family: monospace; font-size: 0.85rem; color: #475569;">
-                                        <?= Html::encode($cfg->getPageId() ?? 'N/A') ?>
+                                        <?= Html::encode($locationId) ?>
                                     </td>
                                     <td style="padding: 14px 16px;">
                                         <?= $this->render('../partials/_status_badge', [
@@ -111,15 +121,15 @@ $this->setTitle('Google Accounts');
                                     <td style="padding: 14px 16px; font-size: 0.85rem; color: #64748b;">
                                         <?= $cfg->getCreatedAt() ? date('M d, Y', $cfg->getCreatedAt()) : 'N/A' ?>
                                     </td>
-                                    <td style="padding: 14px 16px; text-align: right;">
-                                        <div style="display: inline-flex; gap: 6px;">
-                                            <a href="/sys-yii3/settings/google/view?id=<?= $cfg->getId() ?>" class="rs-btn rs-btn--sm rs-btn--secondary" title="View Details">
+                                    <td style="padding: 14px 16px; text-align: right; white-space: nowrap;">
+                                        <div style="display: inline-flex; gap: 6px; justify-content: flex-end;">
+                                            <a href="/sys-yii3/settings/google/view?id=<?= $cfg->getId() ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="View Details">
                                                 View
                                             </a>
-                                            <a href="/sys-yii3/settings/google/update?id=<?= $cfg->getId() ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Edit Settings">
+                                            <a href="/sys-yii3/settings/google/update?id=<?= $cfg->getId() ?>" class="rs-btn rs-btn--sm rs-btn--secondary" title="Edit Settings">
                                                 Edit
                                             </a>
-                                            <a href="/sys-yii3/settings/google/revoke?id=<?= $cfg->getId() ?>" class="rs-btn rs-btn--sm rs-btn--danger" onclick="return confirm('Are you sure you want to disconnect this location?');" title="Disconnect">
+                                            <a href="/sys-yii3/settings/google/revoke?id=<?= $cfg->getId() ?>" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-danger" onclick="return confirm('Are you sure you want to disconnect this location?');" title="Disconnect">
                                                 Disconnect
                                             </a>
                                         </div>

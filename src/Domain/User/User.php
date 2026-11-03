@@ -86,6 +86,11 @@ final class User
         return $this->role;
     }
 
+    public function getRoleName(): ?string
+    {
+        return $this->role;
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->role === self::ROLE_SUPER;
@@ -125,6 +130,11 @@ final class User
     public function getCreatedAtStr(string $format = 'M j, Y'): string
     {
         return $this->createdAt !== null ? date($format, $this->createdAt) : '-';
+    }
+
+    public function getUpdatedAtStr(string $format = 'M j, Y'): string
+    {
+        return $this->updatedAt !== null ? date($format, $this->updatedAt) : '-';
     }
 
     public function getCreatedAt(): ?int

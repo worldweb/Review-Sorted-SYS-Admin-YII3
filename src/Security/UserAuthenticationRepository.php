@@ -21,6 +21,7 @@ final class UserAuthenticationRepository implements UserAuthenticationRepository
         'auth_key' => 'u.auth_key',
         'status' => 'u.status',
         'account_id' => 'u.account_id',
+        'owner_id' => 'u.owner_id',
         'role' => 'aa.item_name',
     ];
 

@@ -47,9 +47,9 @@ final class AccountUpdateAction
         $queryParams = $request->getQueryParams();
         $targetId = isset($queryParams['id']) ? (int) $queryParams['id'] : ($currentUser->getAccountId() ?? 0);
 
-        // Server-side authorization check matching AccountsController lines 162-166
+        // Server-side authorization check matching AccountsController
         if (!$currentUser->isAdmin()) {
-            if ($targetId !== $currentUser->getAccountId()) {
+            if (!$context->canAccessAccount($targetId) && $targetId !== $currentUser->getAccountId()) {
                 $response = $this->responseFactory->createResponse(403);
                 $response->getBody()->write('Forbidden: You are not allowed to edit this workspace.');
                 return $response;

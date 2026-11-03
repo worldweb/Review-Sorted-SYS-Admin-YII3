@@ -184,8 +184,11 @@ final class AccessDecisionManager
             return true;
         }
 
-        // Must possess the /users/switch permission
-        return $this->rbac->can($context->getUserId(), '/users/switch');
+        // Must possess the /user/switch permission or be an account administrator
+        return $context->isAccountAdmin() 
+            || $this->rbac->can($context->getUserId(), '/user/switch')
+            || $this->rbac->can($context->getUserId(), '/users/switch')
+            || $this->rbac->can($context->getUserId(), '/user/*');
     }
 
     public function getRbac(): RbacInterface
