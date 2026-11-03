@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Yiisoft\Html\Html;
+
 /**
  * @var App\Domain\SocialPost\SocialPost $model
  * @var Yiisoft\Session\Flash\Flash $flash
@@ -11,62 +13,49 @@ declare(strict_types=1);
 $this->setTitle('Edit Post #' . $model->getId());
 ?>
 
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h2 class="h3 font-weight-bold text-gray-800 mb-1">
-                        <i class="bi bi-pencil-square text-primary me-2"></i>Edit Scheduled Post #<?= $model->getId() ?>
-                    </h2>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="/sys-yii3/social-post">Social Posts</a></li>
-                            <li class="breadcrumb-item"><a href="/sys-yii3/social-post/view?id=<?= $model->getId() ?>">Post #<?= $model->getId() ?></a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Edit</li>
-                        </ol>
-                    </nav>
-                </div>
-                <div>
-                    <a href="/sys-yii3/social-post/view?id=<?= $model->getId() ?>" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i> Cancel
-                    </a>
-                </div>
-            </div>
+<div class="rs-social-post-update">
+    <div class="rs-d-flex rs-justify-content-between rs-align-items-center rs-mb-5">
+        <div>
+            <h1 class="rs-h1 rs-m-0" style="font-size: 1.75rem; font-weight: 700; color: #0f172a; margin: 0;">Edit Post #<?= $model->getId() ?></h1>
+            <div class="rs-text-muted rs-mt-1">Modify content and scheduling options for this dispatch.</div>
+        </div>
+        <div class="rs-d-flex rs-gap-2">
+            <a href="/sys-yii3/social-post/view?id=<?= $model->getId() ?>" class="rs-btn rs-btn--secondary">
+                Cancel
+            </a>
+        </div>
+    </div>
 
-            <?php if ($flash->has('error')): ?>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <?= htmlspecialchars((string) $flash->get('error')) ?>
+    <?php if ($flash->has('error')): ?>
+        <div class="rs-alert rs-alert--danger rs-mb-4" role="alert">
+            <?= Html::encode((string) $flash->get('error')) ?>
+        </div>
+    <?php endif; ?>
+
+    <div class="rs-card rs-form-card">
+        <div class="rs-card__header">
+            <h3 class="rs-card__title">Post Content &amp; Details</h3>
+        </div>
+        <div class="rs-card__body rs-p-6">
+            <form method="post" action="/sys-yii3/social-post/update?id=<?= $model->getId() ?>" class="rs-form">
+                <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
+
+                <div class="rs-form-group rs-mb-5">
+                    <label for="content" class="rs-label rs-font-semibold rs-mb-2">Post Content <span class="rs-text-danger">*</span></label>
+                    <textarea class="rs-input rs-textarea-input rs-w-100" id="content" name="content" rows="6" required placeholder="Write your post content here..."><?= Html::encode($model->getContent()) ?></textarea>
                 </div>
-            <?php endif; ?>
 
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 border-bottom">
-                    <h6 class="m-0 font-weight-bold text-primary">Edit Post Details</h6>
+                <div class="rs-form-group rs-mb-5">
+                    <label for="scheduled_at" class="rs-label rs-font-semibold rs-mb-2">Scheduled Datetime</label>
+                    <input type="datetime-local" class="rs-input rs-w-100" id="scheduled_at" name="scheduled_at" value="<?= Html::encode(!empty($model->getScheduledAt()) ? date('Y-m-d\TH:i', strtotime($model->getScheduledAt())) : '') ?>">
+                    <div class="rs-text-muted rs-mt-1" style="font-size: 0.8rem;">Leave blank to dispatch immediately.</div>
                 </div>
-                <div class="card-body">
-                    <form method="post" action="/sys-yii3/social-post/update?id=<?= $model->getId() ?>">
-                        <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrfToken) ?>">
 
-                        <div class="mb-3">
-                            <label for="content" class="form-label fw-bold">Post Content <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="content" name="content" rows="6" required><?= htmlspecialchars($model->getContent()) ?></textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="scheduled_at" class="form-label fw-bold">Scheduled Datetime</label>
-                            <input type="datetime-local" class="form-control" id="scheduled_at" name="scheduled_at" value="<?= htmlspecialchars(!empty($model->getScheduledAt()) ? date('Y-m-d\TH:i', strtotime($model->getScheduledAt())) : '') ?>">
-                        </div>
-
-                        <div class="pt-3 border-top d-flex justify-content-end">
-                            <a href="/sys-yii3/social-post/view?id=<?= $model->getId() ?>" class="btn btn-secondary me-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="bi bi-check-lg me-1"></i> Update Post
-                            </button>
-                        </div>
-                    </form>
+                <div class="rs-d-flex rs-justify-content-between rs-align-items-center rs-mt-6 rs-pt-4 rs-border-top" style="border-top: 1px solid var(--rs-border, #E2E8F0);">
+                    <a href="/sys-yii3/social-post/view?id=<?= $model->getId() ?>" class="rs-btn rs-btn--secondary">Cancel</a>
+                    <button type="submit" class="rs-btn rs-btn--primary rs-px-6">Update Post</button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>

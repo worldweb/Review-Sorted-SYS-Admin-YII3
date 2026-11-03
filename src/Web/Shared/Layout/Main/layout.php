@@ -123,7 +123,7 @@ $this->beginPage();
                     <line x1="3" y1="18" x2="21" y2="18"></line>
                 </svg>
             </button>
-            <a href="/sys-yii3/" class="rs-header__brand">
+            <a href="/sys-yii3/reviews" class="rs-header__brand">
                 <?= Html::encode($applicationParams->name) ?>
             </a>
         </div>
@@ -219,12 +219,25 @@ $this->beginPage();
             <nav class="rs-sidebar__nav" aria-label="Main Navigation">
                 <ul class="rs-nav-menu">
                     <?php foreach ($menuItems as $item): ?>
-                        <li class="<?= $item['active'] ? 'active' : '' ?>">
-                            <a href="<?= Html::encode($item['url']) ?>" class="rs-sidebar__item <?= $item['active'] ? 'rs-sidebar__item--active' : '' ?>">
-                                <span class="rs-sidebar__icon"><?= $item['icon'] ?></span>
-                                <span class="rs-sidebar__item-label"><?= Html::encode($item['label']) ?></span>
-                            </a>
-                        </li>
+                        <?php $itemType = $item['type'] ?? 'item'; ?>
+                        <?php if ($itemType === 'header'): ?>
+                            <li class="rs-sidebar-group-header"><?= Html::encode($item['label']) ?></li>
+                        <?php elseif ($itemType === 'divider'): ?>
+                            <li class="rs-sidebar-divider-wrapper"><div class="rs-sidebar-divider"></div></li>
+                        <?php elseif ($itemType === 'subitem'): ?>
+                            <li class="rs-sidebar-subitem <?= !empty($item['active']) ? 'active' : '' ?>">
+                                <a href="<?= Html::encode($item['url']) ?>">
+                                    <span><?= Html::encode($item['label']) ?></span>
+                                </a>
+                            </li>
+                        <?php else: ?>
+                            <li class="<?= !empty($item['active']) ? 'active' : '' ?>">
+                                <a href="<?= Html::encode($item['url']) ?>" class="rs-sidebar__item <?= !empty($item['active']) ? 'rs-sidebar__item--active' : '' ?>">
+                                    <span class="rs-sidebar__icon"><?= $item['icon'] ?? '' ?></span>
+                                    <span class="rs-sidebar__item-label"><?= Html::encode($item['label']) ?></span>
+                                </a>
+                            </li>
+                        <?php endif; ?>
                     <?php endforeach; ?>
                 </ul>
             </nav>

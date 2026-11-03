@@ -61,6 +61,9 @@ return [
             Route::get('/accounts')
                 ->action(Web\Account\AccountListAction::class)
                 ->name('accounts_index'),
+            Route::get('/accounts/export')
+                ->action(Web\Account\AccountExportAction::class)
+                ->name('accounts_export'),
             Route::get('/accounts/view')
                 ->action(Web\Account\AccountViewAction::class)
                 ->name('accounts_view'),
@@ -291,6 +294,40 @@ return [
                 ->action(Web\SocialConnection\Action\GoogleLinkAction::class)
                 ->name('settings_google_link'),
 
+            // Facebook API Routes
+            Route::get('/settings/facebook-api')
+                ->action(Web\SocialConnection\Action\FacebookApiIndexAction::class)
+                ->name('settings_facebook_api_index'),
+            Route::methods(['GET', 'POST'], '/settings/facebook-api/create')
+                ->action(Web\SocialConnection\Action\FacebookApiCreateAction::class)
+                ->name('settings_facebook_api_create'),
+            Route::methods(['GET', 'POST'], '/settings/facebook-api/update')
+                ->action(Web\SocialConnection\Action\FacebookApiUpdateAction::class)
+                ->name('settings_facebook_api_update'),
+            Route::get('/settings/facebook-api/view')
+                ->action(Web\SocialConnection\Action\FacebookApiViewAction::class)
+                ->name('settings_facebook_api_view'),
+            Route::get('/settings/facebook-api/delete')
+                ->action(Web\SocialConnection\Action\FacebookApiDeleteAction::class)
+                ->name('settings_facebook_api_delete'),
+
+            // Google API Routes
+            Route::get('/settings/google-api')
+                ->action(Web\SocialConnection\Action\GoogleApiIndexAction::class)
+                ->name('settings_google_api_index'),
+            Route::methods(['GET', 'POST'], '/settings/google-api/create')
+                ->action(Web\SocialConnection\Action\GoogleApiCreateAction::class)
+                ->name('settings_google_api_create'),
+            Route::methods(['GET', 'POST'], '/settings/google-api/update')
+                ->action(Web\SocialConnection\Action\GoogleApiUpdateAction::class)
+                ->name('settings_google_api_update'),
+            Route::get('/settings/google-api/view')
+                ->action(Web\SocialConnection\Action\GoogleApiViewAction::class)
+                ->name('settings_google_api_view'),
+            Route::get('/settings/google-api/delete')
+                ->action(Web\SocialConnection\Action\GoogleApiDeleteAction::class)
+                ->name('settings_google_api_delete'),
+
             // Social Publishing Studio Routes
             Route::get('/social-post')
                 ->action(Web\SocialPost\Action\SocialPostIndexAction::class)
@@ -361,6 +398,22 @@ return [
             Route::methods(['GET', 'POST'], '/hooks/messages')
                 ->action(Web\Hooks\Action\HooksMessagesAction::class)
                 ->name('hooks_messages'),
+
+            // Notifications
+            Route::get('/notification/latest')
+                ->action(Web\Notification\Action\NotificationLatestAction::class)
+                ->name('notification_latest'),
+            Route::methods(['GET', 'POST'], '/notification/mark-read')
+                ->action(Web\Notification\Action\NotificationMarkReadAction::class)
+                ->name('notification_mark_read'),
+            Route::methods(['GET', 'POST'], '/notification/mark-all-read')
+                ->action(Web\Notification\Action\NotificationMarkAllReadAction::class)
+                ->name('notification_mark_all_read'),
+
+            // Global Search / Command Palette
+            Route::get('/site/search')
+                ->action(Web\HomePage\GlobalSearchAction::class)
+                ->name('site_search'),
         ),
     Route::get('/')
         ->action(Web\HomePage\Action::class)
@@ -590,6 +643,40 @@ return [
         ->action(Web\SocialConnection\Action\GoogleLinkAction::class)
         ->name('root_settings_google_link'),
 
+    // Root Facebook API Routes
+    Route::get('/settings/facebook-api')
+        ->action(Web\SocialConnection\Action\FacebookApiIndexAction::class)
+        ->name('root_settings_facebook_api_index'),
+    Route::methods(['GET', 'POST'], '/settings/facebook-api/create')
+        ->action(Web\SocialConnection\Action\FacebookApiCreateAction::class)
+        ->name('root_settings_facebook_api_create'),
+    Route::methods(['GET', 'POST'], '/settings/facebook-api/update')
+        ->action(Web\SocialConnection\Action\FacebookApiUpdateAction::class)
+        ->name('root_settings_facebook_api_update'),
+    Route::get('/settings/facebook-api/view')
+        ->action(Web\SocialConnection\Action\FacebookApiViewAction::class)
+        ->name('root_settings_facebook_api_view'),
+    Route::get('/settings/facebook-api/delete')
+        ->action(Web\SocialConnection\Action\FacebookApiDeleteAction::class)
+        ->name('root_settings_facebook_api_delete'),
+
+    // Root Google API Routes
+    Route::get('/settings/google-api')
+        ->action(Web\SocialConnection\Action\GoogleApiIndexAction::class)
+        ->name('root_settings_google_api_index'),
+    Route::methods(['GET', 'POST'], '/settings/google-api/create')
+        ->action(Web\SocialConnection\Action\GoogleApiCreateAction::class)
+        ->name('root_settings_google_api_create'),
+    Route::methods(['GET', 'POST'], '/settings/google-api/update')
+        ->action(Web\SocialConnection\Action\GoogleApiUpdateAction::class)
+        ->name('root_settings_google_api_update'),
+    Route::get('/settings/google-api/view')
+        ->action(Web\SocialConnection\Action\GoogleApiViewAction::class)
+        ->name('root_settings_google_api_view'),
+    Route::get('/settings/google-api/delete')
+        ->action(Web\SocialConnection\Action\GoogleApiDeleteAction::class)
+        ->name('root_settings_google_api_delete'),
+
     // Root Social Publishing Studio Routes
     Route::get('/social-post')
         ->action(Web\SocialPost\Action\SocialPostIndexAction::class)
@@ -660,4 +747,20 @@ return [
     Route::methods(['GET', 'POST'], '/hooks/messages')
         ->action(Web\Hooks\Action\HooksMessagesAction::class)
         ->name('root_hooks_messages'),
+
+    // Root Notifications
+    Route::get('/notification/latest')
+        ->action(Web\Notification\Action\NotificationLatestAction::class)
+        ->name('root_notification_latest'),
+    Route::methods(['GET', 'POST'], '/notification/mark-read')
+        ->action(Web\Notification\Action\NotificationMarkReadAction::class)
+        ->name('root_notification_mark_read'),
+    Route::methods(['GET', 'POST'], '/notification/mark-all-read')
+        ->action(Web\Notification\Action\NotificationMarkAllReadAction::class)
+        ->name('root_notification_mark_all_read'),
+
+    // Root Global Search / Command Palette
+    Route::get('/site/search')
+        ->action(Web\HomePage\GlobalSearchAction::class)
+        ->name('root_site_search'),
 ];

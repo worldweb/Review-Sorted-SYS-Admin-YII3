@@ -30,7 +30,6 @@ $activeTab = 'send';
 <?php endforeach; ?>
 
 <div class="rs-page">
-    <?php include __DIR__ . '/_nav.php'; ?>
 
     <!-- Flash notifications -->
     <?php foreach ($flash->getAll() as $type => $messages): ?>

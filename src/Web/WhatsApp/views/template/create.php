@@ -17,14 +17,11 @@ declare(strict_types=1);
  */
 
 $this->setTitle('Create WhatsApp Template');
-$activeTab = 'templates';
 $template = null;
 $actionUrl = '/sys-yii3/whatsapp/template/create';
 ?>
 
 <div class="rs-page">
-    <?php include __DIR__ . '/../_nav.php'; ?>
-
     <div class="rs-page-header rs-mb-6">
         <h1 class="rs-page-title rs-m-0">Create WhatsApp Template</h1>
         <p class="rs-text-muted rs-m-0">Build a reusable plain-text template with merge tags for WhatsApp messages.</p>

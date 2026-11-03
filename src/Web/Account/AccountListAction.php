@@ -6,6 +6,7 @@ namespace App\Web\Account;
 
 use App\Domain\Account\AccountRepositoryInterface;
 use App\Domain\Account\AccountSearchFilter;
+use App\Domain\Subscription\SubscriptionRepositoryInterface;
 use App\Domain\User\UserRepositoryInterface;
 use App\Security\Authorization\AccessDecisionManager;
 use App\Security\TenantContextProviderInterface;
@@ -30,6 +31,7 @@ final class AccountListAction
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
         private ?CsrfTokenInterface $csrfToken = null,
+        private ?SubscriptionRepositoryInterface $subscriptionRepo = null,
     ) {
     }
 
@@ -65,6 +67,15 @@ final class AccountListAction
         $billingOwnerId = $currentUser->getOwnerId() ?? $currentUser->getId();
         $billingData = $this->accountRepo->getBillingSummary($billingAccountId, $billingOwnerId);
 
+        $availablePlans = [];
+        if ($this->subscriptionRepo !== null) {
+            try {
+                $availablePlans = $this->subscriptionRepo->findAllPlans();
+            } catch (\Throwable) {
+                $availablePlans = [];
+            }
+        }
+
         return $this->viewRenderer
             ->render(__DIR__ . '/views/index', [
                 'accounts' => $accounts,
@@ -74,6 +85,7 @@ final class AccountListAction
                 'currentUser' => $currentUser,
                 'context' => $context,
                 'csrfToken' => $this->csrfToken?->getValue(),
+                'availablePlans' => $availablePlans,
             ]);
     }
 

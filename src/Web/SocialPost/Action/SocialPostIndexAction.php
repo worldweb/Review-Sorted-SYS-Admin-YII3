@@ -43,6 +43,11 @@ final class SocialPostIndexAction
         $queryParams = $request->getQueryParams();
         $page = max(1, (int) ($queryParams['page'] ?? 1));
         $typeFilter = !empty($queryParams['type']) ? (string) $queryParams['type'] : null;
+        $q = isset($queryParams['q']) ? trim((string) $queryParams['q']) : '';
+        $status = isset($queryParams['status']) ? trim((string) $queryParams['status']) : '';
+        $platform = isset($queryParams['platform']) ? trim((string) $queryParams['platform']) : '';
+        $dateFrom = isset($queryParams['date_from']) ? trim((string) $queryParams['date_from']) : '';
+        $dateTo = isset($queryParams['date_to']) ? trim((string) $queryParams['date_to']) : '';
         $pageSize = 15;
         $offset = ($page - 1) * $pageSize;
 
@@ -61,6 +66,11 @@ final class SocialPostIndexAction
                 'pageCount' => $pageCount,
                 'pageSize' => $pageSize,
                 'typeFilter' => $typeFilter,
+                'q' => $q,
+                'status' => $status,
+                'platform' => $platform,
+                'dateFrom' => $dateFrom,
+                'dateTo' => $dateTo,
                 'currentUser' => $currentUser,
                 'flash' => $flash,
                 'csrfToken' => $this->csrfToken?->getValue() ?? '',

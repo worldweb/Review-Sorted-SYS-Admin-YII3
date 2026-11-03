@@ -68,4 +68,20 @@ interface SocialConnectionRepositoryInterface
      * Delete a connection record.
      */
     public function deleteConfig(int $id, ?TenantContextInterface $context = null): bool;
+
+    /**
+     * @return array<int, Api>
+     */
+    public function findApisByService(int $serviceId): array;
+
+    public function findApiById(int $id): ?Api;
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function saveApi(array $data, ?int $id = null): ?int;
+
+    public function deleteApi(int $id): bool;
+
+    public function countAssignedPages(int $apiId): int;
 }

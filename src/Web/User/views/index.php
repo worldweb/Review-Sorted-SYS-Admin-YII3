@@ -30,10 +30,10 @@ $currentPage = $filter->page;
 // Reusable Page Header Action Buttons
 $actionButtons = [];
 if ($canAddAdmin) {
-    $actionButtons[] = '<a href="/sys-yii3/user/create" class="rs-btn rs-btn--ghost">+ Add Admin</a>';
-    $actionButtons[] = '<a href="/sys-yii3/user/create-acc-admin" class="rs-btn rs-btn--secondary">+ Add Account Admin</a>';
+    $actionButtons[] = '<a href="/sys-yii3/user/create" class="rs-btn rs-btn--ghost rs-d-flex rs-align-items-center rs-gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg> Add Admin</a>';
+    $actionButtons[] = '<a href="/sys-yii3/user/create-acc-admin" class="rs-btn rs-btn--secondary rs-d-flex rs-align-items-center rs-gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg> Add Account Admin</a>';
 } elseif ($canAddWorker) {
-    $actionButtons[] = '<a href="/sys-yii3/user/create-worker" class="rs-btn rs-btn--primary">+ Add User</a>';
+    $actionButtons[] = '<a href="/sys-yii3/user/create-worker" class="rs-btn rs-btn--primary rs-d-flex rs-align-items-center rs-gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg> Add User</a>';
 }
 
 $title = 'Users';
@@ -42,57 +42,9 @@ $actions = $actionButtons;
 include __DIR__ . '/../../Shared/Components/_page_header.php';
 ?>
 
-<!-- Filter Form -->
-<div class="rs-card rs-mb-4" style="margin-bottom: 20px; padding: 16px 20px;">
-    <form method="get" action="/sys-yii3/users" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;">
-        <div style="flex: 1; min-width: 220px;">
-            <label for="filter-q" class="rs-label" style="font-size: 12px; margin-bottom: 4px;">Search Name or Email</label>
-            <input type="text" id="filter-q" name="q" class="rs-input" value="<?= Html::encode($filter->search) ?>" placeholder="Search users...">
-        </div>
-
-        <div style="width: 160px;">
-            <label for="filter-status" class="rs-label" style="font-size: 12px; margin-bottom: 4px;">Status</label>
-            <select id="filter-status" name="status" class="rs-input" style="height: 44px;">
-                <option value="">All Statuses</option>
-                <option value="1" <?= $filter->status === 1 ? 'selected' : '' ?>>Active</option>
-                <option value="0" <?= $filter->status === 0 ? 'selected' : '' ?>>Disabled</option>
-            </select>
-        </div>
-
-        <div style="width: 180px;">
-            <label for="filter-role" class="rs-label" style="font-size: 12px; margin-bottom: 4px;">Role</label>
-            <select id="filter-role" name="role" class="rs-input" style="height: 44px;">
-                <option value="">All Roles</option>
-                <option value="super" <?= $filter->role === 'super' ? 'selected' : '' ?>>Administrator (root)</option>
-                <option value="admin" <?= $filter->role === 'admin' ? 'selected' : '' ?>>Administrator</option>
-                <option value="account_admin" <?= $filter->role === 'account_admin' ? 'selected' : '' ?>>Account Administrator</option>
-                <option value="worker" <?= $filter->role === 'worker' ? 'selected' : '' ?>>User</option>
-            </select>
-        </div>
-
-        <?php if (!empty($accountsList)): ?>
-            <div style="width: 200px;">
-                <label for="filter-account" class="rs-label" style="font-size: 12px; margin-bottom: 4px;">Workspace / Account</label>
-                <select id="filter-account" name="account_id" class="rs-input" style="height: 44px;">
-                    <option value="">All Workspaces</option>
-                    <?php foreach ($accountsList as $accId => $accName): ?>
-                        <option value="<?= $accId ?>" <?= $filter->accountId === $accId ? 'selected' : '' ?>>
-                            <?= Html::encode($accName) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-        <?php endif; ?>
-
-        <div style="display: flex; gap: 8px;">
-            <button type="submit" class="rs-btn rs-btn--primary" style="height: 44px;">Filter</button>
-            <a href="/sys-yii3/users" class="rs-btn rs-btn--ghost" style="height: 44px; display: inline-flex; align-items: center; text-decoration: none;">Reset</a>
-        </div>
-    </form>
-</div>
-
 <!-- Data Grid -->
 <div class="rs-card">
+    <form method="get" action="/sys-yii3/users" id="users-filter-form">
     <div class="rs-table-wrapper" style="overflow-x: auto;">
         <table class="rs-table rs-table--hover" style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead>
@@ -105,6 +57,45 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                     <th>Account</th>
                     <th>Created At</th>
                     <th style="width: 140px; text-align: right;">Actions</th>
+                </tr>
+                <tr class="rs-table__filter-row" style="background: #f8fafc;">
+                    <td></td>
+                    <td>
+                        <input type="text" name="q" class="rs-input rs-w-100" style="font-size: 12px; padding: 4px 8px;" placeholder="Filter name/email..." value="<?= Html::encode($filter->search ?? '') ?>" onkeydown="if(event.key==='Enter') this.form.submit();">
+                    </td>
+                    <td></td>
+                    <td>
+                        <select name="status" class="rs-select rs-input rs-w-100" style="font-size: 12px; padding: 4px 6px;" onchange="this.form.submit()">
+                            <option value="">All</option>
+                            <option value="1" <?= $filter->status === 1 ? 'selected' : '' ?>>Active</option>
+                            <option value="0" <?= $filter->status === 0 ? 'selected' : '' ?>>Disabled</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select name="role" class="rs-select rs-input rs-w-100" style="font-size: 12px; padding: 4px 6px;" onchange="this.form.submit()">
+                            <option value="">All</option>
+                            <option value="super" <?= $filter->role === 'super' ? 'selected' : '' ?>>Administrator (root)</option>
+                            <option value="admin" <?= $filter->role === 'admin' ? 'selected' : '' ?>>Administrator</option>
+                            <option value="account_admin" <?= $filter->role === 'account_admin' ? 'selected' : '' ?>>Account Administrator</option>
+                            <option value="worker" <?= $filter->role === 'worker' ? 'selected' : '' ?>>User</option>
+                        </select>
+                    </td>
+                    <td>
+                        <?php if (!empty($accountsList)): ?>
+                            <select name="account_id" class="rs-select rs-input rs-w-100" style="font-size: 12px; padding: 4px 6px;" onchange="this.form.submit()">
+                                <option value="">All</option>
+                                <?php foreach ($accountsList as $accId => $accName): ?>
+                                    <option value="<?= $accId ?>" <?= $filter->accountId === $accId ? 'selected' : '' ?>>
+                                        <?= Html::encode($accName) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        <?php endif; ?>
+                    </td>
+                    <td></td>
+                    <td class="rs-text-right">
+                        <button type="submit" class="rs-btn rs-btn--xs rs-btn--primary">Filter</button>
+                    </td>
                 </tr>
             </thead>
             <tbody>
@@ -174,4 +165,5 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
             </div>
         <?php endif; ?>
     </div>
+    </form>
 </div>

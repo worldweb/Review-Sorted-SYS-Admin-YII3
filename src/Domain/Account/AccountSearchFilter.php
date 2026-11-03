@@ -17,17 +17,24 @@ final class AccountSearchFilter
         public readonly int $pageSize = 20,
         public readonly string $sortField = 'id',
         public readonly string $sortOrder = 'DESC',
+        public readonly string $businessName = '',
+        public readonly string $firstName = '',
+        public readonly string $email = '',
     ) {
     }
 
     public static function fromQueryParams(array $params, int $defaultPageSize = 20): self
     {
         $search = isset($params['q']) && is_string($params['q']) ? trim($params['q']) : '';
-        if ($search === '' && isset($params['business_name']) && is_string($params['business_name'])) {
-            $search = trim($params['business_name']);
+        $businessName = isset($params['business_name']) && is_string($params['business_name']) ? trim($params['business_name']) : '';
+        $firstName = isset($params['first_name']) && is_string($params['first_name']) ? trim($params['first_name']) : '';
+        $email = isset($params['email']) && is_string($params['email']) ? trim($params['email']) : '';
+
+        if ($search === '' && $businessName !== '') {
+            $search = $businessName;
         }
-        if ($search === '' && isset($params['email']) && is_string($params['email'])) {
-            $search = trim($params['email']);
+        if ($search === '' && $email !== '') {
+            $search = $email;
         }
 
         $status = null;
@@ -59,6 +66,9 @@ final class AccountSearchFilter
             pageSize: $pageSize,
             sortField: $sortField,
             sortOrder: $sortOrder,
+            businessName: $businessName,
+            firstName: $firstName,
+            email: $email,
         );
     }
 

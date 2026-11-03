@@ -1,0 +1,183 @@
+/* ==========================================================================
+   Reviews Sorted - Google Project Connections Stylesheet (google-project.css)
+   ========================================================================== */
+
+/* 1. Header Styles */
+.rs-review-header {
+    background-color: var(--rs-bg-surface);
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-lg);
+    padding: var(--rs-space-6);
+    box-shadow: var(--rs-shadow-sm);
+}
+
+/* 2. Grid Layout for Details Page */
+.rs-google-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--rs-space-5);
+}
+
+.rs-google-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rs-space-4);
+    padding: var(--rs-space-4);
+    background-color: var(--rs-bg-app);
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-md);
+    transition: transform var(--rs-transition-fast), box-shadow var(--rs-transition-fast);
+}
+
+.rs-google-item:hover {
+    box-shadow: var(--rs-shadow-sm);
+    transform: translateY(-1px);
+}
+
+.rs-google-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--rs-radius-md);
+    background-color: var(--rs-white);
+    border: 1px solid var(--rs-border);
+    color: var(--rs-primary);
+    flex-shrink: 0;
+}
+
+.rs-google-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rs-space-1);
+}
+
+.rs-google-label {
+    font-size: var(--rs-font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--rs-text-muted);
+}
+
+.rs-google-value {
+    font-size: var(--rs-font-size-sm);
+    font-weight: 700;
+    color: var(--rs-text-main);
+    word-break: break-word;
+}
+
+/* Summary Card */
+.rs-page-summary-card {
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-lg);
+    box-shadow: var(--rs-shadow-sm);
+    background-color: var(--rs-bg-surface);
+}
+
+.rs-google-logo-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--rs-primary);
+    flex-shrink: 0;
+}
+
+/* Code area layout */
+.rs-code-card {
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-lg);
+    background-color: var(--rs-bg-surface);
+    box-shadow: var(--rs-shadow-sm);
+}
+
+.rs-code-editor-style {
+    font-family: var(--rs-font-mono, monospace);
+    font-size: var(--rs-font-size-xs);
+    color: #e2e8f0;
+    background-color: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: var(--rs-radius-md);
+    padding: var(--rs-space-4);
+    min-height: 160px;
+    max-height: 320px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    width: 100%;
+}
+
+/* Form container aesthetics */
+.rs-form-card {
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-lg);
+    box-shadow: var(--rs-shadow-sm);
+    background-color: var(--rs-bg-surface);
+}
+
+/* Textarea in forms */
+.rs-textarea-input {
+    min-height: 160px;
+    font-family: var(--rs-font-mono, monospace);
+}
+
+/* Form Helper Text */
+.rs-form-field-wrapper .hint-block {
+    display: block;
+    margin-top: var(--rs-space-2);
+    font-size: var(--rs-font-size-xs);
+    color: var(--rs-text-muted);
+}
+
+.rs-form-field-wrapper .help-block-error {
+    display: block;
+    margin-top: var(--rs-space-2);
+    font-size: var(--rs-font-size-xs);
+    color: var(--rs-danger);
+    font-weight: 500;
+}
+
+/* Destructive Delete Button Styles */
+.rs-btn--danger {
+    /*color: var(--rs-danger-text);*/
+    border-color: var(--rs-danger);
+}
+
+.rs-btn--danger:hover {
+    background-color: var(--rs-danger);
+    color: var(--rs-white);
+}
+
+/* Buttons sizing and responsive stack */
+@media (max-width: 768px) {
+    .rs-btn {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    .rs-review-header .rs-d-flex {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .rs-review-header .rs-header-actions {
+        width: 100%;
+        margin-top: var(--rs-space-4);
+    }
+    
+    .rs-google-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .rs-form-card .rs-d-flex {
+        flex-direction: column;
+        gap: var(--rs-space-3);
+    }
+    
+    .rs-page-summary-card .rs-d-flex {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

@@ -12,13 +12,7 @@ use Yiisoft\Html\Html;
  */
 
 $this->setTitle('Template: ' . $template->getName());
-$activeTab = 'templates';
-?>
-
 <div class="rs-page">
-    <!-- Sub-navigation tabs -->
-    <?php include __DIR__ . '/../_nav.php'; ?>
-
     <!-- Page Header -->
     <div class="rs-page-header rs-d-flex rs-align-items-center rs-justify-content-between rs-mb-6">
         <div>

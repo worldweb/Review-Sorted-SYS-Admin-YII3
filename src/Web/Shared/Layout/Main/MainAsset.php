@@ -12,7 +12,5 @@ final class MainAsset extends AssetBundle
     public ?string $baseUrl = '@assetsUrl/main';
     public ?string $sourcePath = '@assetsSource/main';
 
-    public array $css = [
-        'site.css',
-    ];
+    public array $css = [];
 }

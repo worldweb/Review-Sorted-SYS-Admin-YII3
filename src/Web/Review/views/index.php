@@ -100,15 +100,17 @@ $renderStars = static function (?float $rawRate): string {
                 <h1 class="rs-page-title rs-m-0">Reviews & Mentions</h1>
                 <p class="rs-text-muted rs-m-0 rs-mt-1">Manage and inspect customer feedback across all connected channels.</p>
             </div>
-            <div class="rs-d-flex rs-align-items-center rs-gap-2">
+            <div class="rs-page-header__actions rs-d-flex rs-align-items-center rs-gap-3">
                 <?php if ($isGoogleOrFacebookChannel): ?>
-                    <button type="button" class="rs-btn rs-btn--info btn-reply-all" onclick="submitBulkReply();">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                        Reply all
+                    <button type="button" class="rs-btn rs-btn--primary btn-reply-all" onclick="submitBulkReply();">
+                        Bulk Reply
                     </button>
+                <?php else: ?>
+                    <span class="rs-text-muted rs-text-xs" style="font-style: italic; line-height: 36px;">
+                        <i class="fa fa-info-circle"></i> To use Bulk Reply, please filter reviews by Google or Facebook channel.
+                    </span>
                 <?php endif; ?>
                 <a href="/sys-yii3/reviews/export" class="rs-btn rs-btn--secondary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     Export Data
                 </a>
             </div>
@@ -140,113 +142,66 @@ $renderStars = static function (?float $rawRate): string {
         </div>
     </div>
 
-    <!-- Filter Toolbar Card -->
-    <div class="rs-card rs-mb-5">
-        <div class="rs-card__header rs-py-3">
-            <h3 class="rs-card__title" style="font-size: 15px;">Filter & Search Reviews</h3>
-        </div>
-        <div class="rs-card__body rs-p-4">
-            <form method="GET" action="/sys-yii3/reviews" class="rs-form">
-                <div class="rs-row rs-d-flex rs-flex-wrap rs-gap-3 rs-align-items-end">
-                    <div style="flex: 1 1 160px;">
-                        <label class="rs-label rs-text-xs rs-mb-1">Channel</label>
-                        <select name="service" class="rs-select rs-input rs-w-100">
-                            <option value="" <?= $filter->getServiceId() === null ? 'selected' : '' ?>>All Channels</option>
-                            <?php foreach ($serviceOptions as $val => $lbl): ?>
-                                <option value="<?= $val ?>" <?= $filter->getServiceId() === $val ? 'selected' : '' ?>><?= Html::encode($lbl) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div style="flex: 1 1 180px;">
-                        <label class="rs-label rs-text-xs rs-mb-1">Page / Alias</label>
-                        <select name="service_config" class="rs-select rs-input rs-w-100">
-                            <option value="" <?= $filter->getServiceConfigId() === null ? 'selected' : '' ?>>All Pages</option>
-                            <?php foreach ($serviceConfigOptions as $cfgId => $cfgLabel): ?>
-                                <option value="<?= $cfgId ?>" <?= $filter->getServiceConfigId() === $cfgId ? 'selected' : '' ?>><?= Html::encode($cfgLabel) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div style="flex: 1 1 120px;">
-                        <label class="rs-label rs-text-xs rs-mb-1">Rating</label>
-                        <select name="review_rate" class="rs-select rs-input rs-w-100">
-                            <option value="" <?= $filter->getReviewRate() === null ? 'selected' : '' ?>>All Ratings</option>
-                            <option value="5" <?= $filter->getReviewRate() === 5.0 ? 'selected' : '' ?>>5 Stars</option>
-                            <option value="4" <?= $filter->getReviewRate() === 4.0 ? 'selected' : '' ?>>4 Stars</option>
-                            <option value="3" <?= $filter->getReviewRate() === 3.0 ? 'selected' : '' ?>>3 Stars</option>
-                            <option value="2" <?= $filter->getReviewRate() === 2.0 ? 'selected' : '' ?>>2 Stars</option>
-                            <option value="1" <?= $filter->getReviewRate() === 1.0 ? 'selected' : '' ?>>1 Star</option>
-                        </select>
-                    </div>
-
-                    <div style="flex: 1 1 130px;">
-                        <label class="rs-label rs-text-xs rs-mb-1">Status</label>
-                        <select name="read" class="rs-select rs-input rs-w-100">
-                            <option value="" <?= $filter->getRead() === null ? 'selected' : '' ?>>All Statuses</option>
-                            <option value="0" <?= $filter->getRead() === 0 ? 'selected' : '' ?>>Unread</option>
-                            <option value="1" <?= $filter->getRead() === 1 ? 'selected' : '' ?>>Read</option>
-                            <option value="9" <?= $filter->getRead() === 9 ? 'selected' : '' ?>>Replied</option>
-                        </select>
-                    </div>
-
-                    <div style="flex: 1 1 160px;">
-                        <label class="rs-label rs-text-xs rs-mb-1">Customer</label>
-                        <input type="text" name="customer_name" class="rs-input rs-w-100" placeholder="Search customer..." value="<?= Html::encode($filter->getCustomerName() ?? '') ?>">
-                    </div>
-
-                    <div style="flex: 1 1 200px;">
-                        <label class="rs-label rs-text-xs rs-mb-1">Review Text</label>
-                        <input type="text" name="review_text" class="rs-input rs-w-100" placeholder="Keyword in review..." value="<?= Html::encode($filter->getReviewText() ?? '') ?>">
-                    </div>
-
-                    <div class="rs-d-flex rs-gap-2">
-                        <button type="submit" class="rs-btn rs-btn--primary">Filter</button>
-                        <a href="/sys-yii3/reviews" class="rs-btn rs-btn--outline">Reset</a>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Notice if Bulk Reply is available or prompt to filter -->
-    <div class="rs-d-flex rs-justify-content-between rs-align-items-center rs-mb-3">
-        <div>
-            <?php if ($isGoogleOrFacebookChannel): ?>
-                <span class="rs-text-sm rs-text-muted">
-                    <span class="rs-badge rs-badge--primary rs-mr-1">Bulk Reply Ready</span>
-                    Select reviews using the checkboxes below, then click <strong>Reply all</strong>.
-                </span>
-            <?php else: ?>
-                <span class="rs-text-sm rs-text-muted rs-font-italic">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                    To use Bulk Reply, please filter reviews by Google or Facebook channel above.
-                </span>
-            <?php endif; ?>
-        </div>
-    </div>
-
     <!-- Reviews Grid Table Card -->
     <div class="rs-card rs-mb-6">
-        <div class="rs-table-wrapper">
-            <table class="rs-table rs-table--hover rs-w-100" style="margin: 0;">
-                <thead>
-                    <tr>
-                        <?php if ($isGoogleOrFacebookChannel): ?>
-                            <th style="width: 40px; text-align: center;">
-                                <input type="checkbox" id="check-all-reviews" title="Select all on this page">
-                            </th>
-                        <?php endif; ?>
-                        <th style="width: 14%; min-width: 120px;">Alias</th>
-                        <th style="width: 9%; min-width: 75px;">Channel</th>
-                        <th style="width: 11%; min-width: 95px;">Rate</th>
-                        <th style="width: 7%; min-width: 70px;">Risk</th>
-                        <th style="width: <?= $isGoogleOrFacebookChannel ? '26%' : '30%' ?>; min-width: 160px;">Review Text</th>
-                        <th style="width: 10%; min-width: 105px;">Date</th>
-                        <th style="width: 8%; min-width: 75px;">Status</th>
-                        <th class="rs-text-center" style="width: 110px; min-width: 110px;">Action</th>
-                    </tr>
-                </thead>
+        <form method="GET" action="/sys-yii3/reviews" id="reviews-filter-form">
+            <div class="rs-table-wrapper">
+                <table class="rs-table rs-table--hover rs-w-100" style="margin: 0;">
+                    <thead>
+                        <tr>
+                            <?php if ($isGoogleOrFacebookChannel): ?>
+                                <th style="width: 40px; text-align: center;">
+                                    <input type="checkbox" id="check-all-reviews" title="Select all on this page">
+                                </th>
+                            <?php endif; ?>
+                            <th style="width: 14%; min-width: 120px;">Alias</th>
+                            <th style="width: 9%; min-width: 75px;">Channel</th>
+                            <th style="width: 11%; min-width: 95px;">Rate</th>
+                            <th style="width: 7%; min-width: 70px;">Risk</th>
+                            <th style="width: <?= $isGoogleOrFacebookChannel ? '26%' : '30%' ?>; min-width: 160px;">Review Text</th>
+                            <th style="width: 10%; min-width: 105px;">Date</th>
+                            <th style="width: 8%; min-width: 75px;">Status</th>
+                            <th class="rs-text-center" style="width: 110px; min-width: 110px;">Action</th>
+                        </tr>
+                        <tr class="rs-table__filter-row" style="background: #f8fafc;">
+                            <?php if ($isGoogleOrFacebookChannel): ?>
+                                <td></td>
+                            <?php endif; ?>
+                            <td>
+                                <select name="service_config" class="rs-select rs-input rs-w-100" style="font-size: 12px; padding: 4px 6px;" onchange="this.form.submit()">
+                                    <option value="">All</option>
+                                    <?php foreach ($serviceConfigOptions as $cfgId => $cfgLabel): ?>
+                                        <option value="<?= $cfgId ?>" <?= $filter->getServiceConfigId() === $cfgId ? 'selected' : '' ?>><?= Html::encode($cfgLabel) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="service" class="rs-select rs-input rs-w-100" style="font-size: 12px; padding: 4px 6px;" onchange="this.form.submit()">
+                                    <option value="">All</option>
+                                    <?php foreach ($serviceOptions as $val => $lbl): ?>
+                                        <option value="<?= $val ?>" <?= $filter->getServiceId() === $val ? 'selected' : '' ?>><?= Html::encode($lbl) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                <input type="text" name="review_text" class="rs-input rs-w-100" style="font-size: 12px; padding: 4px 8px;" placeholder="Search text..." value="<?= Html::encode($filter->getReviewText() ?? '') ?>" onkeydown="if(event.key==='Enter') this.form.submit();">
+                            </td>
+                            <td></td>
+                            <td>
+                                <select name="read" class="rs-select rs-input rs-w-100" style="font-size: 12px; padding: 4px 6px;" onchange="this.form.submit()">
+                                    <option value="">All</option>
+                                    <option value="0" <?= $filter->getRead() === 0 ? 'selected' : '' ?>>Unread</option>
+                                    <option value="1" <?= $filter->getRead() === 1 ? 'selected' : '' ?>>Read</option>
+                                    <option value="9" <?= $filter->getRead() === 9 ? 'selected' : '' ?>>Replied</option>
+                                </select>
+                            </td>
+                            <td class="rs-text-center">
+                                <button type="submit" class="rs-btn rs-btn--xs rs-btn--primary">Filter</button>
+                            </td>
+                        </tr>
+                    </thead>
                 <tbody>
                     <?php if (empty($reviews)): ?>
                         <tr>
@@ -349,6 +304,7 @@ $renderStars = static function (?float $rawRate): string {
                 </tbody>
             </table>
         </div>
+        </form>
 
         <!-- Table Footer / Action Bar -->
         <div class="rs-table-footer rs-d-flex rs-align-items-center rs-justify-content-between rs-p-4 rs-flex-wrap rs-gap-3">

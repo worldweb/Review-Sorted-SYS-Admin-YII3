@@ -20,12 +20,10 @@ use Yiisoft\Html\Html;
  */
 
 $this->setTitle('E-mail Delivery Queue');
-$activeTab = 'queue';
 $totalPages = max(1, (int) ceil($totalItems / $pageSize));
 ?>
 
 <div class="rs-page">
-    <?php include __DIR__ . '/_nav.php'; ?>
 
     <!-- Flash notifications -->
     <?php foreach ($flash->getAll() as $type => $messages): ?>

@@ -36,17 +36,14 @@ $hasSelectedAccount = !empty($formData['account_id']);
 <form method="POST" action="<?= $isEdit ? '/sys-yii3/location-group/update?id=' . (int) ($formData['id'] ?? 0) : '/sys-yii3/location-group/create' ?>" id="location-group-form">
     <input type="hidden" name="_csrf" value="<?= Html::encode($effectiveCsrf) ?>">
 
-    <div class="rs-grid rs-grid--cols-1 rs-grid--cols-lg-3 rs-gap-6 rs-mb-6">
-        
-        <!-- Left Column: Details -->
-        <div class="rs-col-span-1">
-            <div class="rs-card">
-                <div class="rs-card__header" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
-                    <h3 style="margin: 0; font-size: 15px; font-weight: 600;">
-                        <i class="fa-solid fa-sliders rs-mr-1" style="color: #64748B;"></i> Group Settings
-                    </h3>
-                </div>
-                <div class="rs-card__body" style="padding: 20px;">
+    <!-- Card 1: Group Settings -->
+    <div class="rs-card rs-mb-5">
+        <div class="rs-card__header" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
+            <h3 style="margin: 0; font-size: 15px; font-weight: 600;">
+                <i class="fa-solid fa-sliders rs-mr-1" style="color: #64748B;"></i> Group Settings
+            </h3>
+        </div>
+        <div class="rs-card__body" style="padding: 20px;">
                     
                     <!-- Account Selection -->
                     <div style="margin-bottom: 16px;">
@@ -134,12 +131,10 @@ $hasSelectedAccount = !empty($formData['account_id']);
 
                 </div>
             </div>
-        </div>
 
-        <!-- Right Column: Interactive Destination Picker -->
-        <div class="rs-col-span-2">
-            <div class="rs-card">
-                <div class="rs-card__header rs-d-flex rs-justify-content-between rs-align-items-center rs-flex-wrap rs-gap-3" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
+    <!-- Card 2: Interactive Destination Picker -->
+    <div class="rs-card rs-mb-5">
+        <div class="rs-card__header rs-d-flex rs-justify-content-between rs-align-items-center rs-flex-wrap rs-gap-3" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
                     <div class="rs-d-flex rs-align-items-center rs-gap-2">
                         <h3 style="margin: 0; font-size: 15px; font-weight: 600;">
                             <i class="fa-solid fa-globe rs-mr-1" style="color: #64748B;"></i> Connected Social Destinations
@@ -307,7 +302,6 @@ $hasSelectedAccount = !empty($formData['account_id']);
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Form Actions Footer -->
     <div class="rs-card" style="padding: 16px 20px; background: #F8FAFC; border-top: 1px solid var(--rs-border, #E2E8F0);">

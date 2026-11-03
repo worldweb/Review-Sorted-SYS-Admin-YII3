@@ -45,7 +45,7 @@ final class GlobalSettingsIndexAction
         $flash = new Flash($this->session);
         $queryParams = $request->getQueryParams();
         $section = (string) ($queryParams['section'] ?? 'general');
-        $allowedSections = ['general', 'security', 'reviews', 'media', 'subscriptions', 'roles', 'queue'];
+        $allowedSections = ['general', 'security', 'reviews', 'media', 'subscriptions', 'queue', 'roles', 'database_migration'];
         if (!in_array($section, $allowedSections, true)) {
             $section = 'general';
         }

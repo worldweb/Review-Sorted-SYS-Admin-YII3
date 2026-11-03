@@ -19,15 +19,12 @@ use Yiisoft\Html\Html;
  */
 
 $this->setTitle('Edit Template: ' . $template->getName());
-$activeTab = 'templates';
 $actionUrl = '/sys-yii3/email/template/update?id=' . $template->getId();
 $accounts = [];
 $targetAccountId = $template->getAccountId();
 ?>
 
 <div class="rs-page">
-    <?php include __DIR__ . '/../_nav.php'; ?>
-
     <div class="rs-page-header rs-mb-6">
         <h1 class="rs-page-title rs-m-0">Edit E-mail Template: <?= Html::encode($template->getName()) ?></h1>
         <p class="rs-text-muted rs-m-0">Modify template title, status, and message HTML body.</p>

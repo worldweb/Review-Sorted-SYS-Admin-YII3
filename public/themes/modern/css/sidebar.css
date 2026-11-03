@@ -223,3 +223,73 @@
         padding: var(--rs-space-2) var(--rs-space-3);
     }
 }
+
+
+/* ==========================================================================
+   Reviews Sorted - Native Submenu & Hierarchy Navigation Styles
+   ========================================================================== */
+
+.rs-sidebar-group-header {
+    font-size: 11px !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    color: var(--rs-text-muted) !important;
+    font-weight: 600 !important;
+    margin: 0.75rem 0 0.25rem 1.5rem !important;
+    padding: 0 !important;
+    pointer-events: none;
+    list-style: none;
+}
+
+.rs-sidebar-divider-wrapper {
+    pointer-events: none;
+    padding: 0 1.5rem;
+    list-style: none;
+}
+
+.rs-sidebar-divider {
+    border-top: 1px solid var(--rs-border);
+    margin: 0.5rem 0;
+    list-style: none;
+}
+
+.rs-sidebar-subitem {
+    list-style: none;
+}
+
+.rs-sidebar-subitem > a {
+    display: flex !important;
+    align-items: center !important;
+    text-decoration: none !important;
+    border-radius: 6px !important;
+    transition: all 0.15s ease !important;
+    padding: 0 0.75rem 0 0.75rem !important;
+    height: 38px !important;
+    margin: 2px 0.5rem 2px 1.5rem !important;
+    background-color: transparent !important;
+    color: #64748B !important;
+    font-size: 13px !important;
+}
+
+.rs-sidebar-subitem > a:hover {
+    background-color: #F8FAFC !important;
+    color: #475569 !important;
+}
+
+.rs-sidebar-subitem.active > a {
+    background-color: #F4FBF7 !important;
+    position: relative;
+    color: #0F5132 !important;
+    font-weight: 600 !important;
+}
+
+.rs-sidebar-subitem.active > a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 25%;
+    height: 50%;
+    width: 3px;
+    background-color: #0F5132;
+    border-radius: 0 2px 2px 0;
+}

@@ -203,6 +203,10 @@ final class AccountRepository implements AccountRepositoryInterface
             ]);
         }
 
+        if ($filter->firstName !== '') {
+            $query->andWhere(['like', 'first_name', $filter->firstName]);
+        }
+
         // Status filter
         if ($filter->status !== null) {
             $query->andWhere(['status' => $filter->status]);

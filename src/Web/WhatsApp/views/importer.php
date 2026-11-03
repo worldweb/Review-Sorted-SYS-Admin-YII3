@@ -37,27 +37,18 @@ $actions = [
     '<a href="/sys-yii3/whatsapp/send" class="rs-btn rs-btn--primary"><i class="fa-brands fa-whatsapp rs-mr-1"></i> Send Campaign</a>'
 ];
 include __DIR__ . '/../../Shared/Components/_page_header.php';
-
-// Sub-Navigation
-$activeTab = 'importer';
-include __DIR__ . '/_nav.php';
 ?>
 
 <?php if ($flash !== null && !empty($flash->getAll())): ?>
     <?php include __DIR__ . '/../../Shared/Components/_alerts.php'; ?>
 <?php endif; ?>
 
-<div class="rs-grid rs-grid--cols-1 rs-grid--cols-lg-3 rs-gap-6 rs-mb-6">
-    
-    <!-- Left Column: CSV Upload Form -->
-    <div class="rs-col-span-1">
-        <div class="rs-card">
-            <div class="rs-card__header" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
-                <h3 style="margin: 0; font-size: 15px; font-weight: 600;">
-                    <i class="fa-solid fa-file-arrow-up rs-mr-1" style="color: #64748B;"></i> Upload Phone CSV
-                </h3>
-            </div>
-            <div class="rs-card__body" style="padding: 20px;">
+<!-- Upload CSV Card -->
+<div class="rs-card rs-mb-6">
+    <div class="rs-card__header">
+        <h3 class="rs-card__title">Select CSV file to upload</h3>
+    </div>
+    <div class="rs-card__body rs-p-6">
                 <form method="POST" action="/sys-yii3/whatsapp/importer" enctype="multipart/form-data">
                     <input type="hidden" name="_csrf" value="<?= Html::encode($effectiveCsrf) ?>">
                     <?php if ($accountId !== null && $context->isUnrestricted()): ?>
@@ -100,12 +91,11 @@ include __DIR__ . '/_nav.php';
                 </form>
             </div>
         </div>
-    </div>
 
-    <!-- Right Column: Contacts Grid -->
-    <div class="rs-col-span-2">
-        <div class="rs-card">
-            <div class="rs-card__header rs-d-flex rs-justify-content-between rs-align-items-center rs-flex-wrap rs-gap-3" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
+    <!-- Saved Contacts Card -->
+    <div class="rs-card rs-mb-6">
+        <div class="rs-card__header rs-d-flex rs-justify-content-between rs-align-items-center rs-flex-wrap rs-gap-3">
+            <h3 class="rs-card__title">Saved WhatsApp Contacts</h3>
                 <div class="rs-d-flex rs-align-items-center rs-gap-2">
                     <span class="rs-badge rs-badge--neutral" style="font-size: 13px; font-weight: 600;">
                         <?= $total ?> <?= $total === 1 ? 'Contact' : 'Contacts' ?>
@@ -228,7 +218,6 @@ include __DIR__ . '/_nav.php';
             <?php endif; ?>
         </div>
     </div>
-</div>
 
 <!-- Modal for Single Contact Delete -->
 <div id="delete-contact-modal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center;">

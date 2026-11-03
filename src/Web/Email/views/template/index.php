@@ -15,13 +15,9 @@ use Yiisoft\Html\Html;
  */
 
 $this->setTitle('E-mail Templates');
-$activeTab = 'templates';
 ?>
 
 <div class="rs-page">
-    <!-- Sub-navigation tabs -->
-    <?php include __DIR__ . '/../_nav.php'; ?>
-
     <!-- Flash notifications -->
     <?php foreach ($flash->getAll() as $type => $messages): ?>
         <?php foreach ($messages as $message): ?>

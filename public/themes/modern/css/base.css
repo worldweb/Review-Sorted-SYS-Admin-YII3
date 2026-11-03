@@ -2,13 +2,6 @@
    Reviews Sorted - Base Styles
    ========================================================================== */
 
-/* Global Document Reset */
-html,
-body {
-    margin: 0;
-    padding: 0;
-}
-
 /* Apply box-sizing border-box globally to the wrapper to prevent overriding bootstrap globals where not wrapped */
 .rs-app-wrapper,
 .rs-app-wrapper *,

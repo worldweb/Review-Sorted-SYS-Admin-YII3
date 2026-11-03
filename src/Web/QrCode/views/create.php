@@ -428,10 +428,10 @@ if ($isUpdate && !empty($model->getQrcode())) {
 
                     <!-- Step Navigation Actions -->
                     <div class="rs-qr-navigation actions">
-                        <button type="button" class="btn btn-primary rs-btn rs-btn-secondary" id="prevBtn" style="display: none;">
+                        <button type="button" class="rs-btn rs-btn--secondary" id="prevBtn" style="display: none;">
                             <i class="fa-solid fa-angle-left"></i> Previous
                         </button>
-                        <button type="button" class="btn btn-primary rs-btn rs-btn-primary" id="nextBtn">
+                        <button type="button" class="rs-btn rs-btn--primary" id="nextBtn">
                             Next <i class="fa-solid fa-angle-right"></i>
                         </button>
                     </div>

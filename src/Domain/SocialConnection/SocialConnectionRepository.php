@@ -233,4 +233,96 @@ final class SocialConnectionRepository implements SocialConnectionRepositoryInte
             return false;
         }
     }
+
+    public function findApisByService(int $serviceId): array
+    {
+        $rows = (new Query($this->db))
+            ->from('{{%api}}')
+            ->where(['service_id' => $serviceId])
+            ->orderBy(['id' => SORT_DESC])
+            ->all();
+
+        $apis = [];
+        foreach ($rows as $row) {
+            $apis[] = Api::fromDatabaseRow($row);
+        }
+        return $apis;
+    }
+
+    public function findApiById(int $id): ?Api
+    {
+        $row = (new Query($this->db))
+            ->from('{{%api}}')
+            ->where(['id' => $id])
+            ->one();
+
+        if ($row === null || $row === false) {
+            return null;
+        }
+
+        return Api::fromDatabaseRow($row);
+    }
+
+    public function saveApi(array $data, ?int $id = null): ?int
+    {
+        $now = time();
+        $fields = [
+            'service_id' => (int) ($data['service_id'] ?? 0),
+            'label' => (string) ($data['label'] ?? ''),
+            'updated_at' => $now,
+        ];
+        if (array_key_exists('api_key', $data)) {
+            $fields['api_key'] = $data['api_key'];
+        }
+        if (array_key_exists('client_id', $data)) {
+            $fields['client_id'] = $data['client_id'];
+        }
+        if (array_key_exists('token', $data)) {
+            $fields['token'] = $data['token'];
+        }
+        if (array_key_exists('client_json', $data)) {
+            $fields['client_json'] = $data['client_json'];
+        }
+
+        try {
+            if ($id !== null && $id > 0) {
+                $this->db->createCommand()
+                    ->update('{{%api}}', $fields, ['id' => $id])
+                    ->execute();
+                return $id;
+            } else {
+                $fields['created_at'] = $now;
+                $this->db->createCommand()
+                    ->insert('{{%api}}', $fields)
+                    ->execute();
+                return (int) $this->db->getLastInsertId();
+            }
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    public function deleteApi(int $id): bool
+    {
+        try {
+            $this->db->createCommand()
+                ->delete('{{%api}}', ['id' => $id])
+                ->execute();
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    public function countAssignedPages(int $apiId): int
+    {
+        try {
+            return (int) (new Query($this->db))
+                ->from('{{%service_config}}')
+                ->where(['api_id' => $apiId])
+                ->count();
+        } catch (\Throwable) {
+            return 0;
+        }
+    }
 }
