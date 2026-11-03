@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Domain\Account\AccountRepository;
 use App\Domain\Account\AccountRepositoryInterface;
+use App\Domain\Chat\ChatRepository;
+use App\Domain\Chat\ChatRepositoryInterface;
 use App\Domain\Email\EmailRepository;
 use App\Domain\Email\EmailRepositoryInterface;
 use App\Domain\LocationGroup\LocationGroupRepository;
@@ -16,6 +18,12 @@ use App\Domain\Review\ReviewRepository;
 use App\Domain\Review\ReviewRepositoryInterface;
 use App\Domain\Setting\SettingRepository;
 use App\Domain\Setting\SettingRepositoryInterface;
+use App\Domain\SocialConnection\SocialConnectionRepository;
+use App\Domain\SocialConnection\SocialConnectionRepositoryInterface;
+use App\Domain\SocialPost\SocialPostRepository;
+use App\Domain\SocialPost\SocialPostRepositoryInterface;
+use App\Domain\Subscription\SubscriptionRepository;
+use App\Domain\Subscription\SubscriptionRepositoryInterface;
 use App\Domain\User\UserRepository;
 use App\Domain\User\UserRepositoryInterface;
 use App\Domain\WhatsApp\WhatsAppRepository;
@@ -43,6 +51,10 @@ return [
     ReviewRepositoryInterface::class => ReviewRepository::class,
     UserRepositoryInterface::class => UserRepository::class,
     SettingRepositoryInterface::class => SettingRepository::class,
+    SocialConnectionRepositoryInterface::class => SocialConnectionRepository::class,
+    SocialPostRepositoryInterface::class => SocialPostRepository::class,
+    SubscriptionRepositoryInterface::class => SubscriptionRepository::class,
+    ChatRepositoryInterface::class => ChatRepository::class,
 
     // Authentication Credential Repository (isolated from domain DTOs)
     UserAuthenticationRepositoryInterface::class => UserAuthenticationRepository::class,

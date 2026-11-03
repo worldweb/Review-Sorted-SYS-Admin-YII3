@@ -1,0 +1,71 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\SocialConnection;
+
+use App\Security\TenantContextInterface;
+
+/**
+ * Repository interface for external social platform connections (Facebook, Google, Instagram).
+ */
+interface SocialConnectionRepositoryInterface
+{
+    /**
+     * Find a single ServiceConfig by ID, scoped to tenant context if not super admin.
+     */
+    public function findById(int $id, ?TenantContextInterface $context = null): ?ServiceConfig;
+
+    /**
+     * Find all ServiceConfigs for Facebook (service_id = 2), scoped to tenant.
+     *
+     * @return array<int, ServiceConfig>
+     */
+    public function findFacebookConfigs(?TenantContextInterface $context = null, int $limit = 50, int $offset = 0): array;
+
+    /**
+     * Count Facebook configs for tenant.
+     */
+    public function countFacebookConfigs(?TenantContextInterface $context = null): int;
+
+    /**
+     * Find all ServiceConfigs for Google (service_id = 1), scoped to tenant.
+     *
+     * @return array<int, ServiceConfig>
+     */
+    public function findGoogleConfigs(?TenantContextInterface $context = null, int $limit = 50, int $offset = 0): array;
+
+    /**
+     * Count Google configs for tenant.
+     */
+    public function countGoogleConfigs(?TenantContextInterface $context = null): int;
+
+    /**
+     * Find all linked Instagram sub-services for a given ServiceConfig ID.
+     *
+     * @return array<int, SubService>
+     */
+    public function findSubServicesForConfig(int $serviceConfigId): array;
+
+    /**
+     * Find all linked social destinations across platforms for an account.
+     *
+     * @return array<int, ServiceConfig>
+     */
+    public function findAllLinkedForAccount(int $accountId): array;
+
+    /**
+     * Update label / emailLowReview for a ServiceConfig.
+     */
+    public function updateConfig(int $id, array $data, ?TenantContextInterface $context = null): bool;
+
+    /**
+     * Revoke or unlink a connection (sets linked = 0).
+     */
+    public function unlinkConfig(int $id, ?TenantContextInterface $context = null): bool;
+
+    /**
+     * Delete a connection record.
+     */
+    public function deleteConfig(int $id, ?TenantContextInterface $context = null): bool;
+}

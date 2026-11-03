@@ -243,6 +243,135 @@ return [
             Route::get('/whatsapp/importer/sample')
                 ->action(Web\WhatsApp\Action\WhatsAppSampleCsvAction::class)
                 ->name('whatsapp_importer_sample'),
+
+            // Social Connections & Settings Routes
+            Route::get('/settings')
+                ->action(Web\SocialConnection\Action\SettingsIndexAction::class)
+                ->name('settings_index'),
+            Route::get('/settings/index')
+                ->action(Web\SocialConnection\Action\SettingsIndexAction::class)
+                ->name('settings_index_alias'),
+            Route::get('/settings/facebook')
+                ->action(Web\SocialConnection\Action\FacebookIndexAction::class)
+                ->name('settings_facebook'),
+            Route::get('/settings/facebook/view')
+                ->action(Web\SocialConnection\Action\FacebookViewAction::class)
+                ->name('settings_facebook_view'),
+            Route::methods(['GET', 'POST'], '/settings/facebook/update')
+                ->action(Web\SocialConnection\Action\FacebookUpdateAction::class)
+                ->name('settings_facebook_update'),
+            Route::get('/settings/facebook/revoke')
+                ->action(Web\SocialConnection\Action\FacebookRevokeAction::class)
+                ->name('settings_facebook_revoke'),
+            Route::get('/settings/facebook/delete')
+                ->action(Web\SocialConnection\Action\FacebookDeleteAction::class)
+                ->name('settings_facebook_delete'),
+            Route::get('/settings/facebook/setup')
+                ->action(Web\SocialConnection\Action\FacebookSetupAction::class)
+                ->name('settings_facebook_setup'),
+            Route::get('/settings/google')
+                ->action(Web\SocialConnection\Action\GoogleIndexAction::class)
+                ->name('settings_google'),
+            Route::get('/settings/google/view')
+                ->action(Web\SocialConnection\Action\GoogleViewAction::class)
+                ->name('settings_google_view'),
+            Route::methods(['GET', 'POST'], '/settings/google/update')
+                ->action(Web\SocialConnection\Action\GoogleUpdateAction::class)
+                ->name('settings_google_update'),
+            Route::get('/settings/google/revoke')
+                ->action(Web\SocialConnection\Action\GoogleRevokeAction::class)
+                ->name('settings_google_revoke'),
+            Route::get('/settings/google/delete')
+                ->action(Web\SocialConnection\Action\GoogleDeleteAction::class)
+                ->name('settings_google_delete'),
+            Route::get('/settings/google/setup')
+                ->action(Web\SocialConnection\Action\GoogleSetupAction::class)
+                ->name('settings_google_setup'),
+            Route::get('/settings/google/link')
+                ->action(Web\SocialConnection\Action\GoogleLinkAction::class)
+                ->name('settings_google_link'),
+
+            // Social Publishing Studio Routes
+            Route::get('/social-post')
+                ->action(Web\SocialPost\Action\SocialPostIndexAction::class)
+                ->name('social_post_index'),
+            Route::get('/social-post/index')
+                ->action(Web\SocialPost\Action\SocialPostIndexAction::class)
+                ->name('social_post_index_alias'),
+            Route::get('/social-post/history')
+                ->action(Web\SocialPost\Action\SocialPostHistoryAction::class)
+                ->name('social_post_history'),
+            Route::methods(['GET', 'POST'], '/social-post/create')
+                ->action(Web\SocialPost\Action\SocialPostCreateAction::class)
+                ->name('social_post_create'),
+            Route::get('/social-post/view')
+                ->action(Web\SocialPost\Action\SocialPostViewAction::class)
+                ->name('social_post_view'),
+            Route::methods(['GET', 'POST'], '/social-post/update')
+                ->action(Web\SocialPost\Action\SocialPostUpdateAction::class)
+                ->name('social_post_update'),
+            Route::get('/social-post/cancel')
+                ->action(Web\SocialPost\Action\SocialPostCancelAction::class)
+                ->name('social_post_cancel'),
+            Route::get('/social-post/delete')
+                ->action(Web\SocialPost\Action\SocialPostDeleteAction::class)
+                ->name('social_post_delete'),
+            Route::get('/social-post/retry')
+                ->action(Web\SocialPost\Action\SocialPostRetryAction::class)
+                ->name('social_post_retry'),
+
+            // Subscription & Billing Routes
+            Route::get('/subscription')
+                ->action(Web\Subscription\Action\SubscriptionIndexAction::class)
+                ->name('subscription_index'),
+            Route::get('/subscription/index')
+                ->action(Web\Subscription\Action\SubscriptionIndexAction::class)
+                ->name('subscription_index_alias'),
+            Route::methods(['GET', 'POST'], '/subscription/create')
+                ->action(Web\Subscription\Action\SubscriptionCreateAction::class)
+                ->name('subscription_create'),
+            Route::methods(['GET', 'POST'], '/subscription/update')
+                ->action(Web\Subscription\Action\SubscriptionUpdateAction::class)
+                ->name('subscription_update'),
+            Route::get('/subscription/delete')
+                ->action(Web\Subscription\Action\SubscriptionDeleteAction::class)
+                ->name('subscription_delete'),
+            Route::methods(['GET', 'POST'], '/stripe-webhook/handle-stripe-event')
+                ->action(Web\Subscription\Action\StripeWebhookAction::class)
+                ->name('stripe_webhook_handle'),
+            Route::methods(['GET', 'POST'], '/stripe-webhook/index')
+                ->action(Web\Subscription\Action\StripeWebhookAction::class)
+                ->name('stripe_webhook_index'),
+
+            // Global Platform Settings Routes
+            Route::methods(['GET', 'POST'], '/global-settings')
+                ->action(Web\GlobalSettings\Action\GlobalSettingsIndexAction::class)
+                ->name('global_settings_index'),
+            Route::methods(['GET', 'POST'], '/global-settings/index')
+                ->action(Web\GlobalSettings\Action\GlobalSettingsIndexAction::class)
+                ->name('global_settings_index_alias'),
+
+            // Chat & Customer Inbox Routes
+            Route::get('/chats')
+                ->action(Web\Chat\Action\ChatIndexAction::class)
+                ->name('chats_index'),
+            Route::get('/chats/index')
+                ->action(Web\Chat\Action\ChatIndexAction::class)
+                ->name('chats_index_alias'),
+            Route::methods(['GET', 'POST'], '/chats/view')
+                ->action(Web\Chat\Action\ChatViewAction::class)
+                ->name('chats_view'),
+
+            // API & External Webhooks
+            Route::get('/accountapi')
+                ->action(Web\Api\Action\AccountApiAction::class)
+                ->name('account_api_index'),
+            Route::get('/accountapi/index')
+                ->action(Web\Api\Action\AccountApiAction::class)
+                ->name('account_api_index_alias'),
+            Route::methods(['GET', 'POST'], '/hooks/messages')
+                ->action(Web\Hooks\Action\HooksMessagesAction::class)
+                ->name('hooks_messages'),
         ),
     Route::get('/')
         ->action(Web\HomePage\Action::class)
@@ -424,4 +553,133 @@ return [
     Route::get('/whatsapp/importer/sample')
         ->action(Web\WhatsApp\Action\WhatsAppSampleCsvAction::class)
         ->name('root_whatsapp_importer_sample'),
+
+    // Root Social Connections & Settings Routes
+    Route::get('/settings')
+        ->action(Web\SocialConnection\Action\SettingsIndexAction::class)
+        ->name('root_settings_index'),
+    Route::get('/settings/index')
+        ->action(Web\SocialConnection\Action\SettingsIndexAction::class)
+        ->name('root_settings_index_alias'),
+    Route::get('/settings/facebook')
+        ->action(Web\SocialConnection\Action\FacebookIndexAction::class)
+        ->name('root_settings_facebook'),
+    Route::get('/settings/facebook/view')
+        ->action(Web\SocialConnection\Action\FacebookViewAction::class)
+        ->name('root_settings_facebook_view'),
+    Route::methods(['GET', 'POST'], '/settings/facebook/update')
+        ->action(Web\SocialConnection\Action\FacebookUpdateAction::class)
+        ->name('root_settings_facebook_update'),
+    Route::get('/settings/facebook/revoke')
+        ->action(Web\SocialConnection\Action\FacebookRevokeAction::class)
+        ->name('root_settings_facebook_revoke'),
+    Route::get('/settings/facebook/delete')
+        ->action(Web\SocialConnection\Action\FacebookDeleteAction::class)
+        ->name('root_settings_facebook_delete'),
+    Route::get('/settings/facebook/setup')
+        ->action(Web\SocialConnection\Action\FacebookSetupAction::class)
+        ->name('root_settings_facebook_setup'),
+    Route::get('/settings/google')
+        ->action(Web\SocialConnection\Action\GoogleIndexAction::class)
+        ->name('root_settings_google'),
+    Route::get('/settings/google/view')
+        ->action(Web\SocialConnection\Action\GoogleViewAction::class)
+        ->name('root_settings_google_view'),
+    Route::methods(['GET', 'POST'], '/settings/google/update')
+        ->action(Web\SocialConnection\Action\GoogleUpdateAction::class)
+        ->name('root_settings_google_update'),
+    Route::get('/settings/google/revoke')
+        ->action(Web\SocialConnection\Action\GoogleRevokeAction::class)
+        ->name('root_settings_google_revoke'),
+    Route::get('/settings/google/delete')
+        ->action(Web\SocialConnection\Action\GoogleDeleteAction::class)
+        ->name('root_settings_google_delete'),
+    Route::get('/settings/google/setup')
+        ->action(Web\SocialConnection\Action\GoogleSetupAction::class)
+        ->name('root_settings_google_setup'),
+    Route::get('/settings/google/link')
+        ->action(Web\SocialConnection\Action\GoogleLinkAction::class)
+        ->name('root_settings_google_link'),
+
+    // Root Social Publishing Studio Routes
+    Route::get('/social-post')
+        ->action(Web\SocialPost\Action\SocialPostIndexAction::class)
+        ->name('root_social_post_index'),
+    Route::get('/social-post/index')
+        ->action(Web\SocialPost\Action\SocialPostIndexAction::class)
+        ->name('root_social_post_index_alias'),
+    Route::get('/social-post/history')
+        ->action(Web\SocialPost\Action\SocialPostHistoryAction::class)
+        ->name('root_social_post_history'),
+    Route::methods(['GET', 'POST'], '/social-post/create')
+        ->action(Web\SocialPost\Action\SocialPostCreateAction::class)
+        ->name('root_social_post_create'),
+    Route::get('/social-post/view')
+        ->action(Web\SocialPost\Action\SocialPostViewAction::class)
+        ->name('root_social_post_view'),
+    Route::methods(['GET', 'POST'], '/social-post/update')
+        ->action(Web\SocialPost\Action\SocialPostUpdateAction::class)
+        ->name('root_social_post_update'),
+    Route::get('/social-post/cancel')
+        ->action(Web\SocialPost\Action\SocialPostCancelAction::class)
+        ->name('root_social_post_cancel'),
+    Route::get('/social-post/delete')
+        ->action(Web\SocialPost\Action\SocialPostDeleteAction::class)
+        ->name('root_social_post_delete'),
+    Route::get('/social-post/retry')
+        ->action(Web\SocialPost\Action\SocialPostRetryAction::class)
+        ->name('root_social_post_retry'),
+
+    // Root Subscription & Billing Routes
+    Route::get('/subscription')
+        ->action(Web\Subscription\Action\SubscriptionIndexAction::class)
+        ->name('root_subscription_index'),
+    Route::get('/subscription/index')
+        ->action(Web\Subscription\Action\SubscriptionIndexAction::class)
+        ->name('root_subscription_index_alias'),
+    Route::methods(['GET', 'POST'], '/subscription/create')
+        ->action(Web\Subscription\Action\SubscriptionCreateAction::class)
+        ->name('root_subscription_create'),
+    Route::methods(['GET', 'POST'], '/subscription/update')
+        ->action(Web\Subscription\Action\SubscriptionUpdateAction::class)
+        ->name('root_subscription_update'),
+    Route::get('/subscription/delete')
+        ->action(Web\Subscription\Action\SubscriptionDeleteAction::class)
+        ->name('root_subscription_delete'),
+    Route::methods(['GET', 'POST'], '/stripe-webhook/handle-stripe-event')
+        ->action(Web\Subscription\Action\StripeWebhookAction::class)
+        ->name('root_stripe_webhook_handle'),
+    Route::methods(['GET', 'POST'], '/stripe-webhook/index')
+        ->action(Web\Subscription\Action\StripeWebhookAction::class)
+        ->name('root_stripe_webhook_index'),
+
+    // Root Global Platform Settings Routes
+    Route::methods(['GET', 'POST'], '/global-settings')
+        ->action(Web\GlobalSettings\Action\GlobalSettingsIndexAction::class)
+        ->name('root_global_settings_index'),
+    Route::methods(['GET', 'POST'], '/global-settings/index')
+        ->action(Web\GlobalSettings\Action\GlobalSettingsIndexAction::class)
+        ->name('root_global_settings_index_alias'),
+
+    // Root Chat & Customer Inbox Routes
+    Route::get('/chats')
+        ->action(Web\Chat\Action\ChatIndexAction::class)
+        ->name('root_chats_index'),
+    Route::get('/chats/index')
+        ->action(Web\Chat\Action\ChatIndexAction::class)
+        ->name('root_chats_index_alias'),
+    Route::methods(['GET', 'POST'], '/chats/view')
+        ->action(Web\Chat\Action\ChatViewAction::class)
+        ->name('root_chats_view'),
+
+    // Root API & External Webhooks
+    Route::get('/accountapi')
+        ->action(Web\Api\Action\AccountApiAction::class)
+        ->name('root_account_api_index'),
+    Route::get('/accountapi/index')
+        ->action(Web\Api\Action\AccountApiAction::class)
+        ->name('root_account_api_index_alias'),
+    Route::methods(['GET', 'POST'], '/hooks/messages')
+        ->action(Web\Hooks\Action\HooksMessagesAction::class)
+        ->name('root_hooks_messages'),
 ];

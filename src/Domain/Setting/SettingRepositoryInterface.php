@@ -38,6 +38,11 @@ interface SettingRepositoryInterface
     public function has(string $key): bool;
 
     /**
+     * Save or update a setting value.
+     */
+    public function set(string $key, ?string $value): bool;
+
+    /**
      * Invalidate in-memory cached settings (for long-running daemons or queue workers).
      */
     public function clearCache(): void;

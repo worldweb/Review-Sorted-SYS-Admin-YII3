@@ -1,0 +1,236 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\SocialConnection;
+
+use App\Security\TenantContextInterface;
+use App\Security\TenantContextProviderInterface;
+use Yiisoft\Db\Connection\ConnectionInterface;
+use Yiisoft\Db\Query\Query;
+
+final class SocialConnectionRepository implements SocialConnectionRepositoryInterface
+{
+    public function __construct(
+        private ConnectionInterface $db,
+        private ?TenantContextProviderInterface $tenantContextProvider = null,
+    ) {
+    }
+
+    public function findById(int $id, ?TenantContextInterface $context = null): ?ServiceConfig
+    {
+        $ctx = $context ?? $this->tenantContextProvider?->get();
+        if ($ctx !== null && $ctx->isGuest()) {
+            return null;
+        }
+
+        $query = (new Query($this->db))
+            ->from('{{%service_config}}')
+            ->where(['id' => $id]);
+
+        if ($ctx !== null && !$ctx->isUnrestricted()) {
+            $accessible = $ctx->getAccessibleAccountIds();
+            if (empty($accessible)) {
+                return null;
+            }
+            $query->andWhere(['in', 'account_id', $accessible]);
+        }
+
+        /** @var array<string, mixed>|false $row */
+        $row = $query->one();
+        if ($row === null || $row === false) {
+            return null;
+        }
+
+        $config = ServiceConfig::fromDatabaseRow($row);
+        $subs = $this->findSubServicesForConfig($id);
+
+        return $config->withSubServices($subs);
+    }
+
+    public function findFacebookConfigs(?TenantContextInterface $context = null, int $limit = 50, int $offset = 0): array
+    {
+        $ctx = $context ?? $this->tenantContextProvider?->get();
+        $query = (new Query($this->db))
+            ->from('{{%service_config}}')
+            ->where(['service_id' => ServiceConfig::SERVICE_FACEBOOK, 'linked' => ServiceConfig::LINKED_YES])
+            ->orderBy(['id' => SORT_DESC])
+            ->limit($limit)
+            ->offset($offset);
+
+        if ($ctx !== null && !$ctx->isUnrestricted()) {
+            $accessible = $ctx->getAccessibleAccountIds();
+            if (empty($accessible)) {
+                return [];
+            }
+            $query->andWhere(['in', 'account_id', $accessible]);
+        }
+
+        $rows = $query->all();
+        $configs = [];
+        foreach ($rows as $row) {
+            $c = ServiceConfig::fromDatabaseRow($row);
+            $subs = $this->findSubServicesForConfig($c->getId());
+            $configs[] = $c->withSubServices($subs);
+        }
+
+        return $configs;
+    }
+
+    public function countFacebookConfigs(?TenantContextInterface $context = null): int
+    {
+        $ctx = $context ?? $this->tenantContextProvider?->get();
+        $query = (new Query($this->db))
+            ->from('{{%service_config}}')
+            ->where(['service_id' => ServiceConfig::SERVICE_FACEBOOK, 'linked' => ServiceConfig::LINKED_YES]);
+
+        if ($ctx !== null && !$ctx->isUnrestricted()) {
+            $accessible = $ctx->getAccessibleAccountIds();
+            if (empty($accessible)) {
+                return 0;
+            }
+            $query->andWhere(['in', 'account_id', $accessible]);
+        }
+
+        return (int) $query->count();
+    }
+
+    public function findGoogleConfigs(?TenantContextInterface $context = null, int $limit = 50, int $offset = 0): array
+    {
+        $ctx = $context ?? $this->tenantContextProvider?->get();
+        $query = (new Query($this->db))
+            ->from('{{%service_config}}')
+            ->where(['service_id' => ServiceConfig::SERVICE_GOOGLE, 'linked' => ServiceConfig::LINKED_YES])
+            ->orderBy(['id' => SORT_DESC])
+            ->limit($limit)
+            ->offset($offset);
+
+        if ($ctx !== null && !$ctx->isUnrestricted()) {
+            $accessible = $ctx->getAccessibleAccountIds();
+            if (empty($accessible)) {
+                return [];
+            }
+            $query->andWhere(['in', 'account_id', $accessible]);
+        }
+
+        $rows = $query->all();
+        $configs = [];
+        foreach ($rows as $row) {
+            $configs[] = ServiceConfig::fromDatabaseRow($row);
+        }
+
+        return $configs;
+    }
+
+    public function countGoogleConfigs(?TenantContextInterface $context = null): int
+    {
+        $ctx = $context ?? $this->tenantContextProvider?->get();
+        $query = (new Query($this->db))
+            ->from('{{%service_config}}')
+            ->where(['service_id' => ServiceConfig::SERVICE_GOOGLE, 'linked' => ServiceConfig::LINKED_YES]);
+
+        if ($ctx !== null && !$ctx->isUnrestricted()) {
+            $accessible = $ctx->getAccessibleAccountIds();
+            if (empty($accessible)) {
+                return 0;
+            }
+            $query->andWhere(['in', 'account_id', $accessible]);
+        }
+
+        return (int) $query->count();
+    }
+
+    public function findSubServicesForConfig(int $serviceConfigId): array
+    {
+        $rows = (new Query($this->db))
+            ->from('{{%sub_service}}')
+            ->where(['service_config_id' => $serviceConfigId])
+            ->all();
+
+        $subs = [];
+        foreach ($rows as $row) {
+            $subs[] = SubService::fromDatabaseRow($row);
+        }
+
+        return $subs;
+    }
+
+    public function findAllLinkedForAccount(int $accountId): array
+    {
+        $rows = (new Query($this->db))
+            ->from('{{%service_config}}')
+            ->where(['account_id' => $accountId, 'linked' => ServiceConfig::LINKED_YES])
+            ->orderBy(['service_id' => SORT_ASC, 'label' => SORT_ASC])
+            ->all();
+
+        $configs = [];
+        foreach ($rows as $row) {
+            $c = ServiceConfig::fromDatabaseRow($row);
+            $subs = $this->findSubServicesForConfig($c->getId());
+            $configs[] = $c->withSubServices($subs);
+        }
+
+        return $configs;
+    }
+
+    public function updateConfig(int $id, array $data, ?TenantContextInterface $context = null): bool
+    {
+        $existing = $this->findById($id, $context);
+        if ($existing === null) {
+            return false;
+        }
+
+        $updateFields = [
+            'updated_at' => time(),
+        ];
+        if (isset($data['label'])) {
+            $updateFields['label'] = (string) $data['label'];
+        }
+        if (isset($data['email_low_review'])) {
+            $updateFields['email_low_review'] = (string) $data['email_low_review'];
+        }
+
+        try {
+            $this->db->createCommand()
+                ->update('{{%service_config}}', $updateFields, ['id' => $id])
+                ->execute();
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    public function unlinkConfig(int $id, ?TenantContextInterface $context = null): bool
+    {
+        $existing = $this->findById($id, $context);
+        if ($existing === null) {
+            return false;
+        }
+
+        try {
+            $this->db->createCommand()
+                ->update('{{%service_config}}', ['linked' => ServiceConfig::LINKED_NO, 'updated_at' => time()], ['id' => $id])
+                ->execute();
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    public function deleteConfig(int $id, ?TenantContextInterface $context = null): bool
+    {
+        $existing = $this->findById($id, $context);
+        if ($existing === null) {
+            return false;
+        }
+
+        try {
+            $this->db->createCommand()
+                ->delete('{{%service_config}}', ['id' => $id])
+                ->execute();
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+}

@@ -124,6 +124,34 @@ final class SettingRepository implements SettingRepositoryInterface
             ->exists();
     }
 
+    public function set(string $key, ?string $value): bool
+    {
+        try {
+            $existing = (new Query($this->db))
+                ->from('{{%system_setting}}')
+                ->where(['key' => $key])
+                ->exists();
+
+            if ($existing) {
+                $this->db->createCommand()->update(
+                    '{{%system_setting}}',
+                    ['value' => $value, 'updated_at' => time()],
+                    ['key' => $key]
+                )->execute();
+            } else {
+                $this->db->createCommand()->insert(
+                    '{{%system_setting}}',
+                    ['key' => $key, 'value' => $value, 'updated_at' => time()]
+                )->execute();
+            }
+
+            $this->clearCache();
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
     public function clearCache(): void
     {
         $this->allSettingsCache = null;
