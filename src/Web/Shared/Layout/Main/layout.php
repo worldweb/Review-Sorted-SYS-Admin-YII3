@@ -236,16 +236,18 @@ $this->beginPage();
         <!-- RS Main Content Wrapper -->
         <main class="rs-layout-main">
             <!-- Breadcrumbs & Alerts Section -->
-            <div class="rs-mb-4">
-                <?php
-                if (!empty($breadcrumbs)) {
-                    include __DIR__ . '/../../Components/_breadcrumbs.php';
-                }
-                if (!empty($alerts)) {
-                    include __DIR__ . '/../../Components/_alerts.php';
-                }
-                ?>
-            </div>
+            <?php if (!empty($breadcrumbs) || !empty($alerts)): ?>
+                <div class="rs-mb-4">
+                    <?php
+                    if (!empty($breadcrumbs)) {
+                        include __DIR__ . '/../../Components/_breadcrumbs.php';
+                    }
+                    if (!empty($alerts)) {
+                        include __DIR__ . '/../../Components/_alerts.php';
+                    }
+                    ?>
+                </div>
+            <?php endif; ?>
 
             <!-- Page Content -->
             <div class="rs-legacy-view">

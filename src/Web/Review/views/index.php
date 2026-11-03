@@ -88,7 +88,7 @@ $renderStars = static function (?float $rawRate): string {
 };
 ?>
 
-<div class="rs-page rs-p-6">
+<div class="rs-page">
     <?php if (isset($flash)): ?>
         <?php include dirname(__DIR__, 2) . '/Shared/Components/_alerts.php'; ?>
     <?php endif; ?>
@@ -237,14 +237,14 @@ $renderStars = static function (?float $rawRate): string {
                                 <input type="checkbox" id="check-all-reviews" title="Select all on this page">
                             </th>
                         <?php endif; ?>
-                        <th style="width: 14%;">Alias</th>
-                        <th style="width: 10%;">Channel</th>
-                        <th style="width: 12%;">Rate</th>
-                        <th style="width: 8%;">Risk</th>
-                        <th style="width: <?= $isGoogleOrFacebookChannel ? '28%' : '32%' ?>;">Review Text</th>
-                        <th style="width: 10%;">Date</th>
-                        <th style="width: 8%;">Status</th>
-                        <th class="rs-text-center" style="width: 120px;">Action</th>
+                        <th style="width: 14%; min-width: 120px;">Alias</th>
+                        <th style="width: 9%; min-width: 75px;">Channel</th>
+                        <th style="width: 11%; min-width: 95px;">Rate</th>
+                        <th style="width: 7%; min-width: 70px;">Risk</th>
+                        <th style="width: <?= $isGoogleOrFacebookChannel ? '26%' : '30%' ?>; min-width: 160px;">Review Text</th>
+                        <th style="width: 10%; min-width: 105px;">Date</th>
+                        <th style="width: 8%; min-width: 75px;">Status</th>
+                        <th class="rs-text-center" style="width: 110px; min-width: 110px;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -290,7 +290,7 @@ $renderStars = static function (?float $rawRate): string {
                                     </td>
                                 <?php endif; ?>
                                 <td>
-                                    <span class="rs-font-medium" style="font-size: 13px;"><?= $aliasDisplay ?></span>
+                                    <span class="rs-font-medium" style="font-size: 13px; word-break: break-word; line-height: 1.35; display: inline-block;"><?= $aliasDisplay ?></span>
                                     <?php if (!$item->isServiceReady()): ?>
                                         <span class="rs-badge rs-badge--danger rs-text-xs" title="Connection requires configuration">(!)</span>
                                     <?php endif; ?>
@@ -330,14 +330,14 @@ $renderStars = static function (?float $rawRate): string {
                                         <span class="rs-badge rs-badge--danger">UNREAD</span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="rs-text-center">
+                                <td class="rs-text-center" style="white-space: nowrap;">
                                     <div class="rs-d-flex rs-justify-content-center rs-align-items-center rs-gap-1">
-                                        <a href="<?= Html::encode($viewUrl) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Inspect Review">
+                                        <a href="<?= Html::encode($viewUrl) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Inspect Review" style="padding: 4px 8px; font-size: 12px;">
                                             View
                                         </a>
                                         <form method="POST" action="/sys-yii3/reviews/delete" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this review?');">
                                             <input type="hidden" name="id" value="<?= $item->getId() ?>">
-                                            <button type="submit" class="rs-btn rs-btn--sm rs-btn--outline rs-btn--danger-outline" title="Delete Review">
+                                            <button type="submit" class="rs-btn rs-btn--sm rs-btn--outline rs-btn--danger-outline" title="Delete Review" style="padding: 4px 8px; font-size: 12px;">
                                                 Delete
                                             </button>
                                         </form>

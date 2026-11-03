@@ -19,7 +19,7 @@
 
 /* Headers */
 .rs-table th {
-    padding: var(--rs-space-3) var(--rs-space-4);
+    padding: var(--rs-space-3) var(--rs-space-3);
     background-color: var(--rs-bg-surface);
     color: var(--rs-text-muted);
     font-weight: 600;
@@ -46,7 +46,7 @@
 
 /* Rows */
 .rs-table td {
-    padding: var(--rs-space-4);
+    padding: var(--rs-space-3) var(--rs-space-3);
     border-bottom: 1px solid var(--rs-border);
     color: var(--rs-text-main);
     vertical-align: middle;
