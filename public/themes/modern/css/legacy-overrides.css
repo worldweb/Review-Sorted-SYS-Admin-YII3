@@ -1,0 +1,146 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Legacy Bootstrap Overrides (v7.0)
+   ========================================================================== */
+
+/* 1. Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rs-space-2);
+    font-family: var(--rs-font-family);
+    font-size: var(--rs-font-size-sm);
+    font-weight: 600;
+    line-height: 1;
+    padding: var(--rs-space-3) var(--rs-space-4);
+    border-radius: var(--rs-radius-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all var(--rs-transition-fast);
+    text-decoration: none;
+    box-shadow: none;
+    background-image: none;
+}
+
+.btn-primary { background-color: var(--rs-primary); color: var(--rs-white); border-color: var(--rs-primary); }
+.btn-primary:hover, .btn-primary:focus { background-color: var(--rs-primary-dark); color: var(--rs-white); box-shadow: var(--rs-focus-ring); }
+
+.btn-success { background-color: var(--rs-success); color: var(--rs-white); border-color: var(--rs-success); }
+.btn-success:hover, .btn-success:focus { background-color: var(--rs-success-bg); color: var(--rs-success-text); box-shadow: var(--rs-focus-ring); }
+
+.btn-info { background-color: var(--rs-primary); color: var(--rs-white); border-color: var(--rs-primary); }
+.btn-info:hover, .btn-info:focus { background-color: var(--rs-primary-dark); color: var(--rs-white); box-shadow: var(--rs-focus-ring); }
+
+.btn-warning { background-color: var(--rs-accent); color: var(--rs-white); border-color: var(--rs-accent); }
+.btn-warning:hover, .btn-warning:focus { background-color: var(--rs-accent-hover); color: var(--rs-white); }
+
+.btn-danger { background-color: var(--rs-danger); color: var(--rs-white); border-color: var(--rs-danger); }
+.btn-danger:hover, .btn-danger:focus { background-color: var(--rs-danger-bg); color: var(--rs-danger-text); box-shadow: var(--rs-focus-ring-danger); }
+
+.btn-default { background-color: var(--rs-white); color: var(--rs-text-main); border-color: var(--rs-border); }
+.btn-default:hover, .btn-default:focus { background-color: var(--rs-bg-app); color: var(--rs-primary); border-color: var(--rs-primary); }
+
+/* 2. Panels */
+.panel {
+    background-color: var(--rs-white);
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-md);
+    box-shadow: var(--rs-shadow-sm);
+    margin-bottom: var(--rs-space-6);
+}
+.panel-heading {
+    padding: var(--rs-space-4) var(--rs-space-5);
+    border-bottom: 1px solid var(--rs-border);
+    background-color: var(--rs-bg-surface);
+    font-size: var(--rs-font-size-md);
+    font-weight: 600;
+    color: var(--rs-text-main);
+    border-top-left-radius: var(--rs-radius-md);
+    border-top-right-radius: var(--rs-radius-md);
+}
+.panel-body {
+    padding: var(--rs-space-5);
+}
+.panel-footer {
+    padding: var(--rs-space-4) var(--rs-space-5);
+    border-top: 1px solid var(--rs-border);
+    background-color: var(--rs-bg-surface);
+    border-bottom-left-radius: var(--rs-radius-md);
+    border-bottom-right-radius: var(--rs-radius-md);
+}
+
+/* 3. Wells */
+.well {
+    background-color: var(--rs-bg-surface);
+    border: 1px dashed var(--rs-border);
+    padding: var(--rs-space-5);
+    border-radius: var(--rs-radius-md);
+    box-shadow: none;
+}
+
+/* 4. Labels */
+.label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.625rem;
+    font-size: var(--rs-font-size-xs);
+    font-weight: 600;
+    line-height: 1.5;
+    border-radius: var(--rs-radius-pill);
+    background-color: var(--rs-primary);
+    color: var(--rs-white);
+    text-transform: capitalize;
+}
+.label-success { background-color: var(--rs-success-bg); color: var(--rs-success-text); }
+.label-danger { background-color: var(--rs-danger-bg); color: var(--rs-danger-text); }
+.label-warning { background-color: var(--rs-warning-bg); color: var(--rs-warning-text); }
+.label-info { background-color: var(--rs-info-bg); color: var(--rs-info-text); }
+.label-primary { background-color: var(--rs-primary); color: var(--rs-white); }
+.label-default { background-color: var(--rs-bg-app); color: var(--rs-text-muted); }
+
+/* 5. Nav Tabs */
+.nav-tabs {
+    border-bottom: 1px solid var(--rs-border);
+}
+.nav-tabs > li {
+    margin-bottom: -1px;
+}
+.nav-tabs > li > a {
+    padding: var(--rs-space-3) var(--rs-space-4);
+    font-weight: 600;
+    font-size: var(--rs-font-size-sm);
+    color: var(--rs-text-muted);
+    border: 1px solid transparent;
+    border-radius: var(--rs-radius-md) var(--rs-radius-md) 0 0;
+    transition: color var(--rs-transition-fast);
+}
+.nav-tabs > li > a:hover {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--rs-primary);
+}
+.nav-tabs > li.active > a, 
+.nav-tabs > li.active > a:hover, 
+.nav-tabs > li.active > a:focus {
+    color: var(--rs-primary);
+    background-color: var(--rs-white);
+    border: 1px solid var(--rs-border);
+    border-bottom-color: transparent;
+    cursor: default;
+}
+
+/* 6. List Groups */
+.list-group-item {
+    padding: var(--rs-space-3) var(--rs-space-4);
+    border: 1px solid var(--rs-border);
+    font-size: var(--rs-font-size-sm);
+    color: var(--rs-text-main);
+}
+.list-group-item.active,
+.list-group-item.active:hover,
+.list-group-item.active:focus {
+    background-color: var(--rs-primary-dark);
+    border-color: var(--rs-primary-dark);
+    color: var(--rs-white);
+}

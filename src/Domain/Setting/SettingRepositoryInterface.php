@@ -36,4 +36,9 @@ interface SettingRepositoryInterface
      * Check if a setting key exists in the database.
      */
     public function has(string $key): bool;
+
+    /**
+     * Invalidate in-memory cached settings (for long-running daemons or queue workers).
+     */
+    public function clearCache(): void;
 }

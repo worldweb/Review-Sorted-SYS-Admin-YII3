@@ -27,6 +27,7 @@ final class Account
         private ?string $website = null,
         private ?int $createdAt = null,
         private ?int $updatedAt = null,
+        private int $qrCode = 0,
     ) {
     }
 
@@ -46,6 +47,7 @@ final class Account
             website: $row['website'] ?? null,
             createdAt: isset($row['created_at']) && $row['created_at'] !== null ? (int) $row['created_at'] : null,
             updatedAt: isset($row['updated_at']) && $row['updated_at'] !== null ? (int) $row['updated_at'] : null,
+            qrCode: (int) ($row['qr_code'] ?? 0),
         );
     }
 
@@ -67,6 +69,16 @@ final class Account
     public function isActive(): bool
     {
         return $this->status === self::STATUS_ACTIVE;
+    }
+
+    public function getStatusName(): string
+    {
+        return $this->status === self::STATUS_ACTIVE ? 'Active' : 'Disabled';
+    }
+
+    public function getCreatedAtStr(string $format = 'M j, Y'): string
+    {
+        return $this->createdAt !== null ? date($format, $this->createdAt) : '-';
     }
 
     public function getMaxUsers(): int
@@ -117,6 +129,16 @@ final class Account
     public function getUpdatedAt(): ?int
     {
         return $this->updatedAt;
+    }
+
+    public function getQrCode(): int
+    {
+        return $this->qrCode;
+    }
+
+    public function isQrCodeEnabled(): bool
+    {
+        return $this->qrCode === 1;
     }
 
     /**

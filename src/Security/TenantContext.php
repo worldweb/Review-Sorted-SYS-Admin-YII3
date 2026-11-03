@@ -73,14 +73,40 @@ final class TenantContext implements TenantContextInterface
         return new self();
     }
 
+    /**
+     * Create an unrestricted system context for internal authentication and bootstrap lookups.
+     */
+    public static function unrestricted(?int $userId = null): self
+    {
+        return new self(
+            userId: $userId ?? 0,
+            role: User::ROLE_SUPER,
+        );
+    }
+
     public function isGuest(): bool
     {
         return $this->userId === null;
     }
 
+    public function isAuthenticated(): bool
+    {
+        return $this->userId !== null;
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === User::ROLE_ADMIN || $this->role === User::ROLE_SUPER;
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === User::ROLE_SUPER;
+    }
+
+    public function isUnrestricted(): bool
+    {
+        return $this->isAdmin() && $this->scopedAccountId === null;
     }
 
     public function getUserId(): ?int
@@ -115,21 +141,27 @@ final class TenantContext implements TenantContextInterface
         }
 
         if ($this->isAdmin()) {
+            // When an administrator is explicitly scoped into an account,
+            // they are restricted to that account for the scoped session
+            if ($this->scopedAccountId !== null) {
+                return $accountId === $this->scopedAccountId;
+            }
+            // Unrestricted global administrator can access all accounts
             return true;
         }
 
         return in_array($accountId, $this->accessibleAccountIds, true);
     }
 
-    public function applyTenantScope(Query $query, string $accountColumn = 'account_id'): Query
+    public function applyTenantScope(Query $query, string $column = 'account_id', ?string $tableAlias = null): Query
     {
         if ($this->isGuest()) {
-            // Strict denial for guest access
+            // Strict denial for unauthenticated guest access
             return $query->andWhere('0 = 1');
         }
 
-        if ($this->isAdmin() && $this->scopedAccountId === null) {
-            // Global admin has access to all records
+        if ($this->isUnrestricted()) {
+            // Unrestricted global administrator has access to all records
             return $query;
         }
 
@@ -139,6 +171,12 @@ final class TenantContext implements TenantContextInterface
             return $query->andWhere('0 = 1');
         }
 
-        return $query->andWhere([$accountColumn => $targetAccountId]);
+        // Prevent column ambiguity in joined queries
+        $qualifiedColumn = $column;
+        if ($tableAlias !== null && !str_contains($column, '.')) {
+            $qualifiedColumn = $tableAlias . '.' . $column;
+        }
+
+        return $query->andWhere([$qualifiedColumn => $targetAccountId]);
     }
 }

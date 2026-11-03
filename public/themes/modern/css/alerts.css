@@ -1,0 +1,96 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Alerts (v7.0)
+   ========================================================================== */
+
+.rs-alert {
+    padding: var(--rs-space-4);
+    border-radius: var(--rs-radius-md);
+    margin-bottom: var(--rs-space-4);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rs-space-3);
+    font-size: var(--rs-font-size-sm);
+    line-height: 1.5;
+}
+
+.rs-alert__icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.rs-alert__content {
+    flex-grow: 1;
+}
+
+.rs-alert__close {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    color: inherit;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity var(--rs-transition-fast);
+}
+
+.rs-alert__close:hover {
+    opacity: 1;
+}
+
+/* Types */
+.rs-alert--success {
+    background-color: var(--rs-success-bg);
+    color: var(--rs-success-text);
+    border: 1px solid var(--rs-success);
+}
+
+.rs-alert--warning {
+    background-color: var(--rs-warning-bg);
+    color: var(--rs-warning-text);
+    border: 1px solid var(--rs-warning);
+}
+
+.rs-alert--danger {
+    background-color: var(--rs-danger-bg);
+    color: var(--rs-danger-text);
+    border: 1px solid var(--rs-danger);
+}
+
+.rs-alert--info {
+    background-color: var(--rs-info-bg);
+    color: var(--rs-info-text);
+    border: 1px solid var(--rs-info);
+}
+
+/* Yii Alert Overrides */
+.alert {
+    padding: var(--rs-space-4);
+    border-radius: var(--rs-radius-md);
+    margin-bottom: var(--rs-space-4);
+    font-size: var(--rs-font-size-sm);
+    line-height: 1.5;
+}
+
+.alert-success {
+    background-color: var(--rs-success-bg);
+    color: var(--rs-success-text);
+    border: 1px solid var(--rs-success);
+}
+
+.alert-danger {
+    background-color: var(--rs-danger-bg);
+    color: var(--rs-danger-text);
+    border: 1px solid var(--rs-danger);
+}
+
+.alert-warning {
+    background-color: var(--rs-warning-bg);
+    color: var(--rs-warning-text);
+    border: 1px solid var(--rs-warning);
+}
+
+.alert-info {
+    background-color: var(--rs-info-bg);
+    color: var(--rs-info-text);
+    border: 1px solid var(--rs-info);
+}

@@ -1,0 +1,37 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Footer (v8.0)
+   ========================================================================== */
+
+.rs-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--rs-space-6) 0 var(--rs-space-4);
+    margin-top: auto;
+    border-top: 1px solid var(--rs-border);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--rs-text-muted);
+}
+
+.rs-footer__copyright {
+    letter-spacing: 0.02em;
+}
+
+.rs-footer__powered {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rs-footer__link {
+    color: var(--rs-text-main);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.rs-footer__link:hover {
+    color: var(--rs-primary);
+    text-decoration: underline;
+}

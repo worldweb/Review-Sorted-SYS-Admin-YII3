@@ -1,0 +1,67 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Breadcrumbs & Nav (v7.0)
+   ========================================================================== */
+
+.rs-breadcrumbs {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--rs-space-4);
+    font-size: 0; /* Hide Yii2 default raw text separator */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.rs-breadcrumbs__item,
+.rs-breadcrumb__item {
+    font-size: var(--rs-font-size-sm);
+    color: var(--rs-text-muted);
+    text-decoration: none;
+    transition: color var(--rs-transition-fast);
+    display: flex;
+    align-items: center;
+}
+
+.rs-breadcrumbs__item + .rs-breadcrumbs__item::before,
+.rs-breadcrumb__item + .rs-breadcrumb__item::before {
+    content: '/';
+    color: var(--rs-border);
+    margin: 0 var(--rs-space-2);
+}
+
+.rs-breadcrumbs__item:hover,
+.rs-breadcrumb__item:hover {
+    color: var(--rs-primary);
+}
+
+.rs-breadcrumbs__item--active,
+.rs-breadcrumb__item--active {
+    color: var(--rs-text-main);
+    font-weight: 600;
+    pointer-events: none;
+}
+
+/* Page Header integration */
+.rs-page-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--rs-space-6);
+}
+
+.rs-page-header__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rs-page-header__title {
+    font-size: var(--rs-font-size-h2);
+    font-weight: var(--rs-font-weight-h2);
+    color: var(--rs-text-main);
+    margin: 0;
+}
+
+.rs-page-header__actions {
+    display: flex;
+    gap: var(--rs-space-3);
+}

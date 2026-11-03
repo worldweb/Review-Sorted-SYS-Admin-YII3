@@ -1,0 +1,53 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise ActiveForm Overrides (v7.0)
+   ========================================================================== */
+
+/* Overriding Yii's default Bootstrap ActiveForm classes */
+.form-group {
+    margin-bottom: var(--rs-space-4);
+}
+
+.control-label {
+    display: block;
+    font-size: var(--rs-font-size-sm);
+    font-weight: 600;
+    color: var(--rs-text-main);
+    margin-bottom: var(--rs-space-2);
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--rs-space-3) var(--rs-space-4);
+    font-family: var(--rs-font-family);
+    font-size: var(--rs-font-size-sm);
+    color: var(--rs-text-main);
+    background-color: var(--rs-white);
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-md);
+    transition: all var(--rs-transition-fast);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--rs-primary);
+    box-shadow: var(--rs-focus-ring);
+}
+
+.has-error .form-control {
+    border-color: var(--rs-danger);
+}
+
+.has-error .form-control:focus {
+    box-shadow: var(--rs-focus-ring-danger);
+}
+
+.help-block {
+    display: block;
+    font-size: var(--rs-font-size-xs);
+    color: var(--rs-text-muted);
+    margin-top: var(--rs-space-1);
+}
+
+.has-error .help-block {
+    color: var(--rs-danger);
+}

@@ -1,0 +1,174 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Security\Middleware;
+
+use App\Domain\Account\AccountRepositoryInterface;
+use App\Domain\User\UserRepositoryInterface;
+use App\Security\RememberMeService;
+use App\Security\TenantContext;
+use App\Security\TenantContextProviderInterface;
+use App\Security\UserAuthenticationRepositoryInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\Session\SessionInterface;
+
+/**
+ * AuthenticationMiddleware.
+ * Handles user session restoration, remember-me auto-login, request-level tenant context initialization,
+ * and route authorization boundaries.
+ */
+final class AuthenticationMiddleware implements MiddlewareInterface
+{
+    public const SESSION_AUTH_KEY = '_auth_user_id';
+
+    /**
+     * Public paths that do not require an authenticated session.
+     */
+    private const PUBLIC_PATHS = [
+        '/sys-yii3/login',
+        '/login',
+        '/sys-yii3/forgot-password',
+        '/forgot-password',
+        '/sys-yii3/reset-password',
+        '/reset-password',
+        '/sys-yii3/new-client',
+        '/new-client',
+        '/sys-yii3/qrcode/scan',
+        '/qrcode/scan',
+    ];
+
+    public function __construct(
+        private SessionInterface $session,
+        private UserAuthenticationRepositoryInterface $authRepo,
+        private UserRepositoryInterface $userRepo,
+        private AccountRepositoryInterface $accountRepo,
+        private TenantContextProviderInterface $tenantContextProvider,
+        private RememberMeService $rememberMeService,
+        private ResponseFactoryInterface $responseFactory,
+    ) {
+    }
+
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        // 0. Ensure request-level isolation: reset context to guest before processing
+        $this->tenantContextProvider->reset();
+
+        $path = $request->getUri()->getPath();
+
+        // 1. Resolve Identity: Check active session
+        $userId = $this->session->get(self::SESSION_AUTH_KEY);
+        $identity = null;
+
+        if (is_int($userId) || (is_string($userId) && is_numeric($userId))) {
+            $identity = $this->authRepo->findAuthIdentityById((int) $userId);
+        }
+
+        // 2. If not in session, attempt remember-me auto-login
+        if ($identity === null) {
+            $identity = $this->rememberMeService->extractIdentityFromCookie($request);
+            if ($identity !== null) {
+                // Restore session from valid remember-me token
+                $this->session->set(self::SESSION_AUTH_KEY, $identity->getId());
+            }
+        }
+
+        // 3. Verify user status & tenant account status
+        $authenticatedUser = null;
+        if ($identity !== null && $identity->isActive()) {
+            $role = $identity->getRole();
+            $accountActive = true;
+
+            // Verify tenant account is active for non-admin roles
+            if ($role === 'account_admin' || $role === 'worker') {
+                $accountId = $identity->getAccountId();
+                if ($accountId !== null && $accountId > 0) {
+                    $account = $this->accountRepo->findById($accountId);
+                    if ($account === null || !$account->isActive()) {
+                        $accountActive = false;
+                    }
+                } else {
+                    $accountActive = false;
+                }
+            }
+
+            if ($accountActive) {
+                // Resolve full domain User DTO
+                $authenticatedUser = $this->userRepo->findById($identity->getId(), TenantContext::unrestricted());
+            }
+        }
+
+        // 4. Establish Request-Level Tenant Context
+        if ($authenticatedUser !== null) {
+            $tenantContext = TenantContext::fromUser($authenticatedUser);
+            $this->tenantContextProvider->set($tenantContext);
+
+            // Attach user and tenant context to PSR-7 request attributes
+            $request = $request
+                ->withAttribute('currentUser', $authenticatedUser)
+                ->withAttribute('tenantContext', $tenantContext);
+        } else {
+            // Clean up any stale/invalid session
+            if ($this->session->has(self::SESSION_AUTH_KEY)) {
+                $this->session->remove(self::SESSION_AUTH_KEY);
+            }
+            $this->tenantContextProvider->reset();
+        }
+
+        $isPublic = $this->isPublicPath($path);
+        $isLoginPath = $path === '/sys-yii3/login' || $path === '/login';
+
+        // 5. Route Protection Rules
+        // Authenticated users trying to access login page are redirected to dashboard (matches Yii 2 behavior)
+        if ($authenticatedUser !== null && $isLoginPath) {
+            return $this->createRedirectResponse('/sys-yii3/');
+        }
+
+        // Unauthenticated guests accessing protected routes are redirected to login
+        if ($authenticatedUser === null && !$isPublic) {
+            return $this->createRedirectResponse('/sys-yii3/login');
+        }
+
+        return $handler->handle($request);
+    }
+
+    /**
+     * Determines whether a path is public or a static asset.
+     */
+    private function isPublicPath(string $path): bool
+    {
+        // Allow static assets
+        if (
+            str_starts_with($path, '/sys-yii3/assets/') ||
+            str_starts_with($path, '/assets/') ||
+            str_starts_with($path, '/sys-yii3/themes/') ||
+            str_starts_with($path, '/themes/') ||
+            str_ends_with($path, '.ico') ||
+            str_ends_with($path, '.svg') ||
+            str_ends_with($path, '.png') ||
+            str_ends_with($path, '.css') ||
+            str_ends_with($path, '.js')
+        ) {
+            return true;
+        }
+
+        foreach (self::PUBLIC_PATHS as $publicPath) {
+            if ($path === $publicPath || rtrim($path, '/') === $publicPath) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function createRedirectResponse(string $url): ResponseInterface
+    {
+        return $this->responseFactory
+            ->createResponse(302)
+            ->withHeader('Location', $url);
+    }
+}

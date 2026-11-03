@@ -1,0 +1,96 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Navigation Overrides (v7.0)
+   ========================================================================== */
+
+/* Used to strip Bootstrap's native nav styling */
+.rs-nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.rs-nav-menu > li {
+    margin-bottom: var(--rs-space-1);
+}
+
+.rs-nav-menu > li > a {
+    display: flex;
+    align-items: center;
+    gap: var(--rs-space-3);
+    padding: var(--rs-space-2) var(--rs-space-3);
+    color: var(--rs-text-main);
+    text-decoration: none;
+    border-radius: var(--rs-radius-md);
+    font-size: var(--rs-font-size-sm);
+    font-weight: 500;
+    transition: all var(--rs-transition-fast);
+}
+
+.rs-nav-menu > li > a:hover,
+.rs-nav-menu > li > a:focus {
+    background-color: var(--rs-bg-app);
+    color: var(--rs-primary);
+    text-decoration: none;
+    outline: none;
+}
+
+.rs-nav-menu > li.active > a,
+.rs-nav-menu > li.active > a:hover,
+.rs-nav-menu > li.active > a:focus {
+    background-color: var(--rs-primary-dark);
+    color: var(--rs-white);
+}
+
+/* Nav Submenus (if any) */
+.rs-nav-menu .nav-second-level {
+    list-style: none;
+    padding-left: var(--rs-space-4);
+    margin-top: var(--rs-space-1);
+}
+
+.rs-nav-menu .nav-second-level > li > a {
+    font-size: var(--rs-font-size-xs);
+    padding: var(--rs-space-1) var(--rs-space-3);
+    color: var(--rs-text-muted);
+}
+
+.rs-nav-menu .nav-second-level > li > a:hover {
+    color: var(--rs-primary);
+}
+
+.rs-nav-menu .nav-second-level > li.active > a {
+    color: var(--rs-text-main);
+    font-weight: 600;
+}
+
+/* Legacy Settings Secondary Navigation Reset & Styling */
+.rs-list-unstyled {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin: 0 !important;
+}
+
+.rs-sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    color: var(--rs-text-main, #334155);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.rs-sidebar-link:hover {
+    background-color: var(--rs-bg-app, #f8fafc);
+    color: var(--rs-primary, #0f172a);
+    text-decoration: none;
+}
+
+.rs-sidebar-link.is-active {
+    background-color: #234137 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}

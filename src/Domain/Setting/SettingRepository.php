@@ -123,4 +123,10 @@ final class SettingRepository implements SettingRepositoryInterface
             ->where(['key' => $key])
             ->exists();
     }
+
+    public function clearCache(): void
+    {
+        $this->allSettingsCache = null;
+        $this->itemCache = [];
+    }
 }

@@ -1,0 +1,108 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Pagination (v7.0)
+   ========================================================================== */
+
+/* Standard rs-pagination */
+.rs-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: var(--rs-space-4) 0;
+    gap: var(--rs-space-1);
+}
+
+.rs-pagination__item {
+    display: inline-block;
+}
+
+.rs-pagination__link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 var(--rs-space-2);
+    border-radius: var(--rs-radius-sm);
+    font-size: var(--rs-font-size-sm);
+    color: var(--rs-text-main);
+    text-decoration: none;
+    transition: all var(--rs-transition-fast);
+    background-color: transparent;
+    border: 1px solid transparent;
+}
+
+.rs-pagination__link:hover {
+    background-color: var(--rs-bg-app);
+    color: var(--rs-primary);
+}
+
+.rs-pagination__item--active .rs-pagination__link {
+    background-color: var(--rs-primary);
+    color: var(--rs-white);
+    border-color: var(--rs-primary);
+}
+
+.rs-pagination__item--disabled .rs-pagination__link {
+    color: var(--rs-text-muted);
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Overriding Yii's default pagination classes - ensured consistent sizing and right alignment */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    list-style: none;
+    padding: 0;
+    margin: var(--rs-space-4) 0 0 0;
+    gap: var(--rs-space-1);
+}
+
+.pagination > li > a,
+.pagination > li > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: var(--rs-radius-sm);
+    font-size: var(--rs-font-size-sm);
+    color: var(--rs-text-main);
+    text-decoration: none;
+    transition: all var(--rs-transition-fast);
+    background-color: transparent;
+    border: 1px solid transparent;
+}
+
+/* Ensure prev/next arrows have adequate glyph size */
+.pagination > li.prev > a,
+.pagination > li.next > a {
+    font-size: var(--rs-font-size-md);
+}
+
+.pagination > li > a:hover,
+.pagination > li > span:hover {
+    background-color: var(--rs-bg-app);
+    color: var(--rs-primary);
+}
+
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover {
+    background-color: var(--rs-primary);
+    color: var(--rs-white);
+    border-color: var(--rs-primary);
+}
+
+.pagination > .disabled > span,
+.pagination > .disabled > a {
+    color: var(--rs-text-muted);
+    pointer-events: none;
+    background-color: transparent;
+    border-color: transparent;
+}

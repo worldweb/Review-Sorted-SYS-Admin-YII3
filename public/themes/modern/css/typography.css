@@ -1,0 +1,79 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Design System Typography (v7.0)
+   ========================================================================== */
+
+.rs-app-wrapper {
+    font-family: var(--rs-font-family);
+    font-size: var(--rs-font-size-body);
+    font-weight: var(--rs-font-weight-body);
+    line-height: var(--rs-line-height-normal);
+    color: var(--rs-text-main);
+    background-color: var(--rs-bg-app);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, .rs-display {
+    font-size: var(--rs-font-size-display);
+    font-weight: 900;
+    line-height: var(--rs-line-height-tight);
+    color: var(--rs-text-main);
+    margin-bottom: var(--rs-space-6);
+    letter-spacing: -0.02em;
+}
+
+h2, .rs-h1 {
+    font-size: var(--rs-font-size-h1);
+    font-weight: var(--rs-font-weight-h1);
+    line-height: var(--rs-line-height-tight);
+    color: var(--rs-text-main);
+    margin-bottom: var(--rs-space-5);
+    letter-spacing: -0.01em;
+}
+
+h3, .rs-h2 {
+    font-size: var(--rs-font-size-h2);
+    font-weight: var(--rs-font-weight-h2);
+    line-height: var(--rs-line-height-tight);
+    color: var(--rs-text-main);
+    margin-bottom: var(--rs-space-4);
+}
+
+h4, .rs-h3 {
+    font-size: var(--rs-font-size-h3);
+    font-weight: var(--rs-font-weight-h3);
+    line-height: var(--rs-line-height-tight);
+    color: var(--rs-text-main);
+    margin-bottom: var(--rs-space-3);
+}
+
+p {
+    margin-bottom: var(--rs-space-4);
+}
+
+.rs-text-lg {
+    font-size: var(--rs-font-size-body-lg);
+}
+
+.rs-text-sm {
+    font-size: var(--rs-font-size-sm);
+}
+
+.rs-text-xs {
+    font-size: var(--rs-font-size-xs);
+}
+
+.rs-text-muted {
+    color: var(--rs-text-muted);
+}
+
+a:not(.rs-btn) {
+    color: var(--rs-link);
+    text-decoration: none;
+    transition: color var(--rs-transition-fast);
+}
+
+a:hover, a:focus {
+    color: var(--rs-link-hover);
+    text-decoration: underline;
+}

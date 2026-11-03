@@ -1,0 +1,119 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Design System Tokens (v5.0)
+   ========================================================================== */
+
+:root {
+    /* 1. Brand Colors (Single Source of Truth) */
+    --rs-primary: #234137;
+    --rs-primary-hover: #2D5244;
+    --rs-primary-dark: #1A2F26;
+    
+    --rs-accent: #F5A623;
+    --rs-accent-hover: #E0941A;
+    
+    --rs-surface: #FEFBF6;
+    --rs-white: #FFFFFF;
+    --rs-black: #000000;
+    
+    --rs-border-muted: #CED4DA;
+    --rs-text-secondary: #7B8A8B;
+
+    /* 2. Semantic Colors (Derived from Brand or standard accessibility) */
+    --rs-success: #10B981;
+    --rs-success-bg: #D1FAE5;
+    --rs-success-text: #065F46;
+
+    --rs-warning: #F59E0B;
+    --rs-warning-bg: #FEF3C7;
+    --rs-warning-text: #92400E;
+
+    --rs-danger: #EF4444;
+    --rs-danger-bg: #FEE2E2;
+    --rs-danger-text: #991B1B;
+    
+    --rs-info: #3B82F6;
+    --rs-info-bg: #DBEAFE;
+    --rs-info-text: #1E40AF;
+
+    /* 3. Abstract Role Tokens */
+    --rs-bg-app: var(--rs-surface);
+    --rs-bg-surface: var(--rs-white);
+    --rs-border: var(--rs-border-muted);
+    
+    --rs-text-main: var(--rs-primary-dark);
+    --rs-text-muted: var(--rs-text-secondary);
+    --rs-text-inverse: var(--rs-white);
+    
+    --rs-link: var(--rs-primary);
+    --rs-link-hover: var(--rs-accent);
+
+    /* 4. Typography Scale */
+    --rs-font-family: 'Lato', sans-serif;
+    
+    --rs-font-size-display: 3.5rem;
+    --rs-font-weight-display: 900;
+    
+    --rs-font-size-h1: 2.75rem;
+    --rs-font-weight-h1: 700;
+    
+    --rs-font-size-h2: 2rem;
+    --rs-font-weight-h2: 700;
+    
+    --rs-font-size-h3: 1.75rem;
+    --rs-font-weight-h3: 600;
+    
+    --rs-font-size-body-lg: 18px;
+    --rs-font-weight-body-lg: 400;
+    
+    --rs-font-size-body: 16px;
+    --rs-font-size-base: 16px;
+    --rs-font-weight-body: 400;
+    
+    --rs-font-size-sm: 14px; /* Supplementary UI */
+    --rs-font-size-xs: 12px;
+    
+    --rs-line-height-tight: 1.25;
+    --rs-line-height-normal: 1.5;
+    --rs-line-height-loose: 2;
+
+    /* 5. Spacing Scale (8px Grid) */
+    --rs-space-1: 4px;
+    --rs-space-2: 8px;
+    --rs-space-3: 12px;
+    --rs-space-4: 16px;
+    --rs-space-5: 20px;
+    --rs-space-6: 24px;
+    --rs-space-8: 32px;
+    --rs-space-10: 40px;
+    --rs-space-12: 48px;
+    --rs-space-16: 64px;
+
+    /* 6. Radius */
+    --rs-radius-sm: 4px;
+    --rs-radius-md: 8px;
+    --rs-radius-lg: 12px;
+    --rs-radius-pill: 9999px;
+    --rs-radius-full: 50%;
+
+    /* 7. Shadows (Warm/Soft) */
+    --rs-shadow-sm: 0 1px 2px 0 rgba(35, 65, 55, 0.05);
+    --rs-shadow-md: 0 4px 6px -1px rgba(35, 65, 55, 0.1), 0 2px 4px -2px rgba(35, 65, 55, 0.1);
+    --rs-shadow-lg: 0 10px 15px -3px rgba(35, 65, 55, 0.1), 0 4px 6px -4px rgba(35, 65, 55, 0.1);
+    --rs-shadow-modal: 0 25px 50px -12px rgba(35, 65, 55, 0.25);
+    
+    /* 8. Focus Rings */
+    --rs-focus-ring: 0 0 0 2px var(--rs-surface), 0 0 0 4px var(--rs-primary);
+    --rs-focus-ring-danger: 0 0 0 2px var(--rs-surface), 0 0 0 4px var(--rs-danger);
+
+    /* 9. Animation Timing */
+    --rs-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --rs-transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* 10. Z-Index Scale */
+    --rs-z-dropdown: 1000;
+    --rs-z-sticky: 1020;
+    --rs-z-fixed: 1030;
+    --rs-z-modal-backdrop: 1040;
+    --rs-z-modal: 1050;
+    --rs-z-toast: 1060;
+}

@@ -1,0 +1,81 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Dropdowns (v7.0)
+   ========================================================================== */
+
+.rs-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.rs-dropdown__menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: var(--rs-space-2);
+    min-width: 200px;
+    background-color: var(--rs-white);
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-lg);
+    box-shadow: var(--rs-shadow-xl);
+    padding: var(--rs-space-2) 0;
+    z-index: var(--rs-z-dropdown);
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transform-origin: top right;
+    transition: transform var(--rs-transition-fast), opacity var(--rs-transition-fast), visibility var(--rs-transition-fast);
+}
+
+.rs-dropdown--open .rs-dropdown__menu {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+.rs-dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: var(--rs-space-3);
+    padding: var(--rs-space-2) var(--rs-space-4);
+    color: var(--rs-text-main);
+    font-size: var(--rs-font-size-sm);
+    text-decoration: none;
+    transition: background-color var(--rs-transition-fast);
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+}
+
+.rs-dropdown__item:hover,
+.rs-dropdown__item:focus {
+    background-color: var(--rs-bg-app);
+    color: var(--rs-primary);
+    text-decoration: none;
+    outline: none;
+}
+
+.rs-dropdown__divider {
+    height: 1px;
+    background-color: var(--rs-border);
+    margin: var(--rs-space-2) 0;
+}
+
+.rs-dropdown__header {
+    padding: var(--rs-space-2) var(--rs-space-4);
+    font-size: var(--rs-font-size-xs);
+    font-weight: 700;
+    color: var(--rs-text-muted);
+    text-transform: uppercase;
+}
+
+/* Modifiers */
+.rs-dropdown__item--danger {
+    color: var(--rs-danger);
+}
+
+.rs-dropdown__item--danger:hover {
+    background-color: var(--rs-danger-bg);
+    color: var(--rs-danger-text);
+}

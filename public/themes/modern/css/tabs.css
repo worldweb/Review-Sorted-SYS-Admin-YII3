@@ -1,0 +1,71 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Tabs (v8.0)
+   ========================================================================== */
+
+.rs-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--rs-border);
+    gap: var(--rs-space-4);
+    margin-bottom: var(--rs-space-5);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.rs-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.rs-tab {
+    padding: var(--rs-space-3) 0;
+    color: var(--rs-text-muted);
+    font-size: var(--rs-font-size-sm);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: all var(--rs-transition-fast);
+    white-space: nowrap;
+    cursor: pointer;
+    background: transparent;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+
+.rs-tab:hover,
+.rs-tab:focus-visible {
+    color: var(--rs-text-main);
+    border-bottom-color: var(--rs-border-dark);
+    outline: none;
+}
+
+.rs-tab--active {
+    color: var(--rs-primary);
+    border-bottom-color: var(--rs-primary);
+}
+
+.rs-tab--active:hover {
+    color: var(--rs-primary-hover);
+    border-bottom-color: var(--rs-primary-hover);
+}
+
+/* Vertical Tabs */
+.rs-tabs--vertical {
+    flex-direction: column;
+    border-bottom: none;
+    border-right: 1px solid var(--rs-border);
+    gap: var(--rs-space-1);
+    min-width: 200px;
+}
+
+.rs-tabs--vertical .rs-tab {
+    padding: var(--rs-space-2) var(--rs-space-3);
+    border-bottom: none;
+    border-left: 2px solid transparent;
+    border-radius: 0 var(--rs-radius-md) var(--rs-radius-md) 0;
+}
+
+.rs-tabs--vertical .rs-tab--active {
+    border-bottom-color: transparent;
+    border-left-color: var(--rs-primary);
+    background-color: var(--rs-bg-app);
+}

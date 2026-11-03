@@ -1,0 +1,63 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Empty States (v7.0)
+   ========================================================================== */
+
+.rs-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--rs-space-8) var(--rs-space-4);
+    text-align: center;
+    background-color: var(--rs-white);
+    border: 1px dashed var(--rs-border);
+    border-radius: var(--rs-radius-lg);
+    margin-bottom: var(--rs-space-6);
+}
+
+.rs-empty-state--transparent {
+    background-color: transparent;
+    border: none;
+}
+
+.rs-empty-state__icon {
+    width: 64px;
+    height: 64px;
+    color: var(--rs-border);
+    margin-bottom: var(--rs-space-4);
+}
+
+.rs-empty-state__icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.rs-empty-state__title {
+    font-size: var(--rs-font-size-lg);
+    font-weight: 600;
+    color: var(--rs-text-main);
+    margin-bottom: var(--rs-space-2);
+}
+
+.rs-empty-state__description {
+    font-size: var(--rs-font-size-sm);
+    color: var(--rs-text-muted);
+    max-width: 400px;
+    margin-bottom: var(--rs-space-5);
+    line-height: 1.5;
+}
+
+.rs-empty-state__actions {
+    display: flex;
+    gap: var(--rs-space-3);
+    justify-content: center;
+}
+
+/* Specific Types */
+.rs-empty-state--404 .rs-empty-state__icon {
+    color: var(--rs-warning);
+}
+
+.rs-empty-state--error .rs-empty-state__icon {
+    color: var(--rs-danger);
+}

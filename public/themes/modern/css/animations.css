@@ -1,0 +1,71 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Animation System (v7.0)
+   ========================================================================== */
+
+/* Keyframes */
+@keyframes rs-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes rs-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rs-slide-down {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rs-scale-up {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes rs-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Utility Classes */
+.rs-animate-fade-in {
+    animation: rs-fade-in var(--rs-transition-normal) forwards;
+}
+
+.rs-animate-slide-up {
+    animation: rs-slide-up var(--rs-transition-normal) forwards;
+}
+
+.rs-animate-spin {
+    animation: rs-spin 1s linear infinite;
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

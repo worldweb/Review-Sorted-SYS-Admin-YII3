@@ -1,0 +1,225 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Sidebar (v8.0)
+   ========================================================================== */
+
+.rs-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background-color: var(--rs-bg-surface);
+    border-right: 1px solid var(--rs-border);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 72px);
+    position: sticky;
+    top: 72px;
+    overflow-y: auto;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: var(--rs-z-sticky);
+}
+
+/* Custom Scrollbar for Sidebar */
+.rs-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+.rs-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.rs-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+.rs-sidebar:hover::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* Collapsed State (Desktop) */
+.rs-sidebar--collapsed {
+    width: 72px;
+}
+
+.rs-sidebar--collapsed .rs-sidebar__workspace-name,
+.rs-sidebar--collapsed .rs-sidebar__workspace select,
+.rs-sidebar--collapsed .rs-sidebar__group-title,
+.rs-sidebar--collapsed .rs-sidebar__item-label {
+    display: none;
+    opacity: 0;
+}
+
+.rs-sidebar--collapsed .rs-sidebar__item {
+    justify-content: center;
+    padding: var(--rs-space-3);
+}
+
+.rs-sidebar--collapsed .rs-sidebar__icon {
+    margin: 0;
+}
+
+.rs-sidebar__workspace {
+    padding: var(--rs-space-4);
+    border-bottom: 1px solid var(--rs-border);
+    min-height: 72px;
+    display: flex;
+    align-items: center;
+}
+
+.rs-sidebar__workspace-selector {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--rs-space-2) var(--rs-space-3);
+    background-color: var(--rs-bg-app);
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rs-sidebar__workspace-selector:hover {
+    border-color: var(--rs-border-dark, #cbd5e1);
+    background-color: var(--rs-white);
+    box-shadow: var(--rs-shadow-sm);
+}
+
+.rs-sidebar__workspace-name {
+    font-size: var(--rs-font-size-sm);
+    font-weight: 600;
+    color: var(--rs-text-main);
+    transition: opacity 0.2s;
+}
+
+.rs-sidebar__nav {
+    padding: var(--rs-space-4) var(--rs-space-3);
+    flex-grow: 1;
+}
+
+.rs-sidebar__group {
+    margin-bottom: var(--rs-space-6);
+}
+
+.rs-sidebar__group-title {
+    font-size: var(--rs-font-size-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--rs-text-muted);
+    margin-bottom: var(--rs-space-3);
+    padding: 0 var(--rs-space-3);
+    transition: opacity 0.2s;
+}
+
+.rs-sidebar__item {
+    display: flex;
+    align-items: center;
+    gap: var(--rs-space-3);
+    padding: var(--rs-space-2) var(--rs-space-3);
+    color: var(--rs-text-main);
+    text-decoration: none;
+    border-radius: var(--rs-radius-md);
+    font-size: var(--rs-font-size-sm);
+    font-weight: 500;
+    transition: background-color var(--rs-transition-fast), color var(--rs-transition-fast);
+    margin-bottom: var(--rs-space-1);
+    white-space: nowrap;
+    border: 1px solid transparent;
+}
+
+.rs-sidebar__item:hover {
+    background-color: var(--rs-bg-app);
+    color: var(--rs-primary);
+    text-decoration: none;
+}
+
+.rs-sidebar__item--active {
+    background-color: rgba(35, 65, 55, 0.05); /* Subtle tint instead of solid color */
+    color: var(--rs-primary);
+    position: relative;
+}
+
+.rs-sidebar__item--active::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--rs-space-3) * -1);
+    top: 50%;
+    transform: translateY(-50%);
+    height: 60%;
+    width: 4px;
+    background-color: var(--rs-primary);
+    border-radius: 0 4px 4px 0;
+}
+
+.rs-sidebar__item--active:hover {
+    background-color: rgba(35, 65, 55, 0.08);
+    color: var(--rs-primary);
+}
+
+.rs-sidebar__icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+    flex-shrink: 0;
+    transition: opacity 0.2s ease;
+}
+
+.rs-sidebar__item:hover .rs-sidebar__icon {
+    opacity: 0.8;
+}
+
+.rs-sidebar__item--active .rs-sidebar__icon {
+    opacity: 1;
+    color: var(--rs-primary);
+}
+
+/* Mobile Drawer State */
+.rs-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(35, 65, 55, 0.4);
+    z-index: calc(var(--rs-z-modal) - 1);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    backdrop-filter: blur(2px);
+}
+
+.rs-sidebar-overlay.rs-sidebar-overlay--active {
+    opacity: 1;
+    visibility: visible;
+}
+
+@media (max-width: 991.98px) {
+    .rs-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: var(--rs-z-modal);
+        transform: translateX(-100%);
+        width: 280px;
+    }
+    
+    .rs-sidebar.rs-sidebar--mobile-open {
+        transform: translateX(0);
+    }
+    
+    .rs-sidebar--collapsed {
+        /* Disable collapsed mode on mobile, it's either open or closed */
+        width: 280px;
+    }
+    
+    .rs-sidebar--collapsed .rs-sidebar__workspace-name,
+    .rs-sidebar--collapsed .rs-sidebar__workspace select,
+    .rs-sidebar--collapsed .rs-sidebar__group-title,
+    .rs-sidebar--collapsed .rs-sidebar__item-label {
+        display: block;
+        opacity: 1;
+    }
+    
+    .rs-sidebar--collapsed .rs-sidebar__item {
+        justify-content: flex-start;
+        padding: var(--rs-space-2) var(--rs-space-3);
+    }
+}

@@ -1,0 +1,60 @@
+/* ==========================================================================
+   Reviews Sorted - Base Styles
+   ========================================================================== */
+
+/* Apply box-sizing border-box globally to the wrapper to prevent overriding bootstrap globals where not wrapped */
+.rs-app-wrapper,
+.rs-app-wrapper *,
+.rs-app-wrapper *::before,
+.rs-app-wrapper *::after {
+    box-sizing: border-box;
+}
+
+/* Base App Wrapper Typography & Colors */
+.rs-app-wrapper {
+    font-family: var(--rs-font-family);
+    font-size: var(--rs-font-size-sm);
+    line-height: var(--rs-line-height-normal);
+    color: var(--rs-text-main);
+    background-color: var(--rs-bg-app);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Links */
+.rs-app-wrapper a:not(.rs-btn) {
+    color: var(--rs-link);
+    text-decoration: none;
+    transition: color var(--rs-transition-fast);
+}
+
+.rs-app-wrapper a:not(.rs-btn):hover {
+    color: var(--rs-link-hover);
+    text-decoration: underline;
+}
+
+/* Headings */
+.rs-app-wrapper h1,
+.rs-app-wrapper h2,
+.rs-app-wrapper h3,
+.rs-app-wrapper h4,
+.rs-app-wrapper h5,
+.rs-app-wrapper h6 {
+    margin-top: 0;
+    margin-bottom: var(--rs-space-4);
+    font-weight: 600;
+    line-height: var(--rs-line-height-tight);
+    color: var(--rs-text-main);
+}
+
+.rs-app-wrapper h1 { font-size: var(--rs-font-size-2xl); }
+.rs-app-wrapper h2 { font-size: var(--rs-font-size-xl); }
+.rs-app-wrapper h3 { font-size: var(--rs-font-size-lg); }
+.rs-app-wrapper h4 { font-size: var(--rs-font-size-md); }
+
+/* Paragraphs */
+.rs-app-wrapper p {
+    margin-top: 0;
+    margin-bottom: var(--rs-space-4);
+    color: var(--rs-text-muted);
+}

@@ -1,0 +1,33 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Theme Overrides (v7.0)
+   ========================================================================== */
+   
+/* This file acts as the ultimate specific override layer if necessary, 
+   but primarily ensures that any global resets happen here. */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px; /* Base size */
+}
+
+/* Scrollbar Styling for webkit */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--rs-bg-app); 
+}
+ 
+::-webkit-scrollbar-thumb {
+    background: var(--rs-border); 
+    border-radius: var(--rs-radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--rs-text-muted); 
+}

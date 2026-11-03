@@ -1,0 +1,83 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Cards (v7.0)
+   ========================================================================== */
+
+.rs-card {
+    background-color: var(--rs-white);
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-md);
+    box-shadow: var(--rs-shadow-sm);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-bottom: var(--rs-space-6);
+}
+
+.rs-card__header {
+    padding: var(--rs-space-4) var(--rs-space-5);
+    border-bottom: 1px solid var(--rs-border);
+    background-color: var(--rs-bg-surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.rs-card__title {
+    font-size: var(--rs-font-size-md);
+    font-weight: 600;
+    color: var(--rs-text-main);
+    margin: 0;
+}
+
+.rs-card__body {
+    padding: var(--rs-space-5);
+    flex-grow: 1;
+}
+
+.rs-card__footer {
+    padding: var(--rs-space-4) var(--rs-space-5);
+    border-top: 1px solid var(--rs-border);
+    background-color: var(--rs-bg-surface);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--rs-space-3);
+}
+
+/* Modifiers */
+.rs-card--flat {
+    box-shadow: none;
+}
+
+.rs-card--primary {
+    border-top: 4px solid var(--rs-primary);
+}
+
+.rs-card--accent {
+    border-top: 4px solid var(--rs-accent);
+}
+
+/* KPI Card / Widget */
+.rs-widget {
+    background-color: var(--rs-white);
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-md);
+    box-shadow: var(--rs-shadow-sm);
+    padding: var(--rs-space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--rs-space-2);
+    min-width: 260px;
+}
+
+.rs-widget__label {
+    font-size: var(--rs-font-size-sm);
+    font-weight: 500;
+    color: var(--rs-text-muted);
+}
+
+.rs-widget__value {
+    font-size: var(--rs-font-size-h2);
+    font-weight: 700;
+    color: var(--rs-primary);
+}

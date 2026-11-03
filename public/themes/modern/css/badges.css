@@ -1,0 +1,69 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Badges (v7.0)
+   ========================================================================== */
+
+.rs-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.125rem 0.625rem;
+    font-size: var(--rs-font-size-xs);
+    font-weight: 600;
+    line-height: 1.5;
+    border-radius: var(--rs-radius-pill);
+    white-space: nowrap;
+    text-transform: capitalize;
+}
+
+.rs-badge--success {
+    background-color: var(--rs-success-bg);
+    color: var(--rs-success-text);
+}
+
+.rs-badge--warning {
+    background-color: var(--rs-warning-bg);
+    color: var(--rs-warning-text);
+}
+
+.rs-text-danger {
+    color: var(--rs-danger-text);
+}
+
+.rs-badge--danger {
+    background-color: var(--rs-danger-bg);
+    color: var(--rs-danger-text);
+}
+
+.rs-badge--info {
+    background-color: var(--rs-info-bg);
+    color: var(--rs-info-text);
+}
+
+.rs-badge--primary {
+    background-color: var(--rs-primary);
+    color: var(--rs-white);
+}
+
+.rs-badge--muted {
+    background-color: var(--rs-bg-app);
+    color: var(--rs-text-muted);
+}
+
+/* Status Indicators */
+.rs-status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rs-space-2);
+    font-size: var(--rs-font-size-sm);
+    color: var(--rs-text-main);
+}
+
+.rs-status__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.rs-status__dot--success { background-color: var(--rs-success); }
+.rs-status__dot--danger { background-color: var(--rs-danger); }
+.rs-status__dot--warning { background-color: var(--rs-warning); }

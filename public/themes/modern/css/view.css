@@ -1,0 +1,310 @@
+/* ==========================================================================
+   Reviews Sorted - Review Details Modern UI (view.css)
+   ========================================================================== */
+
+/* 1. Header Styles */
+.rs-review-header {
+    background-color: var(--rs-bg-surface);
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-lg);
+    padding: var(--rs-space-6);
+    box-shadow: var(--rs-shadow-sm);
+}
+
+.rs-header-meta-row {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--rs-space-3);
+    line-height: 1;
+    font-size: var(--rs-font-size-sm);
+    color: var(--rs-text-muted);
+}
+
+.rs-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rs-space-1);
+    height: 24px;
+}
+
+.rs-meta-separator {
+    color: var(--rs-border);
+    font-weight: 300;
+    align-self: center;
+}
+
+/* 2. Rating stars formatting */
+.rs-rating-stars {
+    display: inline-flex;
+    align-items: center;
+}
+
+.rs-star-filled {
+    fill: var(--rs-warning, #F59E0B);
+    color: var(--rs-warning, #F59E0B);
+}
+
+.rs-star-half {
+    color: var(--rs-warning, #F59E0B);
+}
+
+.rs-star-empty {
+    fill: transparent;
+    stroke: var(--rs-border, #E5E7EB);
+    stroke-width: 2px;
+    color: var(--rs-border, #E5E7EB);
+}
+
+/* 3. Customer Review Card styling */
+.rs-customer-review-card {
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-lg);
+    box-shadow: var(--rs-shadow-sm);
+    background-color: var(--rs-bg-surface);
+}
+
+.rs-avatar-initials {
+    background-color: var(--rs-primary-dark, #1e293b);
+    color: var(--rs-white, #ffffff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.rs-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--rs-radius-full);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.rs-avatar--md {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+}
+
+.rs-avatar--lg {
+    width: 56px;
+    height: 56px;
+    font-size: 20px;
+}
+
+.rs-review-text {
+    font-size: var(--rs-font-size-body-lg);
+    line-height: var(--rs-line-height-loose);
+    color: var(--rs-text-main);
+    word-break: break-word;
+}
+
+/* 4. Review Insights Card Grid styling */
+.rs-insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--rs-space-5);
+}
+
+.rs-insight-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rs-space-1);
+    padding: var(--rs-space-3);
+    border-radius: var(--rs-radius-md);
+    background-color: var(--rs-bg-app);
+    border: 1px solid var(--rs-border);
+}
+
+.rs-insight-label {
+    font-size: var(--rs-font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--rs-text-muted);
+}
+
+.rs-insight-value {
+    font-size: var(--rs-font-size-sm);
+    font-weight: 600;
+    color: var(--rs-text-main);
+    word-break: break-word;
+}
+
+/* 5. Moderation Card (Warning alert style) */
+.rs-moderation-card {
+    border: 1px solid var(--rs-danger, #ef4444);
+    background-color: var(--rs-danger-bg, #fef2f2);
+    border-radius: var(--rs-radius-lg);
+    box-shadow: var(--rs-shadow-sm);
+}
+
+.rs-moderation-icon-wrapper {
+    color: var(--rs-danger, #ef4444);
+}
+
+/* Primary/Secondary Buttons */
+.rs-btn--danger-outline {
+    background-color: transparent;
+    color: var(--rs-danger, #ef4444);
+    border: 1.5px solid var(--rs-danger, #ef4444);
+}
+
+.rs-btn--danger-outline:hover {
+    background-color: var(--rs-danger, #ef4444);
+    color: var(--rs-white, #ffffff);
+}
+
+/* 6. Reply Composer styling */
+.rs-reply-composer-card {
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-lg);
+    box-shadow: var(--rs-shadow-sm);
+    background-color: var(--rs-bg-surface);
+}
+
+.rs-reply-textarea {
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-md);
+    padding: var(--rs-space-4);
+    font-size: var(--rs-font-size-body);
+    font-family: var(--rs-font-family);
+    color: var(--rs-text-main);
+    background-color: var(--rs-bg-app);
+    transition: border-color var(--rs-transition-fast), box-shadow var(--rs-transition-fast);
+}
+
+.rs-reply-textarea:focus {
+    border-color: var(--rs-primary);
+    box-shadow: var(--rs-focus-ring);
+    outline: none;
+}
+
+/* 7. Activity Timeline styling */
+.rs-timeline-card {
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-lg);
+    box-shadow: var(--rs-shadow-sm);
+    background-color: var(--rs-bg-surface);
+}
+
+.rs-timeline {
+    position: relative;
+    padding-left: var(--rs-space-6);
+}
+
+.rs-timeline__item {
+    position: relative;
+}
+
+.rs-timeline__line {
+    position: absolute;
+    left: calc(-1 * var(--rs-space-6) + 7px);
+    top: 24px;
+    bottom: -32px;
+    width: 2px;
+    background-color: var(--rs-border);
+}
+
+.rs-timeline__item:last-child .rs-timeline__line {
+    display: none;
+}
+
+.rs-timeline__marker {
+    position: absolute;
+    left: calc(-1 * var(--rs-space-6) + 4px);
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--rs-radius-full);
+    background-color: var(--rs-primary);
+    border: 2px solid var(--rs-bg-surface);
+    box-shadow: 0 0 0 2px var(--rs-primary-hover);
+}
+
+.rs-timeline__content {
+    background-color: var(--rs-bg-app);
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-md);
+    padding: var(--rs-space-4);
+}
+
+.rs-timeline__author {
+    font-size: var(--rs-font-size-sm);
+    color: var(--rs-text-main);
+}
+
+.rs-timeline__date {
+    font-size: var(--rs-font-size-xs);
+    color: var(--rs-text-muted);
+}
+
+.rs-timeline__body {
+    font-size: var(--rs-font-size-sm);
+    color: var(--rs-text-main);
+}
+
+/* Empty Timeline State styling */
+.rs-empty-state {
+    padding: var(--rs-space-8) var(--rs-space-4);
+    border: 2px dashed var(--rs-border);
+    border-radius: var(--rs-radius-lg);
+    background-color: var(--rs-bg-app);
+}
+
+.rs-empty-state__icon {
+    color: var(--rs-text-muted);
+}
+
+.rs-empty-state__title {
+    color: var(--rs-text-main);
+}
+
+/* 8. Responsiveness & Layout Grid styling */
+.rs-page {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.rs-dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--rs-space-6);
+}
+
+@media (min-width: 992px) {
+    .rs-dashboard-grid {
+        grid-template-columns: repeat(12, 1fr);
+    }
+    .rs-col-span-8 {
+        grid-column: span 8;
+    }
+    .rs-col-span-4 {
+        grid-column: span 4;
+    }
+}
+
+@media (max-width: 768px) {
+    .rs-btn {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    .rs-review-header .rs-d-flex.rs-align-items-center {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .rs-review-header .rs-ml-auto {
+        margin-left: 0;
+        width: 100%;
+        margin-top: var(--rs-space-4);
+    }
+    
+    .rs-insights-grid {
+        grid-template-columns: 1fr;
+    }
+}

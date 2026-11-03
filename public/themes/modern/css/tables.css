@@ -1,0 +1,77 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Tables (v7.0)
+   ========================================================================== */
+
+.rs-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-md);
+    background-color: var(--rs-white);
+}
+
+.rs-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: var(--rs-font-size-sm);
+}
+
+/* Headers */
+.rs-table th {
+    padding: var(--rs-space-3) var(--rs-space-4);
+    background-color: var(--rs-bg-surface);
+    color: var(--rs-text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: var(--rs-font-size-xs);
+    border-bottom: 1px solid var(--rs-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.rs-table th a {
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rs-space-1);
+}
+
+.rs-table th a:hover {
+    color: var(--rs-primary);
+}
+
+/* Rows */
+.rs-table td {
+    padding: var(--rs-space-4);
+    border-bottom: 1px solid var(--rs-border);
+    color: var(--rs-text-main);
+    vertical-align: middle;
+}
+
+.rs-table tbody tr {
+    transition: background-color var(--rs-transition-fast);
+}
+
+.rs-table tbody tr:hover {
+    background-color: var(--rs-bg-app);
+}
+
+.rs-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Density Modifiers */
+.rs-table--dense td {
+    padding: var(--rs-space-2) var(--rs-space-4);
+}
+
+/* Action Columns */
+.rs-table .rs-table__actions {
+    display: flex;
+    gap: var(--rs-space-2);
+    justify-content: flex-end;
+}

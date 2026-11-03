@@ -1,0 +1,93 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Loading States (v7.0)
+   ========================================================================== */
+
+/* Full Page Loader */
+.rs-loader-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--rs-bg-surface);
+    z-index: var(--rs-z-modal);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rs-space-4);
+}
+
+.rs-loader-overlay--transparent {
+    background-color: rgba(254, 251, 246, 0.8); /* Surface with opacity */
+    backdrop-filter: blur(2px);
+}
+
+/* Spinner */
+.rs-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--rs-border);
+    border-top-color: var(--rs-primary);
+    border-radius: 50%;
+    animation: rs-spin 1s linear infinite;
+}
+
+.rs-spinner--sm {
+    width: 24px;
+    height: 24px;
+    border-width: 2px;
+}
+
+.rs-spinner--lg {
+    width: 64px;
+    height: 64px;
+    border-width: 4px;
+}
+
+/* Skeleton Loading */
+.rs-skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--rs-bg-app) 25%,
+        var(--rs-border) 50%,
+        var(--rs-bg-app) 75%
+    );
+    background-size: 200% 100%;
+    animation: rs-skeleton-loading 1.5s infinite;
+    border-radius: var(--rs-radius-md);
+}
+
+.rs-skeleton--text {
+    height: var(--rs-font-size-body);
+    width: 100%;
+    margin-bottom: var(--rs-space-2);
+}
+
+.rs-skeleton--title {
+    height: var(--rs-font-size-h2);
+    width: 50%;
+    margin-bottom: var(--rs-space-4);
+}
+
+.rs-skeleton--avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.rs-skeleton--button {
+    height: 40px;
+    width: 120px;
+}
+
+@keyframes rs-skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Inline Loading */
+.rs-loading-text {
+    display: flex;
+    align-items: center;
+    gap: var(--rs-space-2);
+    color: var(--rs-text-muted);
+    font-size: var(--rs-font-size-sm);
+}

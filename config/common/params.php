@@ -25,6 +25,9 @@ return [
             'aliases' => Reference::to(Aliases::class),
             'urlGenerator' => Reference::to(UrlGeneratorInterface::class),
             'currentRoute' => Reference::to(CurrentRoute::class),
+            'navigationMenuProvider' => Reference::to(\App\Web\Shared\Navigation\NavigationMenuProvider::class),
+            'tenantContextProvider' => Reference::to(\App\Security\TenantContextProviderInterface::class),
+            'userRepo' => Reference::to(\App\Domain\User\UserRepositoryInterface::class),
         ],
     ],
 

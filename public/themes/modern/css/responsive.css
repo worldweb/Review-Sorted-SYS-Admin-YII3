@@ -1,0 +1,52 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Responsive Framework (v7.0)
+   ========================================================================== */
+
+/* Mobile First Breakpoints */
+:root {
+    --rs-breakpoint-sm: 576px;
+    --rs-breakpoint-md: 768px;
+    --rs-breakpoint-lg: 992px;
+    --rs-breakpoint-xl: 1200px;
+    --rs-breakpoint-xxl: 1400px;
+}
+
+/* Base Mobile */
+/* Default styles are mobile-first */
+
+/* Tablet (sm) */
+@media (min-width: 576px) {
+    .rs-d-sm-none { display: none !important; }
+    .rs-d-sm-block { display: block !important; }
+    .rs-d-sm-flex { display: flex !important; }
+}
+
+/* Tablet Landscape / Desktop (md) */
+@media (min-width: 768px) {
+    .rs-d-md-none { display: none !important; }
+    .rs-d-md-block { display: block !important; }
+    .rs-d-md-flex { display: flex !important; }
+
+    /* Scoped responsive helper mappings */
+    .\md\:rs-flex-row { flex-direction: row !important; }
+    .\md\:rs-grid-cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
+    .\md\:rs-p-5 { padding: var(--rs-space-5) !important; }
+    .\md\:rs-mb-0 { margin-bottom: 0 !important; }
+    .\md\:rs-mr-6 { margin-right: var(--rs-space-6) !important; }
+    .\md\:rs-w-auto { width: auto !important; }
+    .\md\:rs-align-items-center { align-items: center !important; }
+}
+
+/* Desktop (lg) */
+@media (min-width: 992px) {
+    .rs-d-lg-none { display: none !important; }
+    .rs-d-lg-block { display: block !important; }
+    .rs-d-lg-flex { display: flex !important; }
+}
+
+/* Large Desktop (xl) */
+@media (min-width: 1200px) {
+    .rs-d-xl-none { display: none !important; }
+    .rs-d-xl-block { display: block !important; }
+    .rs-d-xl-flex { display: flex !important; }
+}

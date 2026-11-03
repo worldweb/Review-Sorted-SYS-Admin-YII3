@@ -1,0 +1,14 @@
+/*
+ * Reusable Components CSS (Phase A)
+ */
+
+/* ── Table Toolbar ───────────────────────── */
+.mod-table-toolbar { display:flex; align-items:center; justify-content:space-between; padding:var(--rs-space-3) var(--rs-space-4); border-bottom:1px solid var(--rs-border); gap:var(--rs-space-3); flex-wrap:wrap; background:var(--rs-bg-app); }
+.mod-search-input { display:flex; align-items:center; gap:8px; background:var(--rs-bg-surface, #fff); border:1px solid var(--rs-border); border-radius:var(--rs-radius-sm); padding:6px 10px; width:240px; transition:border-color var(--rs-transition-fast); }
+.mod-search-input:focus-within { border-color:var(--rs-primary); }
+.mod-search-input input { border:none; background:transparent; outline:none; font-size:var(--rs-font-size-sm); color:var(--rs-text-main); width:100%; }
+
+@media (max-width:600px) {
+    .mod-table-toolbar { flex-direction:column; align-items:stretch; }
+    .mod-search-input { width:100%; }
+}

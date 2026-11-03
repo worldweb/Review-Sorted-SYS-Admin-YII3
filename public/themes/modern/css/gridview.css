@@ -1,0 +1,76 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise GridView Overrides (v7.0)
+   ========================================================================== */
+
+/* Overriding Yii's default GridView to consume .rs-table mechanics */
+
+.grid-view {
+    width: 100%;
+}
+
+.grid-view .summary {
+    font-size: var(--rs-font-size-xs);
+    color: var(--rs-text-muted);
+    margin-bottom: var(--rs-space-3);
+    text-align: right;
+}
+
+/* Table overrides */
+.grid-view table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--rs-font-size-sm);
+}
+
+.grid-view table th {
+    padding: var(--rs-space-3) var(--rs-space-4);
+    background-color: var(--rs-bg-surface);
+    color: var(--rs-text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: var(--rs-font-size-xs);
+    border-bottom: 1px solid var(--rs-border);
+}
+
+.grid-view table td {
+    padding: var(--rs-space-4);
+    border-bottom: 1px solid var(--rs-border);
+    color: var(--rs-text-main);
+    vertical-align: middle;
+}
+
+.grid-view table tbody tr:hover td {
+    background-color: var(--rs-bg-app);
+}
+
+/* Filter Row */
+.grid-view .filters td {
+    padding: var(--rs-space-2) var(--rs-space-4);
+    background-color: var(--rs-bg-surface);
+}
+
+.grid-view .filters input,
+.grid-view .filters select {
+    width: 100%;
+    padding: var(--rs-space-2) var(--rs-space-3);
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-sm);
+    font-size: var(--rs-font-size-sm);
+}
+
+.grid-view .filters input:focus,
+.grid-view .filters select:focus {
+    outline: none;
+    border-color: var(--rs-primary);
+    box-shadow: var(--rs-focus-ring);
+}
+
+/* Sort Links */
+.grid-view th a.asc::after {
+    content: " ↑";
+}
+
+.grid-view th a.desc::after {
+    content: " ↓";
+}

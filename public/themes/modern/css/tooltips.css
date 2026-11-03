@@ -1,0 +1,36 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Tooltips (v8.0)
+   ========================================================================== */
+
+[data-tooltip] {
+    position: relative;
+    cursor: help;
+}
+
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(4px) scale(0.95);
+    background-color: var(--rs-text-main);
+    color: var(--rs-white);
+    padding: var(--rs-space-1) var(--rs-space-2);
+    border-radius: var(--rs-radius-sm);
+    font-size: var(--rs-font-size-xs);
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    z-index: var(--rs-z-tooltip);
+    transition: all var(--rs-transition-fast);
+    pointer-events: none;
+    box-shadow: var(--rs-shadow-sm);
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-8px) scale(1);
+}

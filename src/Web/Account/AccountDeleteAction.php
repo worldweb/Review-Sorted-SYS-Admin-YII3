@@ -1,0 +1,52 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Web\Account;
+
+use App\Domain\Account\AccountRepositoryInterface;
+use App\Domain\User\UserRepositoryInterface;
+use App\Security\TenantContextProviderInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+/**
+ * AccountDeleteAction.
+ * Handles Workspace deletion matching Yii 2 AccountsController::actionDelete.
+ */
+final class AccountDeleteAction
+{
+    public function __construct(
+        private AccountRepositoryInterface $accountRepo,
+        private UserRepositoryInterface $userRepo,
+        private TenantContextProviderInterface $tenantContextProvider,
+        private ResponseFactoryInterface $responseFactory,
+    ) {
+    }
+
+    public function __invoke(ServerRequestInterface $request): ResponseInterface
+    {
+        $context = $this->tenantContextProvider->get();
+        if ($context->isGuest()) {
+            return $this->redirect('/sys-yii3/login');
+        }
+
+        $currentUser = $this->userRepo->findById($context->getUserId(), $context);
+        if ($currentUser === null || !$currentUser->isAdmin()) {
+            $response = $this->responseFactory->createResponse(403);
+            $response->getBody()->write('Forbidden: Only platform administrators can delete workspaces.');
+            return $response;
+        }
+
+        // Database read-only guard: prevent mutating write
+        return $this->redirect('/sys-yii3/accounts?msg=' . urlencode('Deletion prevented: Database connection is strictly in read-only mode during Phase 3.'));
+    }
+
+    private function redirect(string $url): ResponseInterface
+    {
+        return $this->responseFactory
+            ->createResponse(302)
+            ->withHeader('Location', $url);
+    }
+}

@@ -106,6 +106,27 @@ final class User
         return $this->role === self::ROLE_WORKER;
     }
 
+    public function getRoleLabel(): string
+    {
+        return match ($this->role) {
+            self::ROLE_SUPER => 'Administrator (root)',
+            self::ROLE_ADMIN => 'Administrator',
+            self::ROLE_ACCOUNT_ADMIN => 'Account Administrator',
+            self::ROLE_WORKER => 'User',
+            default => ucfirst((string) ($this->role ?? 'User')),
+        };
+    }
+
+    public function getStatusName(): string
+    {
+        return $this->status === self::STATUS_ACTIVE ? 'Active' : 'Disabled';
+    }
+
+    public function getCreatedAtStr(string $format = 'M j, Y'): string
+    {
+        return $this->createdAt !== null ? date($format, $this->createdAt) : '-';
+    }
+
     public function getCreatedAt(): ?int
     {
         return $this->createdAt;

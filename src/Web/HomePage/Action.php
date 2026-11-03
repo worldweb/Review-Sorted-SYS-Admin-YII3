@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Web\HomePage;
 
+use App\Domain\User\User;
 use App\Environment;
+use App\Security\TenantContextInterface;
 use Composer\InstalledVersions;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
@@ -18,7 +21,7 @@ final readonly class Action
         private ConnectionInterface $db,
     ) {}
 
-    public function __invoke(): ResponseInterface
+    public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
         $dbConnected = false;
         $dbServerVersion = 'Unknown';
@@ -48,6 +51,11 @@ final readonly class Action
             . (InstalledVersions::getPrettyVersion('yiisoft/yii-runner-http') ?? '3.2.x')
             . ')';
 
+        /** @var User|null $currentUser */
+        $currentUser = $request->getAttribute('currentUser');
+        /** @var TenantContextInterface|null $tenantContext */
+        $tenantContext = $request->getAttribute('tenantContext');
+
         return $this->viewRenderer->render(__DIR__ . '/template', [
             'appName' => 'Reviews Sorted',
             'frameworkVersion' => $frameworkVersion,
@@ -60,6 +68,8 @@ final readonly class Action
             'dbServerVersion' => $dbServerVersion,
             'dbDatabaseName' => $dbDatabaseName,
             'dbError' => $dbError,
+            'currentUser' => $currentUser,
+            'tenantContext' => $tenantContext,
         ]);
     }
 }

@@ -1,0 +1,239 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Forms (v7.0)
+   ========================================================================== */
+
+.rs-form-group {
+    margin-bottom: var(--rs-space-4);
+}
+
+.rs-label {
+    display: block;
+    font-size: var(--rs-font-size-sm);
+    font-weight: 600;
+    color: var(--rs-text-main);
+    margin-bottom: var(--rs-space-2);
+}
+
+.rs-input,
+.rs-select,
+.rs-textarea {
+    width: 100%;
+    padding: var(--rs-space-3) var(--rs-space-4);
+    font-family: var(--rs-font-family);
+    font-size: var(--rs-font-size-sm);
+    color: var(--rs-text-main);
+    background-color: var(--rs-white);
+    border: 1px solid var(--rs-border);
+    border-radius: var(--rs-radius-md);
+    transition: all var(--rs-transition-fast);
+}
+
+.rs-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.rs-input:focus,
+.rs-select:focus,
+.rs-textarea:focus {
+    outline: none;
+    border-color: var(--rs-primary);
+    box-shadow: var(--rs-focus-ring);
+}
+
+.rs-input:disabled,
+.rs-select:disabled,
+.rs-textarea:disabled {
+    background-color: var(--rs-bg-app);
+    color: var(--rs-text-muted);
+    cursor: not-allowed;
+}
+
+.rs-input::placeholder {
+    color: var(--rs-text-muted);
+}
+
+/* Checkbox & Radio */
+.rs-checkbox-wrap,
+.rs-radio-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--rs-space-2);
+    cursor: pointer;
+}
+
+.rs-checkbox,
+.rs-radio {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--rs-primary);
+    cursor: pointer;
+}
+
+/* Toggle/Switch */
+.rs-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.rs-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.rs-switch__slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--rs-border);
+    transition: var(--rs-transition-fast);
+    border-radius: var(--rs-radius-pill);
+}
+
+.rs-switch__slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: var(--rs-transition-fast);
+    border-radius: 50%;
+}
+
+.rs-switch input:checked + .rs-switch__slider {
+    background-color: var(--rs-primary);
+}
+
+.rs-switch input:checked + .rs-switch__slider:before {
+    transform: translateX(20px);
+}
+
+.rs-switch input:focus + .rs-switch__slider {
+    box-shadow: var(--rs-focus-ring);
+}
+
+/* Validation States */
+.rs-input--error,
+.rs-select--error,
+.rs-textarea--error {
+    border-color: var(--rs-danger);
+}
+
+.rs-input--error:focus {
+    box-shadow: var(--rs-focus-ring-danger);
+}
+
+.rs-help-block {
+    display: block;
+    font-size: var(--rs-font-size-xs);
+    color: var(--rs-text-muted);
+    margin-top: var(--rs-space-1);
+}
+
+.has-error .rs-help-block {
+    color: var(--rs-danger);
+    font-weight: 500;
+}
+
+.has-error .rs-help-block:not(:empty)::before {
+    content: "⚠ ";
+}
+
+/* Yii2 ActiveForm Error State Integration */
+.has-error .rs-input,
+.has-error .rs-select,
+.has-error .rs-textarea {
+    border-color: var(--rs-danger);
+}
+
+.has-error .rs-input:focus,
+.has-error .rs-select:focus,
+.has-error .rs-textarea:focus {
+    box-shadow: var(--rs-focus-ring-danger);
+}
+
+/* ==========================================================================
+   Target Stores Select2 Scoped Widget Styles (.rs-select2-target-stores)
+   ========================================================================== */
+
+.select2-container--default .select2-selection--multiple {
+    background-color: var(--rs-white, #ffffff);
+    border: 1px solid var(--rs-border, #cbd5e1);
+    border-radius: var(--rs-radius-md, 8px);
+    min-height: 42px;
+    padding: 3px 8px;
+    font-family: var(--rs-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    font-size: var(--rs-font-size-sm, 14px);
+    transition: all var(--rs-transition-fast, 0.15s ease);
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: var(--rs-primary, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    outline: none;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    color: #1e40af;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 3px 8px 3px 22px;
+    margin-top: 4px;
+    margin-right: 6px;
+    position: relative;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: #3b82f6;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    position: absolute;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: #1d4ed8;
+    background: transparent;
+}
+
+.select2-container--default .select2-search--inline .select2-search__field {
+    font-family: var(--rs-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    font-size: 14px;
+    margin-top: 5px;
+    color: var(--rs-text-main, #0f172a);
+}
+
+.select2-dropdown {
+    border: 1px solid var(--rs-border, #cbd5e1);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+}
+
+.select2-container--default .select2-results__option[aria-selected=true] {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    font-weight: 600;
+}
+
+.has-error .select2-container--default .select2-selection--multiple {
+    border-color: var(--rs-danger, #ef4444);
+}
+

@@ -1,0 +1,139 @@
+/* ==========================================================================
+   Reviews Sorted - Enterprise Utility Classes (v7.0)
+   ========================================================================== */
+
+/* Spacing - Margin */
+.rs-m-0 { margin: 0; }
+.rs-mt-0 { margin-top: 0; }
+.rs-mb-0 { margin-bottom: 0; }
+.rs-mt-1 { margin-top: var(--rs-space-1); }
+.rs-mb-1 { margin-bottom: var(--rs-space-1); }
+.rs-mb-2 { margin-bottom: var(--rs-space-2); }
+.rs-mb-3 { margin-bottom: var(--rs-space-3); }
+.rs-mb-4 { margin-bottom: var(--rs-space-4); }
+.rs-mb-5 { margin-bottom: var(--rs-space-5); }
+.rs-mb-6 { margin-bottom: var(--rs-space-6); }
+.rs-ml-2 { margin-left: var(--rs-space-2); }
+.rs-mr-2 { margin-right: var(--rs-space-2); }
+.rs-my-4 { margin-top: var(--rs-space-4); margin-bottom: var(--rs-space-4); }
+.rs-ml-auto { margin-left: auto; }
+.rs-mr-auto { margin-right: auto; }
+
+/* Spacing - Padding */
+.rs-p-0 { padding: 0; }
+.rs-p-2 { padding: var(--rs-space-2); }
+.rs-p-3 { padding: var(--rs-space-3); }
+.rs-p-4 { padding: var(--rs-space-4); }
+.rs-p-5 { padding: var(--rs-space-5); }
+.rs-p-6 { padding: var(--rs-space-6); }
+
+/* Flexbox */
+.rs-d-flex { display: flex; }
+.rs-flex-column { flex-direction: column; }
+.rs-align-items-center { align-items: center; }
+.rs-align-items-start { align-items: flex-start; }
+.rs-align-items-end { align-items: flex-end; }
+.rs-justify-content-center { justify-content: center; }
+.rs-justify-content-between { justify-content: space-between; }
+.rs-justify-content-end { justify-content: flex-end; }
+.rs-flex-wrap { flex-wrap: wrap; }
+.rs-flex-grow-1 { flex-grow: 1; }
+
+/* Grid */
+.rs-d-grid { display: grid; }
+.rs-gap-1 { gap: var(--rs-space-1); }
+.rs-gap-2 { gap: var(--rs-space-2); }
+.rs-gap-3 { gap: var(--rs-space-3); }
+.rs-gap-4 { gap: var(--rs-space-4); }
+.rs-gap-5 { gap: var(--rs-space-5); }
+.rs-gap-6 { gap: var(--rs-space-6); }
+
+/* Row & Column Layout */
+.rs-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--rs-space-5);
+}
+.rs-col {
+    flex: 1 1 0%;
+    min-width: 0;
+}
+@media (max-width: 767.98px) {
+    .rs-row {
+        flex-direction: column;
+    }
+    .rs-col {
+        flex: 1 1 100%;
+        max-width: 100% !important;
+        border-left: none !important;
+        padding-left: 0 !important;
+    }
+}
+
+/* Dividers */
+.rs-divider {
+    height: 1px;
+    background-color: var(--rs-border);
+    width: 100%;
+    border: none;
+    margin: var(--rs-space-4) 0;
+}
+
+/* Typography Helpers */
+.rs-font-medium { font-weight: 500; }
+.rs-font-semibold { font-weight: 600; }
+.rs-font-bold { font-weight: 700; }
+.rs-page-title {
+    font-size: var(--rs-font-size-h2);
+    font-weight: var(--rs-font-weight-h2);
+    color: var(--rs-text-main);
+    margin-bottom: var(--rs-space-2);
+}
+
+/* Table Footer Container */
+.rs-table-footer,
+.mod-table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--rs-space-4);
+    border-top: 1px solid var(--rs-border);
+    flex-wrap: wrap;
+    gap: var(--rs-space-3);
+}
+
+/* Badges */
+.rs-badge--muted {
+    background-color: var(--rs-bg-app);
+    color: var(--rs-text-muted);
+}
+
+/* Display */
+.rs-d-none { display: none; }
+.rs-d-block { display: block; }
+.rs-d-inline-block { display: inline-block; }
+
+/* Text Alignment */
+.rs-text-center { text-align: center; }
+.rs-text-right { text-align: right; }
+.rs-text-left { text-align: left; }
+
+/* Width/Height */
+.rs-w-100 { width: 100%; }
+.rs-h-100 { height: 100%; }
+
+/* Borders & Shadows */
+.rs-shadow-sm { box-shadow: var(--rs-shadow-sm); }
+.rs-shadow-md { box-shadow: var(--rs-shadow-md); }
+.rs-rounded-sm { border-radius: var(--rs-radius-sm); }
+.rs-rounded-md { border-radius: var(--rs-radius-md); }
+.rs-rounded-lg { border-radius: var(--rs-radius-lg); }
+.rs-rounded-pill { border-radius: var(--rs-radius-pill); }
+
+/* Generic Grid Layout */
+.rs-grid-cols-12 { grid-template-columns: repeat(12, 1fr); }
+.rs-col-8 { grid-column: span 8; }
+.rs-col-4 { grid-column: span 4; }
+@media (max-width: 991.98px) {
+    .rs-col-8, .rs-col-4 { grid-column: span 12; }
+}
