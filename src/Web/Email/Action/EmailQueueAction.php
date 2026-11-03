@@ -78,7 +78,8 @@ final class EmailQueueAction
         }
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/queue', [
+            ->withViewPath('@src/Web/Email/views')
+            ->render('queue', [
                 'queueItems' => $queueItems,
                 'totalItems' => $totalItems,
                 'page' => $page,

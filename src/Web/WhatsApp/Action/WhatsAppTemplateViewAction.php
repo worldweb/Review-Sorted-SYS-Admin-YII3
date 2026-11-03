@@ -54,7 +54,8 @@ final class WhatsAppTemplateViewAction
         }
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/template/view', [
+            ->withViewPath('@src/Web/WhatsApp/views')
+            ->render('template/view', [
                 'template' => $template,
                 'currentUser' => $currentUser,
                 'context' => $context,

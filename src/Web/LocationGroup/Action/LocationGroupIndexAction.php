@@ -82,7 +82,8 @@ final class LocationGroupIndexAction
         }
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/index', [
+            ->withViewPath('@src/Web/LocationGroup/views')
+            ->render('index', [
                 'groups' => $hydratedGroups,
                 'total' => $total,
                 'page' => $page,

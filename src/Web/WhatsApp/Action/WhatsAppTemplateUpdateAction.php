@@ -108,7 +108,8 @@ final class WhatsAppTemplateUpdateAction
         }
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/template/update', [
+            ->withViewPath('@src/Web/WhatsApp/views')
+            ->render('template/update', [
                 'template' => $template,
                 'name' => $name,
                 'text' => $text,

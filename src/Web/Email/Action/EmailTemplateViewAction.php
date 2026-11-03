@@ -55,7 +55,8 @@ final class EmailTemplateViewAction
         }
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/template/view', [
+            ->withViewPath('@src/Web/Email/views')
+            ->render('template/view', [
                 'template' => $template,
                 'currentUser' => $currentUser,
                 'context' => $context,

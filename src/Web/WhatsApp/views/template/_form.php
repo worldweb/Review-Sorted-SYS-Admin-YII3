@@ -43,7 +43,7 @@ $isProtected = $template?->isProtected() ?? false;
                             <select name="account_id" id="account_id" class="rs-input">
                                 <?php foreach ($accounts as $acc): ?>
                                     <option value="<?= $acc->getId() ?>" <?= ($targetAccountId === $acc->getId()) ? 'selected' : '' ?>>
-                                        <?= Html::encode($acc->getName()) ?> (#<?= $acc->getId() ?>)
+                                        <?= Html::encode($acc->getBusinessName() ?? "Workspace #{$acc->getId()}") ?> (#<?= $acc->getId() ?>)
                                     </option>
                                 <?php endforeach; ?>
                             </select>

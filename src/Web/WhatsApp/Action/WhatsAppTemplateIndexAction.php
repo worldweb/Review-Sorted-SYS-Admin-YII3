@@ -66,7 +66,8 @@ final class WhatsAppTemplateIndexAction
         }
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/template/index', [
+            ->withViewPath('@src/Web/WhatsApp/views')
+            ->render('template/index', [
                 'templates' => $templates,
                 'search' => $search,
                 'accountId' => $accountId,

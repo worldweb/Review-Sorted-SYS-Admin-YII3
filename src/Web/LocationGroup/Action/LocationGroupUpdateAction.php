@@ -158,7 +158,8 @@ final class LocationGroupUpdateAction
         }
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/update', [
+            ->withViewPath('@src/Web/LocationGroup/views')
+            ->render('update', [
                 'model' => $group,
                 'formData' => $formData,
                 'accountOptions' => $accountOptions,

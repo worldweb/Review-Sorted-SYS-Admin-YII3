@@ -108,7 +108,8 @@ final class EmailTemplateUpdateAction
         }
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/template/update', [
+            ->withViewPath('@src/Web/Email/views')
+            ->render('template/update', [
                 'template' => $template,
                 'name' => $name,
                 'text' => $text,

@@ -161,7 +161,8 @@ final class LocationGroupCreateAction
         }
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/create', [
+            ->withViewPath('@src/Web/LocationGroup/views')
+            ->render('create', [
                 'formData' => $formData,
                 'accountOptions' => $accountOptions,
                 'destinationsByPlatform' => $destinationsByPlatform,

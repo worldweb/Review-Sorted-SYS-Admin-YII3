@@ -204,11 +204,12 @@ final class EmailSendAction
 
         $accounts = [];
         if ($context->isUnrestricted()) {
-            $accounts = $this->accountRepo->findAll($context);
+            $accounts = $this->accountRepo->findAllActive(200, 0, $context);
         }
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/send', [
+            ->withViewPath('@src/Web/Email/views')
+            ->render('send', [
                 'templates' => $templates,
                 'toContacts' => $toContacts,
                 'bccContacts' => $bccContacts,

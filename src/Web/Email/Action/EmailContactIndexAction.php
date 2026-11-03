@@ -69,7 +69,8 @@ final class EmailContactIndexAction
         $total = $this->emailRepo->countContactsByAccount($context, $accountId);
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/importer', [
+            ->withViewPath('@src/Web/Email/views')
+            ->render('importer', [
                 'contacts' => $contacts,
                 'total' => $total,
                 'page' => $page,

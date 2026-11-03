@@ -67,7 +67,8 @@ final class LocationGroupViewAction
         $flash = new Flash($this->session);
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/view', [
+            ->withViewPath('@src/Web/LocationGroup/views')
+            ->render('view', [
                 'model' => $group,
                 'currentUser' => $currentUser,
                 'context' => $context,

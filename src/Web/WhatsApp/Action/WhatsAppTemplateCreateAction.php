@@ -101,11 +101,12 @@ final class WhatsAppTemplateCreateAction
 
         $accounts = [];
         if ($context->isUnrestricted()) {
-            $accounts = $this->accountRepo->findAll($context);
+            $accounts = $this->accountRepo->findAllActive(200, 0, $context);
         }
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/template/create', [
+            ->withViewPath('@src/Web/WhatsApp/views')
+            ->render('template/create', [
                 'name' => $name,
                 'text' => $text,
                 'status' => $status,

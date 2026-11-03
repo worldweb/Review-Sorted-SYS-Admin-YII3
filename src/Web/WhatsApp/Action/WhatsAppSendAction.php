@@ -159,11 +159,12 @@ final class WhatsAppSendAction
 
         $accounts = [];
         if ($context->isUnrestricted()) {
-            $accounts = $this->accountRepo->findAll($context);
+            $accounts = $this->accountRepo->findAllActive(200, 0, $context);
         }
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/send', [
+            ->withViewPath('@src/Web/WhatsApp/views')
+            ->render('send', [
                 'templates' => $templates,
                 'contacts' => $contacts,
                 'formData' => $formData,

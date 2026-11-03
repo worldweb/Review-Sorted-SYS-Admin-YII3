@@ -68,7 +68,8 @@ final class WhatsAppContactIndexAction
         $total = $this->whatsappRepo->countContactsByAccount($context, $accountId);
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/importer', [
+            ->withViewPath('@src/Web/WhatsApp/views')
+            ->render('importer', [
                 'contacts' => $contacts,
                 'total' => $total,
                 'page' => $page,

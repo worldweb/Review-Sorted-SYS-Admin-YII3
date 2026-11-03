@@ -78,7 +78,8 @@ final class WhatsAppHistoryAction
         }
 
         return $this->viewRenderer
-            ->render(__DIR__ . '/../views/history', [
+            ->withViewPath('@src/Web/WhatsApp/views')
+            ->render('history', [
                 'historyItems' => $historyItems,
                 'totalItems' => $totalItems,
                 'page' => $page,
