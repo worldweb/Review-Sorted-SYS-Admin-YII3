@@ -31,7 +31,7 @@ final class WhatsAppTemplateViewAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -41,9 +41,9 @@ final class WhatsAppTemplateViewAction
             return $response;
         }
 
-        $id = (int) ($request->getQueryParams()['id'] ?? 0);
+        $id = (int) ($request->getQueryParams()['id'] ?? $request->getAttribute('id') ?? 0);
         if ($id <= 0) {
-            return $this->redirect('/sys-yii3/whatsapp/templates');
+            return $this->redirect(\App\Environment::url('/whatsapp/templates'));
         }
 
         $template = $this->whatsappRepo->findTemplateById($id, $context);

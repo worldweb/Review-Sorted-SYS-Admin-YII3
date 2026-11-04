@@ -24,7 +24,7 @@ use Yiisoft\Html\Html;
 $this->setTitle($title);
 
 $actions = [
-    '<a href="/sys-yii3/users" class="rs-btn rs-btn--ghost">Back to Users</a>',
+    '<a href="' . \App\Environment::url('/users') . '" class="rs-btn rs-btn--ghost">Back to Users</a>',
 ];
 $description = 'Users / ' . $title;
 include __DIR__ . '/../../Shared/Components/_page_header.php';

@@ -26,7 +26,7 @@ final class SocialPostRetryAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
@@ -35,7 +35,7 @@ final class SocialPostRetryAction
         $this->postRepo->retryPost($id, $context);
         $flash->set('success', 'Post destinations re-queued for delivery retry.');
 
-        return $this->redirect('/sys-yii3/social-post/view?id=' . $id);
+        return $this->redirect(\App\Environment::url('/social-post/view?id=') . $id);
     }
 
     private function redirect(string $url): ResponseInterface

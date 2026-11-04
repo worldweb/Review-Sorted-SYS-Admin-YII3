@@ -26,7 +26,7 @@ final class SocialPostDeleteAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
@@ -35,7 +35,7 @@ final class SocialPostDeleteAction
         $this->postRepo->deletePost($id, $context);
         $flash->set('info', 'Post deleted.');
 
-        return $this->redirect('/sys-yii3/social-post');
+        return $this->redirect(\App\Environment::url('/social-post'));
     }
 
     private function redirect(string $url): ResponseInterface

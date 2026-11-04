@@ -27,7 +27,7 @@ $this->setTitle('Create Location Group');
 $title = 'Create Location Group';
 $description = 'Set up a new operational destination group for your account.';
 $actions = [
-    '<a href="/sys-yii3/location-group/index" class="rs-btn rs-btn--outline"><i class="fa-solid fa-arrow-left rs-mr-1"></i> Back to Groups</a>'
+    '<a href="' . \App\Environment::url('/location-group/index') . '" class="rs-btn rs-btn--outline"><i class="fa-solid fa-arrow-left rs-mr-1"></i> Back to Groups</a>'
 ];
 include __DIR__ . '/../../Shared/Components/_page_header.php';
 ?>

@@ -30,11 +30,11 @@ $currentPage = $filter->page;
 // Reusable Page Header Action Buttons
 $actionButtons = [];
 if ($canAddAdmin) {
-    $actionButtons[] = '<a href="/sys-yii3/user/create" class="rs-btn rs-btn--ghost rs-d-flex rs-align-items-center rs-gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg> Add Admin</a>';
-    $actionButtons[] = '<a href="/sys-yii3/user/create-acc-admin" class="rs-btn rs-btn--secondary rs-d-flex rs-align-items-center rs-gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg> Add Account Admin</a>';
+    $actionButtons[] = '<a href="' . \App\Environment::url('/user/create') . '" class="rs-btn rs-btn--ghost rs-d-flex rs-align-items-center rs-gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg> Add Admin</a>';
+    $actionButtons[] = '<a href="' . \App\Environment::url('/user/create-acc-admin') . '" class="rs-btn rs-btn--secondary rs-d-flex rs-align-items-center rs-gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg> Add Account Admin</a>';
 }
 if ($canAddWorker) {
-    $actionButtons[] = '<a href="/sys-yii3/user/create-worker" class="rs-btn rs-btn--primary rs-d-flex rs-align-items-center rs-gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg> Add User</a>';
+    $actionButtons[] = '<a href="' . \App\Environment::url('/user/create-worker') . '" class="rs-btn rs-btn--primary rs-d-flex rs-align-items-center rs-gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg> Add User</a>';
 }
 
 $title = 'Users';
@@ -45,7 +45,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
 
 <!-- Data Grid -->
 <div class="rs-card">
-    <form method="get" action="/sys-yii3/users" id="users-filter-form">
+    <form method="get" action="<?= \App\Environment::url('/users') ?>" id="users-filter-form">
     <div class="rs-table-wrapper" style="overflow-x: auto;">
         <table class="rs-table rs-table--hover" style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead>
@@ -113,7 +113,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                                 <?= $filter->getOffset() + $idx + 1 ?>
                             </td>
                             <td>
-                                <a href="/sys-yii3/user/view?id=<?= $u->getId() ?>" style="color: var(--rs-primary, #234137); font-weight: 600; text-decoration: none;">
+                                <a href="<?= \App\Environment::url('/user/view?id=' . $u->getId()) ?>" style="color: var(--rs-primary, #234137); font-weight: 600; text-decoration: none;">
                                     <?= Html::encode($u->getName()) ?>
                                 </a>
                             </td>
@@ -139,8 +139,8 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                                 <?= Html::encode($u->getCreatedAtStr()) ?>
                             </td>
                             <td style="text-align: right; white-space: nowrap;">
-                                <a href="/sys-yii3/user/view?id=<?= $u->getId() ?>" class="rs-btn rs-btn--sm rs-btn--ghost" style="text-decoration: none; padding: 4px 8px; font-size: 12px;">View</a>
-                                <a href="/sys-yii3/user/update?id=<?= $u->getId() ?>" class="rs-btn rs-btn--sm rs-btn--secondary" style="text-decoration: none; padding: 4px 8px; font-size: 12px;">Edit</a>
+                                <a href="<?= \App\Environment::url('/user/view?id=' . $u->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--ghost" style="text-decoration: none; padding: 4px 8px; font-size: 12px;">View</a>
+                                <a href="<?= \App\Environment::url('/user/update?id=' . $u->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--secondary" style="text-decoration: none; padding: 4px 8px; font-size: 12px;">Edit</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>

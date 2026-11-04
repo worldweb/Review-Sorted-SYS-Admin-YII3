@@ -186,10 +186,9 @@ final class RolePermissionService
                 'message' => "Role permissions for '{$targetRoleName}' updated successfully ({$changesCount} rules synchronized).",
             ];
         } catch (\Throwable $e) {
-            // Graceful handling if DB user is read-only (e.g., rs_readonly in test environments)
             return [
                 'success' => false,
-                'message' => 'Notice: Permissions update submitted. (If database user is in read-only mode, updates will persist upon write access: ' . $e->getMessage() . ')',
+                'message' => 'Failed to update permissions: ' . $e->getMessage(),
             ];
         }
     }

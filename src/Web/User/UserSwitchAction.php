@@ -32,7 +32,7 @@ final class UserSwitchAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $queryParams = $request->getQueryParams();
@@ -65,7 +65,7 @@ final class UserSwitchAction
         $this->session->regenerateId();
         $this->session->set(AuthenticationMiddleware::SESSION_AUTH_KEY, $targetUser->getId());
 
-        return $this->redirect('/sys-yii3/');
+        return $this->redirect(\App\Environment::url('/'));
     }
 
     private function redirect(string $url): ResponseInterface

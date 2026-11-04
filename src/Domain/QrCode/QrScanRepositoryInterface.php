@@ -57,4 +57,9 @@ interface QrScanRepositoryInterface
         int $pageSize = 20,
         ?TenantContextInterface $context = null
     ): array;
+
+    /**
+     * Records a physical QR code scan event with client IP and timestamp.
+     */
+    public function recordScan(int $qrCodeId, string $userIp): bool;
 }

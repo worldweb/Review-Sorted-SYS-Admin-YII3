@@ -25,15 +25,17 @@ final class SocialConnectionRepository implements SocialConnectionRepositoryInte
         }
 
         $query = (new Query($this->db))
-            ->from('{{%service_config}}')
-            ->where(['id' => $id]);
+            ->select(['sc.*', 'account_business_name' => 'a.business_name'])
+            ->from(['sc' => '{{%service_config}}'])
+            ->leftJoin(['a' => '{{%account}}'], 'a.id = sc.account_id')
+            ->where(['sc.id' => $id]);
 
         if ($ctx !== null && !$ctx->isUnrestricted()) {
             $accessible = $ctx->getAccessibleAccountIds();
             if (empty($accessible)) {
                 return null;
             }
-            $query->andWhere(['in', 'account_id', $accessible]);
+            $query->andWhere(['in', 'sc.account_id', $accessible]);
         }
 
         /** @var array<string, mixed>|false $row */
@@ -52,9 +54,11 @@ final class SocialConnectionRepository implements SocialConnectionRepositoryInte
     {
         $ctx = $context ?? $this->tenantContextProvider?->get();
         $query = (new Query($this->db))
-            ->from('{{%service_config}}')
-            ->where(['service_id' => ServiceConfig::SERVICE_FACEBOOK, 'linked' => ServiceConfig::LINKED_YES])
-            ->orderBy(['id' => SORT_DESC])
+            ->select(['sc.*', 'account_business_name' => 'a.business_name'])
+            ->from(['sc' => '{{%service_config}}'])
+            ->leftJoin(['a' => '{{%account}}'], 'a.id = sc.account_id')
+            ->where(['sc.service_id' => ServiceConfig::SERVICE_FACEBOOK, 'sc.linked' => ServiceConfig::LINKED_YES])
+            ->orderBy(['sc.id' => SORT_DESC])
             ->limit($limit)
             ->offset($offset);
 
@@ -63,7 +67,7 @@ final class SocialConnectionRepository implements SocialConnectionRepositoryInte
             if (empty($accessible)) {
                 return [];
             }
-            $query->andWhere(['in', 'account_id', $accessible]);
+            $query->andWhere(['in', 'sc.account_id', $accessible]);
         }
 
         $rows = $query->all();
@@ -99,9 +103,11 @@ final class SocialConnectionRepository implements SocialConnectionRepositoryInte
     {
         $ctx = $context ?? $this->tenantContextProvider?->get();
         $query = (new Query($this->db))
-            ->from('{{%service_config}}')
-            ->where(['service_id' => ServiceConfig::SERVICE_GOOGLE, 'linked' => ServiceConfig::LINKED_YES])
-            ->orderBy(['id' => SORT_DESC])
+            ->select(['sc.*', 'account_business_name' => 'a.business_name'])
+            ->from(['sc' => '{{%service_config}}'])
+            ->leftJoin(['a' => '{{%account}}'], 'a.id = sc.account_id')
+            ->where(['sc.service_id' => ServiceConfig::SERVICE_GOOGLE, 'sc.linked' => ServiceConfig::LINKED_YES])
+            ->orderBy(['sc.id' => SORT_DESC])
             ->limit($limit)
             ->offset($offset);
 
@@ -110,7 +116,7 @@ final class SocialConnectionRepository implements SocialConnectionRepositoryInte
             if (empty($accessible)) {
                 return [];
             }
-            $query->andWhere(['in', 'account_id', $accessible]);
+            $query->andWhere(['in', 'sc.account_id', $accessible]);
         }
 
         $rows = $query->all();
@@ -126,15 +132,15 @@ final class SocialConnectionRepository implements SocialConnectionRepositoryInte
     {
         $ctx = $context ?? $this->tenantContextProvider?->get();
         $query = (new Query($this->db))
-            ->from('{{%service_config}}')
-            ->where(['service_id' => ServiceConfig::SERVICE_GOOGLE, 'linked' => ServiceConfig::LINKED_YES]);
+            ->from(['sc' => '{{%service_config}}'])
+            ->where(['sc.service_id' => ServiceConfig::SERVICE_GOOGLE, 'sc.linked' => ServiceConfig::LINKED_YES]);
 
         if ($ctx !== null && !$ctx->isUnrestricted()) {
             $accessible = $ctx->getAccessibleAccountIds();
             if (empty($accessible)) {
                 return 0;
             }
-            $query->andWhere(['in', 'account_id', $accessible]);
+            $query->andWhere(['in', 'sc.account_id', $accessible]);
         }
 
         return (int) $query->count();

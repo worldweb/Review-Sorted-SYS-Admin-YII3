@@ -103,7 +103,7 @@ $isProtected = $template?->isProtected() ?? false;
                     <button type="submit" class="rs-btn rs-btn--primary">
                         <i class="fa-solid fa-check rs-mr-1"></i> Save Template
                     </button>
-                    <a href="/sys-yii3/whatsapp/templates" class="rs-btn rs-btn--ghost">Cancel</a>
+                    <a href="<?= \App\Environment::url('/whatsapp/templates') ?>" class="rs-btn rs-btn--ghost">Cancel</a>
                 </div>
             </div>
         </div>

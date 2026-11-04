@@ -37,13 +37,18 @@ if ($user === null && isset($tenantContextProvider, $userRepo)) {
 $menuItems = [];
 $switchableAccounts = [];
 if ($user !== null && isset($navigationMenuProvider)) {
-    $currentPath = $_SERVER['REQUEST_URI'] ?? '/sys-yii3/';
+    $currentPath = $_SERVER['REQUEST_URI'] ?? ($base ?: '/');
     if (str_contains($currentPath, '?')) {
         $currentPath = explode('?', $currentPath, 2)[0];
     }
     $menuItems = $navigationMenuProvider->getMenuItems($user, $currentPath);
     $switchableAccounts = $navigationMenuProvider->getSwitchableAccounts($user->getId());
 }
+
+// 3. Resolve Environment URLs
+$baseUrl = isset($aliases) ? (string) $aliases->get('@baseUrl') : '/';
+$base = ($baseUrl !== '' && $baseUrl !== '/') ? rtrim($baseUrl, '/') : '';
+$themeUrl = $base . '/themes/modern';
 
 $pageTitle = $this->getTitle();
 $fullTitle = !empty($pageTitle)
@@ -57,7 +62,7 @@ $this->beginPage();
 <head>
     <meta charset="<?= Html::encode($applicationParams->charset) ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="/sys-yii3/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="<?= $base ?>/favicon.ico" type="image/x-icon">
     <?php if (!empty($csrf)): ?>
         <meta name="csrf-token" content="<?= Html::encode($csrf) ?>">
     <?php endif; ?>
@@ -69,37 +74,42 @@ $this->beginPage();
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700;900&display=swap" rel="stylesheet">
 
     <!-- Modern Theme 31 Modular CSS Stylesheets in Exact Dependency Order -->
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/variables.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/base.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/typography.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/layout.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/header.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/sidebar.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/footer.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/navigation.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/breadcrumbs.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/buttons.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/forms.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/activeform.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/tables.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/gridview.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/cards.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/dropdowns.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/modals.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/alerts.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/badges.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/pagination.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/tabs.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/tooltips.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/loading.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/animations.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/empty-states.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/dashboard.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/components.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/utilities.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/responsive.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/legacy-overrides.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/theme.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/variables.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/base.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/typography.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/layout.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/header.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/sidebar.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/footer.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/navigation.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/breadcrumbs.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/buttons.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/forms.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/activeform.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/tables.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/gridview.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/cards.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/dropdowns.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/modals.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/alerts.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/badges.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/pagination.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/tabs.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/tooltips.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/loading.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/animations.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/empty-states.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/dashboard.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/components.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/utilities.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/responsive.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/legacy-overrides.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/theme.css">
+
+    <!-- Vendor Dependencies: jQuery & Select2 (Head-loaded for synchronous view script availability) -->
+    <script src="<?= $themeUrl ?>/js/vendor/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
 
     <?php $this->head() ?>
 </head>
@@ -123,7 +133,7 @@ $this->beginPage();
                     <line x1="3" y1="18" x2="21" y2="18"></line>
                 </svg>
             </button>
-            <a href="/sys-yii3/reviews" class="rs-header__brand">
+            <a href="<?= $base ?>/reviews" class="rs-header__brand">
                 <?= Html::encode($applicationParams->name) ?>
             </a>
         </div>
@@ -145,9 +155,9 @@ $this->beginPage();
         <div class="rs-header__actions">
             <!-- Notifications Dropdown -->
             <div class="rs-dropdown" id="rs-notifications-dropdown"
-                 data-url-latest="/sys-yii3/notification/latest"
-                 data-url-mark-read="/sys-yii3/notification/mark-read"
-                 data-url-mark-all-read="/sys-yii3/notification/mark-all-read">
+                 data-url-latest="<?= $base ?>/notification/latest"
+                 data-url-mark-read="<?= $base ?>/notification/mark-read"
+                 data-url-mark-all-read="<?= $base ?>/notification/mark-all-read">
                 <button type="button" class="rs-header__action-btn" id="rs-notification-bell-btn" aria-label="Notifications" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="position: relative;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -176,9 +186,9 @@ $this->beginPage();
                     </svg>
                 </div>
                 <div class="rs-dropdown__menu" role="menu">
-                    <a href="/sys-yii3/user/update?id=<?= $user->getId() ?>" class="rs-dropdown__item" role="menuitem">My Profile</a>
+                    <a href="<?= \App\Environment::url('/user/update?id=' . $user->getId()) ?>" class="rs-dropdown__item" role="menuitem">My Profile</a>
                     <?php if ($user->isAdmin()): ?>
-                        <a href="/sys-yii3/global-settings/index" class="rs-dropdown__item" role="menuitem">Global Settings</a>
+                        <a href="<?= $base ?>/global-settings/index" class="rs-dropdown__item" role="menuitem">Global Settings</a>
                     <?php endif; ?>
                     <div class="rs-dropdown__divider"></div>
                     <a href="#" class="rs-dropdown__item rs-text-danger" role="menuitem" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
@@ -186,7 +196,7 @@ $this->beginPage();
             </div>
 
             <!-- Hidden Logout Form -->
-            <form id="logout-form" action="/sys-yii3/logout" method="post" class="rs-d-none">
+            <form id="logout-form" action="<?= $base ?>/logout" method="post" class="rs-d-none">
                 <?php if (!empty($csrf)): ?>
                     <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>">
                 <?php endif; ?>
@@ -200,7 +210,7 @@ $this->beginPage();
             <!-- Workspace Selector -->
             <?php if (!empty($switchableAccounts) && count($switchableAccounts) > 1): ?>
                 <div class="rs-sidebar__workspace">
-                    <form action="/sys-yii3/user/switch" method="get">
+                    <form action="<?= $base ?>/user/switch" method="get">
                         <select name="id" onchange="this.form.submit()" class="rs-sidebar__workspace-selector" aria-label="Switch Workspace">
                             <?php foreach ($switchableAccounts as $accountId => $accountName): ?>
                                 <option value="<?= $accountId ?>" <?= ($user->getAccountId() === $accountId) ? 'selected="selected"' : '' ?>>
@@ -276,7 +286,7 @@ $this->beginPage();
     </div>
 
     <!-- Command Palette Modal Scaffold -->
-    <div id="rs-command-palette-modal" class="rs-modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Global Search" data-search-url="/sys-yii3/site/search">
+    <div id="rs-command-palette-modal" class="rs-modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Global Search" data-search-url="<?= $base ?>/site/search">
         <div class="rs-modal rs-command-palette">
             <div class="rs-command-palette__header">
                 <svg class="rs-command-palette__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -314,8 +324,8 @@ $this->beginPage();
 <?php endif; ?>
 
 <!-- Modern Theme Vanilla JS Controllers -->
-<script src="/sys-yii3/themes/modern/js/app.layout.js"></script>
-<script src="/sys-yii3/themes/modern/js/app.notifications.js"></script>
+<script src="<?= $themeUrl ?>/js/app.layout.js"></script>
+<script src="<?= $themeUrl ?>/js/app.notifications.js"></script>
 
 <?php $this->endBody() ?>
 </body>

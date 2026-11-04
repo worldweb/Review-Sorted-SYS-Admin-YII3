@@ -107,7 +107,7 @@ $renderStars = static function (?float $rawRate): string {
                         <i class="fa fa-info-circle"></i> To use Bulk Reply, please filter reviews by Google or Facebook channel.
                     </span>
                 <?php endif; ?>
-                <a href="/sys-yii3/reviews/export" class="rs-btn rs-btn--secondary">
+                <a href="<?= \App\Environment::url('/reviews/export') ?>" class="rs-btn rs-btn--secondary">
                     Export Data
                 </a>
             </div>
@@ -142,7 +142,7 @@ $renderStars = static function (?float $rawRate): string {
 
     <!-- Reviews Grid Table Card -->
     <div class="rs-card rs-mb-6">
-        <form method="GET" action="/sys-yii3/reviews" id="reviews-filter-form">
+        <form method="GET" action="<?= \App\Environment::url('/reviews') ?>" id="reviews-filter-form">
             <div class="rs-table-wrapper">
                 <table class="rs-table rs-table--hover rs-w-100" style="margin: 0;">
                     <thead>
@@ -229,7 +229,7 @@ $renderStars = static function (?float $rawRate): string {
                             $textClass = $isLowRate ? 'rs-text-danger' : '';
 
                             $formattedDate = date('d/m/Y H:i', strtotime($item->getReviewDate()));
-                            $viewUrl = '/sys-yii3/reviews/view?id=' . $item->getId();
+                            $viewUrl = \App\Environment::url('/reviews/view?id=' . $item->getId());
                             if (!empty($query64)) {
                                 $viewUrl .= '&q=' . $query64;
                             }
@@ -277,7 +277,7 @@ $renderStars = static function (?float $rawRate): string {
                                         <a href="<?= Html::encode($viewUrl) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Inspect Review" style="padding: 4px 8px; font-size: 12px;">
                                             View
                                         </a>
-                                        <form method="POST" action="/sys-yii3/reviews/delete" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                        <form method="POST" action="<?= \App\Environment::url('/reviews/delete') ?>" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this review?');">
                                             <input type="hidden" name="id" value="<?= $item->getId() ?>">
                                             <button type="submit" class="rs-btn rs-btn--sm rs-btn--outline rs-btn--danger-outline" title="Delete Review" style="padding: 4px 8px; font-size: 12px;">
                                                 Delete
@@ -312,7 +312,7 @@ $renderStars = static function (?float $rawRate): string {
                     $queryParams = $_GET;
                     $buildPageUrl = static function (int $p) use ($queryParams): string {
                         $params = array_merge($queryParams, ['page' => $p]);
-                        return '/sys-yii3/reviews?' . http_build_query($params);
+                        return \App\Environment::url('/reviews') . '?' . http_build_query($params);
                     };
 
                     $startPage = max(1, $currentPage - 2);
@@ -341,7 +341,7 @@ $renderStars = static function (?float $rawRate): string {
 </div>
 
 <script>
-window.reviewReplyAllUrl = '/sys-yii3/reviews/reply-all';
+window.reviewReplyAllUrl = <?= json_encode(\App\Environment::url('/reviews/reply-all')) ?>;
 window.rquery = '<?= Html::encode($query64 ?? '') ?>';
 
 function submitBulkReply() {

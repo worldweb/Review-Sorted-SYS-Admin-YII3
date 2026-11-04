@@ -26,13 +26,13 @@ final class GoogleSetupAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $flash = new Flash($this->session);
         $flash->set('info', 'Google Business Profile connection setup flow. In this environment, existing connected locations are managed in read-only mode.');
 
-        return $this->redirect('/sys-yii3/settings/google');
+        return $this->redirect(\App\Environment::url('/settings/google'));
     }
 
     private function redirect(string $url): ResponseInterface

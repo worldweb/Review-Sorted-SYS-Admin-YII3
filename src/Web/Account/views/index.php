@@ -21,14 +21,16 @@ use Yiisoft\Html\Html;
 
 $this->setTitle('Workspaces & Billing');
 
+$url = static fn(string $p): string => \App\Environment::url($p);
+
 $totalPages = max(1, (int) ceil($total / $filter->pageSize));
 $currentPage = $filter->page;
 
 // Reusable Page Header Actions
 $actions = [];
 if ($currentUser->isAdmin()) {
-    $actions[] = '<a href="/sys-yii3/accounts/export" class="rs-btn rs-btn--outline">Export</a>';
-    $actions[] = '<a href="/sys-yii3/accounts/create" class="rs-btn rs-btn--primary">Create Workspace</a>';
+    $actions[] = '<a href="' . $url('/accounts/export') . '" class="rs-btn rs-btn--outline">Export</a>';
+    $actions[] = '<a href="' . $url('/accounts/create') . '" class="rs-btn rs-btn--primary">Create Workspace</a>';
 }
 
 $title = 'Workspaces & Billing';
@@ -65,7 +67,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                         <?php if (empty($billingData['hasSubscription']) || $billingData['status'] !== 'active'): ?>
                             <a href="#available-plans-section" class="rs-btn rs-btn--sm rs-btn--primary">Select Plan</a>
                         <?php else: ?>
-                            <button type="button" class="rs-btn rs-btn--sm rs-btn--outline" disabled title="Plan upgrade available in future release">Upgrade</button>
+                            <a href="#available-plans-section" class="rs-btn rs-btn--sm rs-btn--outline">Change / Upgrade</a>
                             <button type="button" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-danger" disabled title="Cancellation available in future release">Cancel</button>
                         <?php endif; ?>
                     <?php endif; ?>
@@ -127,6 +129,9 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
         </div>
 
         <div class="rs-d-grid rs-grid-cols-12 rs-gap-6">
+            <?php 
+                $hasActivePaidSub = !empty($billingData['hasSubscription']) && ($billingData['status'] ?? '') === 'active';
+            ?>
             <?php foreach ($availablePlans as $plan): ?>
                 <?php
                     $isCurrentActivePlan = (string) ($billingData['planName'] ?? '') === $plan->getPlanName();
@@ -174,9 +179,22 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                                 <button type="button" class="rs-btn rs-btn--success rs-w-100" disabled>&#10003; Currently Active</button>
                             <?php elseif ($isFreePlan): ?>
                                 <button type="button" class="rs-btn rs-btn--outline rs-w-100" disabled>Free Tier</button>
-                            <?php else: ?>
-                                <button type="button" class="rs-btn rs-btn--primary rs-w-100" onclick="alert('Stripe checkout integration will be triggered for ' + <?= json_encode($plan->getPlanName()) ?>);">
+                            <?php elseif ($hasActivePaidSub): ?>
+                                <button type="button" class="rs-btn rs-btn--primary rs-w-100 rs-btn-change-plan-trigger"
+                                    data-plan-id="<?= Html::encode((string)$plan->getId()) ?>"
+                                    data-plan-name="<?= Html::encode($plan->getPlanName()) ?>"
+                                    data-plan-price="<?= Html::encode((string)$plan->getPlanPrice()) ?>"
+                                    data-plan-interval="<?= Html::encode($plan->getPlanLimit() ?: 'month') ?>"
+                                    data-current-plan-name="<?= Html::encode((string)($billingData['planName'] ?? 'Current Plan')) ?>">
                                     Upgrade to <?= Html::encode($plan->getPlanName()) ?>
+                                </button>
+                            <?php else: ?>
+                                <button type="button" class="rs-btn rs-btn--primary rs-w-100 rs-btn-subscribe-trigger"
+                                    data-plan-id="<?= Html::encode((string)$plan->getId()) ?>"
+                                    data-plan-name="<?= Html::encode($plan->getPlanName()) ?>"
+                                    data-plan-price="<?= Html::encode((string)$plan->getPlanPrice()) ?>"
+                                    data-plan-interval="<?= Html::encode($plan->getPlanLimit() ?: 'month') ?>">
+                                    Subscribe Now
                                 </button>
                             <?php endif; ?>
                         </div>
@@ -189,7 +207,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
 
     <!-- Enterprise GridView matching Yii 2 Modern Theme -->
     <div class="rs-card">
-        <form method="get" action="/sys-yii3/accounts">
+        <form method="get" action="<?= $url('/accounts') ?>">
             <div class="rs-card__header rs-d-flex rs-justify-content-between rs-align-items-center">
                 <div class="rs-d-flex rs-gap-2">
                     <div class="rs-input-group" style="width: 300px;">
@@ -197,7 +215,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                     </div>
                     <button type="submit" class="rs-btn rs-btn--primary">Search</button>
                     <?php if ($filter->search !== '' || $filter->status !== null || $filter->businessName !== '' || $filter->firstName !== '' || $filter->email !== ''): ?>
-                        <a href="/sys-yii3/accounts" class="rs-btn rs-btn--ghost">Reset</a>
+                        <a href="<?= $url('/accounts') ?>" class="rs-btn rs-btn--ghost">Reset</a>
                     <?php endif; ?>
                 </div>
                 <div class="rs-d-flex rs-gap-2">
@@ -211,11 +229,11 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                     <thead>
                         <tr>
                             <th style="width: 50px; text-align: center;">#</th>
-                            <th>Workspace / Business</th>
-                            <th>Primary Contact</th>
+                            <th>Business Name</th>
+                            <th>First Name</th>
                             <th>Email</th>
                             <th>Status</th>
-                            <th>Seats</th>
+                            <th>Subscription</th>
                             <th>Created At</th>
                             <th style="width: 140px; text-align: right;">Actions</th>
                         </tr>
@@ -241,7 +259,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                             <th></th>
                             <th style="text-align: right; white-space: nowrap;">
                                 <button type="submit" class="rs-btn rs-btn--sm rs-btn--primary">Filter</button>
-                                <a href="/sys-yii3/accounts" class="rs-btn rs-btn--sm rs-btn--ghost">Reset</a>
+                                <a href="<?= $url('/accounts') ?>" class="rs-btn rs-btn--sm rs-btn--ghost">Reset</a>
                             </th>
                         </tr>
                     </thead>
@@ -259,12 +277,12 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                                         <?= $filter->getOffset() + $idx + 1 ?>
                                     </td>
                                     <td>
-                                        <a href="/sys-yii3/accounts/view?id=<?= $acc->getId() ?>" class="rs-font-medium rs-text-primary" style="text-decoration: none;">
+                                        <a href="<?= $url('/accounts/view?id=' . $acc->getId()) ?>" class="rs-font-medium rs-text-primary" style="text-decoration: none;">
                                             <?= Html::encode($acc->getBusinessName() ?? "Workspace #{$acc->getId()}") ?>
                                         </a>
                                     </td>
                                     <td>
-                                        <?= Html::encode(trim(($acc->getFirstName() ?? '') . ' ' . ($acc->getLastName() ?? '')) ?: '-') ?>
+                                        <?= Html::encode($acc->getFirstName() ?? '-') ?>
                                     </td>
                                     <td class="rs-text-muted">
                                         <?= Html::encode($acc->getEmail() ?? '-') ?>
@@ -275,14 +293,18 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                                         </span>
                                     </td>
                                     <td>
-                                        <?= $acc->getMaxUsers() ?> seats
+                                        <?php if (!empty($acc->getSubscription())): ?>
+                                            <span class="rs-badge rs-badge--primary">$<?= Html::encode($acc->getSubscription()) ?></span>
+                                        <?php else: ?>
+                                            <span class="rs-badge rs-badge--muted">Free</span>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="rs-text-muted rs-text-sm">
                                         <?= Html::encode($acc->getCreatedAtStr()) ?>
                                     </td>
                                     <td style="text-align: right; white-space: nowrap;">
-                                        <a href="/sys-yii3/accounts/view?id=<?= $acc->getId() ?>" class="rs-btn rs-btn--sm rs-btn--outline">View</a>
-                                        <a href="/sys-yii3/accounts/update?id=<?= $acc->getId() ?>" class="rs-btn rs-btn--sm rs-btn--secondary">Edit</a>
+                                        <a href="<?= $url('/accounts/view?id=' . $acc->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--outline">View</a>
+                                        <a href="<?= $url('/accounts/update?id=' . $acc->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--secondary">Edit</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -311,3 +333,378 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
         </form>
     </div>
 </div>
+
+<!-- Change Plan / Upgrade Confirmation Modal matching Yii 2 -->
+<div id="rs-change-plan-modal" class="rs-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); z-index: 9999; overflow-y: auto; padding: 2rem 1rem; align-items: center; justify-content: center; box-sizing: border-box;">
+    <div class="rs-modal-container" style="background: #ffffff; width: 100%; max-width: 520px; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; margin: auto; display: flex; flex-direction: column;">
+        <div class="rs-modal-header rs-d-flex rs-justify-content-between rs-align-items-center rs-p-4 rs-border-bottom" style="border-bottom: 1px solid #e2e8f0;">
+            <h3 class="rs-font-bold rs-text-lg rs-mb-0" id="rs-change-modal-title">Upgrade Subscription Plan</h3>
+            <button type="button" class="rs-btn rs-btn--ghost rs-p-2" id="rs-change-modal-close-btn" style="background: none; border: none; font-size: 1.25rem; line-height: 1; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <div class="rs-modal-body rs-p-5">
+            <div id="rs-change-plan-alert" class="rs-alert rs-alert--danger rs-mb-4" style="display: none; color: #b91c1c; background: #fef2f2; padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid #fecaca; font-size: 0.875rem;"></div>
+            
+            <div class="rs-mb-4 rs-p-3" style="background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div class="rs-d-flex rs-justify-content-between rs-align-items-center rs-mb-2">
+                    <span class="rs-text-xs rs-text-muted rs-text-uppercase rs-font-bold">Target Plan:</span>
+                    <span class="rs-font-bold rs-text-md" id="rs-change-target-plan-name">-</span>
+                </div>
+                <div class="rs-d-flex rs-justify-content-between rs-align-items-center">
+                    <span class="rs-text-xs rs-text-muted rs-text-uppercase rs-font-bold">New Billing Rate:</span>
+                    <span class="rs-font-bold rs-text-lg rs-text-primary" id="rs-change-target-plan-price">-</span>
+                </div>
+            </div>
+
+            <p class="rs-text-sm rs-text-muted rs-mb-3">
+                You are transitioning from <strong id="rs-change-current-plan-name">Current Plan</strong> to <strong id="rs-change-target-plan-name2">New Plan</strong>. Your new plan benefits will activate immediately upon confirmation.
+            </p>
+
+            <form id="rs-change-plan-form" onsubmit="return false;">
+                <input type="hidden" id="rs-change-target-plan-id" name="plan_id" value="">
+            </form>
+        </div>
+        <div class="rs-modal-footer rs-d-flex rs-justify-content-end rs-gap-3 rs-p-4 rs-border-top" style="border-top: 1px solid #e2e8f0; background: #f8fafc;">
+            <button type="button" class="rs-btn rs-btn--outline" id="rs-change-modal-cancel-btn">Cancel</button>
+            <button type="button" class="rs-btn rs-btn--primary" id="rs-change-modal-submit-btn">
+                <span id="rs-change-submit-btn-text">Confirm Plan Change</span>
+                <span id="rs-change-submit-btn-spinner" style="display: none;">Updating...</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Restored Modern Stripe Checkout Modal matching Yii 2 -->
+<div id="rs-subscribe-modal" class="rs-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); z-index: 9999; overflow-y: auto; padding: 2rem 1rem; align-items: center; justify-content: center;">
+    <div class="rs-modal-container" style="background: #ffffff; width: 100%; max-width: 640px; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; margin: auto;">
+        <!-- Modal Header -->
+        <div class="rs-modal-header rs-d-flex rs-justify-content-between rs-align-items-center rs-p-5 rs-border-bottom" style="border-bottom: 1px solid #e2e8f0;">
+            <div>
+                <h3 class="rs-text-lg rs-font-bold rs-mb-0" id="rs-modal-title">Subscribe to Plan</h3>
+                <p class="rs-text-xs rs-text-muted rs-mb-0 rs-mt-1">Complete your billing information below.</p>
+            </div>
+            <button type="button" id="rs-modal-close-btn" class="rs-btn rs-btn--ghost rs-p-2" style="font-size: 1.25rem; line-height: 1; cursor: pointer; border: none; background: none;">&times;</button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="rs-modal-body rs-p-5">
+            <div id="rs-payment-alert" class="rs-alert rs-alert--danger rs-mb-4" style="display: none; padding: 0.75rem 1rem; background: #fee2e2; border: 1px solid #f87171; border-radius: 6px; color: #b91c1c; font-size: 0.875rem;"></div>
+
+            <form id="rs-subscribe-form" onsubmit="return false;">
+                <input type="hidden" id="rs-plan-id" name="plan_id" value="">
+
+                <!-- Selected Plan Summary Banner -->
+                <div class="rs-d-flex rs-justify-content-between rs-align-items-center rs-p-3 rs-mb-4" style="background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div>
+                        <span class="rs-text-xs rs-text-muted rs-text-uppercase rs-font-bold">Selected Plan</span>
+                        <div class="rs-font-bold rs-text-md" id="rs-modal-plan-name">Plan Name</div>
+                    </div>
+                    <div class="rs-text-right">
+                        <div class="rs-font-bold rs-text-lg" id="rs-modal-plan-price">$0</div>
+                        <span class="rs-text-xs rs-text-muted" id="rs-modal-plan-interval">/ month</span>
+                    </div>
+                </div>
+
+                <!-- Customer Details -->
+                <div class="rs-row rs-d-flex rs-gap-3 rs-mb-3">
+                    <div style="flex: 1;">
+                        <label class="rs-label rs-text-xs rs-font-bold rs-mb-1" for="rs-cust-fname">First Name <span class="rs-text-danger">*</span></label>
+                        <input type="text" id="rs-cust-fname" class="rs-input rs-w-100" placeholder="First Name" required value="<?= Html::encode($currentUser->getName() ?? '') ?>">
+                    </div>
+                    <div style="flex: 1;">
+                        <label class="rs-label rs-text-xs rs-font-bold rs-mb-1" for="rs-cust-lname">Last Name</label>
+                        <input type="text" id="rs-cust-lname" class="rs-input rs-w-100" placeholder="Last Name">
+                    </div>
+                </div>
+
+                <div class="rs-mb-3">
+                    <label class="rs-label rs-text-xs rs-font-bold rs-mb-1" for="rs-cust-email">Billing Email <span class="rs-text-danger">*</span></label>
+                    <input type="email" id="rs-cust-email" class="rs-input rs-w-100" placeholder="billing@example.com" required value="<?= Html::encode($currentUser->getEmail() ?? '') ?>">
+                </div>
+
+                <div class="rs-mb-3">
+                    <label class="rs-label rs-text-xs rs-font-bold rs-mb-1" for="rs-cust-country">Country <span class="rs-text-danger">*</span></label>
+                    <select id="rs-cust-country" class="rs-input rs-w-100" required>
+                        <option value="AU" selected>Australia</option>
+                        <option value="US">United States</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="CA">Canada</option>
+                        <option value="NZ">New Zealand</option>
+                        <option value="DE">Germany</option>
+                        <option value="FR">France</option>
+                        <option value="SG">Singapore</option>
+                        <option value="IN">India</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <!-- Terms and Conditions Checkbox -->
+                <div class="rs-d-flex rs-align-items-start rs-gap-2 rs-mb-2">
+                    <input type="checkbox" id="rs-terms-agree" style="margin-top: 0.25rem;" checked required>
+                    <label for="rs-terms-agree" class="rs-text-xs rs-text-muted">
+                        I agree to the terms and conditions and authorize the recurring subscription charges.
+                    </label>
+                </div>
+            </form>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="rs-modal-footer rs-d-flex rs-justify-content-end rs-gap-3 rs-p-5 rs-border-top" style="border-top: 1px solid #e2e8f0; background: #f8fafc;">
+            <button type="button" id="rs-modal-cancel-btn" class="rs-btn rs-btn--outline">Cancel</button>
+            <button type="button" id="rs-modal-submit-btn" class="rs-btn rs-btn--primary">
+                <span id="rs-submit-btn-text">Confirm & Subscribe</span>
+                <span id="rs-submit-btn-spinner" style="display: none;">Processing...</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const csrfToken = <?= json_encode($csrfToken ?? '') ?>;
+    const subscribeUrl = <?= json_encode(\App\Environment::url('/accounts/subscribe')) ?>;
+
+    // 1. Upgrade / Change Plan Modal Logic
+    const changeModal = document.getElementById('rs-change-plan-modal');
+    const changeModalCloseBtn = document.getElementById('rs-change-modal-close-btn');
+    const changeModalCancelBtn = document.getElementById('rs-change-modal-cancel-btn');
+    const changeModalSubmitBtn = document.getElementById('rs-change-modal-submit-btn');
+    const changeAlertBox = document.getElementById('rs-change-plan-alert');
+
+    function showChangeAlert(msg) {
+        if (changeAlertBox) {
+            changeAlertBox.textContent = msg;
+            changeAlertBox.style.display = 'block';
+        }
+    }
+
+    function hideChangeAlert() {
+        if (changeAlertBox) {
+            changeAlertBox.textContent = '';
+            changeAlertBox.style.display = 'none';
+        }
+    }
+
+    function closeChangeModal() {
+        if (changeModal) {
+            changeModal.style.display = 'none';
+            hideChangeAlert();
+        }
+    }
+
+    if (changeModalCloseBtn) changeModalCloseBtn.addEventListener('click', closeChangeModal);
+    if (changeModalCancelBtn) changeModalCancelBtn.addEventListener('click', closeChangeModal);
+
+    const changePlanBtns = document.querySelectorAll('.rs-btn-change-plan-trigger');
+    changePlanBtns.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const planId = this.getAttribute('data-plan-id');
+            const planName = this.getAttribute('data-plan-name');
+            const planPrice = this.getAttribute('data-plan-price');
+            const planInterval = this.getAttribute('data-plan-interval');
+            const currentPlanName = this.getAttribute('data-current-plan-name') || 'Current Plan';
+
+            const targetIdInput = document.getElementById('rs-change-target-plan-id');
+            if (targetIdInput) targetIdInput.value = planId;
+
+            const nameEl = document.getElementById('rs-change-target-plan-name');
+            if (nameEl) nameEl.textContent = planName;
+
+            const name2El = document.getElementById('rs-change-target-plan-name2');
+            if (name2El) name2El.textContent = planName;
+
+            const priceEl = document.getElementById('rs-change-target-plan-price');
+            if (priceEl) priceEl.textContent = '$' + planPrice + ' / ' + planInterval;
+
+            const curPlanEl = document.getElementById('rs-change-current-plan-name');
+            if (curPlanEl) curPlanEl.textContent = currentPlanName;
+
+            const titleEl = document.getElementById('rs-change-modal-title');
+            if (titleEl) titleEl.textContent = 'Upgrade to ' + planName;
+
+            hideChangeAlert();
+            if (changeModal) changeModal.style.display = 'flex';
+        });
+    });
+
+    if (changeModalSubmitBtn) {
+        changeModalSubmitBtn.addEventListener('click', async function (e) {
+            e.preventDefault();
+            hideChangeAlert();
+
+            const planIdInput = document.getElementById('rs-change-target-plan-id');
+            const planId = planIdInput ? planIdInput.value : '';
+            if (!planId) {
+                showChangeAlert('Please select a target plan.');
+                return;
+            }
+
+            const spinnerText = document.getElementById('rs-change-submit-btn-spinner');
+            const btnText = document.getElementById('rs-change-submit-btn-text');
+            if (changeModalSubmitBtn) changeModalSubmitBtn.disabled = true;
+            if (spinnerText) spinnerText.style.display = 'inline';
+            if (btnText) btnText.style.display = 'none';
+
+            try {
+                const formData = new FormData();
+                if (csrfToken) formData.append('_csrf', csrfToken);
+                formData.append('request_type', 'change_paid_plan');
+                formData.append('plan_id', planId);
+
+                const response = await fetch(subscribeUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                const result = await response.json();
+                if (!response.ok || result.status !== true) {
+                    showChangeAlert(result.error || 'Failed to update subscription. Please try again.');
+                    if (changeModalSubmitBtn) changeModalSubmitBtn.disabled = false;
+                    if (spinnerText) spinnerText.style.display = 'none';
+                    if (btnText) btnText.style.display = 'inline';
+                    return;
+                }
+
+                alert(result.success || 'Subscription updated successfully!');
+                window.location.reload();
+            } catch (err) {
+                showChangeAlert('An unexpected network error occurred. Please try again.');
+                if (changeModalSubmitBtn) changeModalSubmitBtn.disabled = false;
+                if (spinnerText) spinnerText.style.display = 'none';
+                if (btnText) btnText.style.display = 'inline';
+            }
+        });
+    }
+
+    // 2. Initial Subscription Modal Logic
+    const subModal = document.getElementById('rs-subscribe-modal');
+    const subModalCloseBtn = document.getElementById('rs-modal-close-btn');
+    const subModalCancelBtn = document.getElementById('rs-modal-cancel-btn');
+    const subModalSubmitBtn = document.getElementById('rs-modal-submit-btn');
+    const subAlertBox = document.getElementById('rs-payment-alert');
+
+    function showSubAlert(msg) {
+        if (subAlertBox) {
+            subAlertBox.textContent = msg;
+            subAlertBox.style.display = 'block';
+        }
+    }
+
+    function hideSubAlert() {
+        if (subAlertBox) {
+            subAlertBox.textContent = '';
+            subAlertBox.style.display = 'none';
+        }
+    }
+
+    function closeSubModal() {
+        if (subModal) {
+            subModal.style.display = 'none';
+            hideSubAlert();
+        }
+    }
+
+    if (subModalCloseBtn) subModalCloseBtn.addEventListener('click', closeSubModal);
+    if (subModalCancelBtn) subModalCancelBtn.addEventListener('click', closeSubModal);
+
+    const subscribeBtns = document.querySelectorAll('.rs-btn-subscribe-trigger');
+    subscribeBtns.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const planId = this.getAttribute('data-plan-id');
+            const planName = this.getAttribute('data-plan-name');
+            const planPrice = this.getAttribute('data-plan-price');
+            const planInterval = this.getAttribute('data-plan-interval');
+
+            const planIdInput = document.getElementById('rs-plan-id');
+            if (planIdInput) planIdInput.value = planId;
+
+            const nameEl = document.getElementById('rs-modal-plan-name');
+            if (nameEl) nameEl.textContent = planName;
+
+            const priceEl = document.getElementById('rs-modal-plan-price');
+            if (priceEl) priceEl.textContent = '$' + planPrice;
+
+            const intervalEl = document.getElementById('rs-modal-plan-interval');
+            if (intervalEl) intervalEl.textContent = '/ ' + planInterval;
+
+            const titleEl = document.getElementById('rs-modal-title');
+            if (titleEl) titleEl.textContent = 'Subscribe to ' + planName;
+
+            hideSubAlert();
+            if (subModal) subModal.style.display = 'flex';
+        });
+    });
+
+    if (subModalSubmitBtn) {
+        subModalSubmitBtn.addEventListener('click', async function (e) {
+            e.preventDefault();
+            hideSubAlert();
+
+            const planIdInput = document.getElementById('rs-plan-id');
+            const planId = planIdInput ? planIdInput.value : '';
+            if (!planId) {
+                showSubAlert('Please select a subscription plan.');
+                return;
+            }
+
+            const fnameInput = document.getElementById('rs-cust-fname');
+            if (!fnameInput || fnameInput.value.trim() === '') {
+                showSubAlert('Please provide your first name.');
+                return;
+            }
+
+            const emailInput = document.getElementById('rs-cust-email');
+            if (!emailInput || emailInput.value.trim() === '') {
+                showSubAlert('Please provide your billing email.');
+                return;
+            }
+
+            const terms = document.getElementById('rs-terms-agree');
+            if (terms && !terms.checked) {
+                showSubAlert('Please agree to the terms and conditions.');
+                return;
+            }
+
+            const spinnerText = document.getElementById('rs-submit-btn-spinner');
+            const btnText = document.getElementById('rs-submit-btn-text');
+            if (subModalSubmitBtn) subModalSubmitBtn.disabled = true;
+            if (spinnerText) spinnerText.style.display = 'inline';
+            if (btnText) btnText.style.display = 'none';
+
+            try {
+                const formData = new FormData();
+                if (csrfToken) formData.append('_csrf', csrfToken);
+                formData.append('request_type', 'create_customer_subscription');
+                formData.append('plan_id', planId);
+                formData.append('customer_fname', fnameInput.value.trim());
+                formData.append('customer_email', emailInput.value.trim());
+
+                const response = await fetch(subscribeUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                const result = await response.json();
+                if (!response.ok || result.status !== true) {
+                    showSubAlert(result.error || 'Failed to complete subscription. Please try again.');
+                    if (subModalSubmitBtn) subModalSubmitBtn.disabled = false;
+                    if (spinnerText) spinnerText.style.display = 'none';
+                    if (btnText) btnText.style.display = 'inline';
+                    return;
+                }
+
+                alert(result.success || 'Subscribed successfully!');
+                window.location.reload();
+            } catch (err) {
+                showSubAlert('An unexpected network error occurred. Please try again.');
+                if (subModalSubmitBtn) subModalSubmitBtn.disabled = false;
+                if (spinnerText) spinnerText.style.display = 'none';
+                if (btnText) btnText.style.display = 'inline';
+            }
+        });
+    }
+});
+</script>

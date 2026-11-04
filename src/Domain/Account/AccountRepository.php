@@ -11,7 +11,7 @@ use Yiisoft\Db\Query\Query;
 
 /**
  * Account Repository Implementation.
- * Provides safe, parameterized, read-only queries for Account domain entities
+ * Provides safe, parameterized queries and CRUD persistence for Account domain entities
  * with automatic tenant boundary protection.
  */
 final class AccountRepository implements AccountRepositoryInterface
@@ -290,22 +290,55 @@ final class AccountRepository implements AccountRepositoryInterface
 
     public function createAccount(AccountSaveData $data): int
     {
-        throw new \RuntimeException(
-            'Database write operation (createAccount) blocked: Database connection is strictly in read-only mode during Phase 3.'
-        );
+        $now = time();
+        $this->db->createCommand()->insert('{{%account}}', [
+            'business_name' => $data->businessName,
+            'first_name' => $data->firstName,
+            'last_name' => $data->lastName,
+            'email' => $data->email,
+            'contact_number' => $data->contactNumber,
+            'website' => $data->website,
+            'max_users' => $data->maxUsers,
+            'status' => $data->status,
+            'activation_key' => (string) time(),
+            'created_at' => $now,
+            'updated_at' => $now,
+        ])->execute();
+
+        return (int) $this->db->getLastInsertID('{{%account}}');
     }
 
     public function updateAccount(int $id, AccountSaveData $data): bool
     {
-        throw new \RuntimeException(
-            'Database write operation (updateAccount) blocked: Database connection is strictly in read-only mode during Phase 3.'
-        );
+        $now = time();
+        $fields = [
+            'business_name' => $data->businessName,
+            'first_name' => $data->firstName,
+            'last_name' => $data->lastName,
+            'email' => $data->email,
+            'contact_number' => $data->contactNumber,
+            'website' => $data->website,
+            'max_users' => $data->maxUsers,
+            'status' => $data->status,
+            'updated_at' => $now,
+        ];
+
+        $affected = $this->db->createCommand()->update(
+            '{{%account}}',
+            $fields,
+            ['id' => $id]
+        )->execute();
+
+        return $affected >= 0;
     }
 
     public function deleteAccount(int $id): bool
     {
-        throw new \RuntimeException(
-            'Database write operation (deleteAccount) blocked: Database connection is strictly in read-only mode during Phase 3.'
-        );
+        $affected = $this->db->createCommand()->delete(
+            '{{%account}}',
+            ['id' => $id]
+        )->execute();
+
+        return $affected > 0;
     }
 }

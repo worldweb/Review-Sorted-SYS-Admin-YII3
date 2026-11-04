@@ -36,12 +36,12 @@ final class WhatsAppImporterAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         if (!$currentUser->isAdmin() && !$currentUser->isAccountAdmin()) {
@@ -53,7 +53,7 @@ final class WhatsAppImporterAction
         $flash = new Flash($this->session);
 
         if ($request->getMethod() !== 'POST') {
-            return $this->redirect('/sys-yii3/whatsapp/importer');
+            return $this->redirect(\App\Environment::url('/whatsapp/importer'));
         }
 
         $targetAccountId = $context->getScopedAccountId() ?? ($context->getAccountId() ?? $currentUser->getAccountId());
@@ -64,7 +64,7 @@ final class WhatsAppImporterAction
 
         if ($targetAccountId === null || $targetAccountId <= 0) {
             $flash->add('error', 'Cannot import contacts: no tenant account is active.');
-            return $this->redirect('/sys-yii3/whatsapp/importer');
+            return $this->redirect(\App\Environment::url('/whatsapp/importer'));
         }
 
         $uploadedFiles = $request->getUploadedFiles();
@@ -73,14 +73,14 @@ final class WhatsAppImporterAction
 
         if ($file === null || $file->getError() === UPLOAD_ERR_NO_FILE) {
             $flash->add('error', 'Please select a CSV file to upload.');
-            return $this->redirect('/sys-yii3/whatsapp/importer');
+            return $this->redirect(\App\Environment::url('/whatsapp/importer'));
         }
 
         $result = $this->csvImportService->parse($file, ['name', 'phone']);
 
         if ($result->hasHeaderError()) {
             $flash->add('error', (string) $result->getHeaderError());
-            return $this->redirect('/sys-yii3/whatsapp/importer');
+            return $this->redirect(\App\Environment::url('/whatsapp/importer'));
         }
 
         $records = $result->getRecords();
@@ -138,11 +138,11 @@ final class WhatsAppImporterAction
                 $importedCount = $this->whatsappRepo->saveContactsBatch($validRows, $targetAccountId);
                 $flash->add('success', sprintf('%d phone numbers imported successfully.', $importedCount));
             } catch (\Throwable $e) {
-                $flash->add('error', 'Database write error (SELECT-only connection active): ' . $e->getMessage());
+                $flash->add('error', 'Database error: ' . $e->getMessage());
             }
         }
 
-        return $this->redirect('/sys-yii3/whatsapp/importer');
+        return $this->redirect(\App\Environment::url('/whatsapp/importer'));
     }
 
     private function redirect(string $url): ResponseInterface

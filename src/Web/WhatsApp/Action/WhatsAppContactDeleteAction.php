@@ -33,7 +33,7 @@ final class WhatsAppContactDeleteAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -51,7 +51,7 @@ final class WhatsAppContactDeleteAction
         }
 
         if ($id <= 0) {
-            return $this->redirect('/sys-yii3/whatsapp/importer');
+            return $this->redirect(\App\Environment::url('/whatsapp/importer'));
         }
 
         $contact = $this->whatsappRepo->findContactById($id, $context);
@@ -67,10 +67,10 @@ final class WhatsAppContactDeleteAction
             $this->whatsappRepo->deleteContact($id);
             $flash->add('success', sprintf('Contact "%s" deleted successfully.', $contact->getPhone()));
         } catch (\Throwable $e) {
-            $flash->add('error', 'Database write error (SELECT-only connection active): ' . $e->getMessage());
+            $flash->add('error', 'Database error: ' . $e->getMessage());
         }
 
-        return $this->redirect('/sys-yii3/whatsapp/importer');
+        return $this->redirect(\App\Environment::url('/whatsapp/importer'));
     }
 
     private function redirect(string $url): ResponseInterface

@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Environment;
+
 return [
     'charset' => 'UTF-8',
     'locale' => 'en',
-    'name' => 'Reviews Sorted (Yii 3)',
+    'name' => Environment::appName(),
 ];

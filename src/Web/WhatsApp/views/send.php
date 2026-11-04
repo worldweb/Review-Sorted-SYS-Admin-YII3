@@ -21,7 +21,7 @@ use Yiisoft\Html\Html;
 $this->setTitle('Send WhatsApp Messages');
 
 $actions = [
-    '<a href="/sys-yii3/whatsapp/templates" class="rs-btn rs-btn--ghost">Cancel</a>'
+    '<a href="' . \App\Environment::url('/whatsapp/templates') . '" class="rs-btn rs-btn--ghost">Cancel</a>'
 ];
 $title = 'Send WhatsApp Messages';
 $description = 'Send WhatsApp templates to individual contacts or a contact list.';
@@ -44,7 +44,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
     <?php endforeach; ?>
 
     <div class="rs-card rs-mb-6" style="max-width: 800px;">
-        <form method="post" action="/sys-yii3/whatsapp/send" class="rs-form">
+        <form method="post" action="<?= \App\Environment::url('/whatsapp/send') ?>" class="rs-form">
             <?php if (!empty($csrfToken)): ?>
                 <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
             <?php endif; ?>
@@ -168,7 +168,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
             </div>
 
             <div class="rs-card__footer rs-d-flex rs-justify-content-between rs-align-items-center rs-p-4" style="border-top: 1px solid var(--rs-border, #E2E8F0); background: #F8FAFC;">
-                <a href="/sys-yii3/whatsapp/templates" class="rs-btn rs-btn--secondary">Cancel</a>
+                <a href="<?= \App\Environment::url('/whatsapp/templates') ?>" class="rs-btn rs-btn--secondary">Cancel</a>
                 <button type="submit" class="rs-btn rs-btn--primary rs-px-6">
                     Queue Message
                 </button>

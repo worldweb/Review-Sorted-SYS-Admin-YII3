@@ -29,7 +29,7 @@ $pageTitle = $isUpdate
     : 'Create QR Code';
 $this->setTitle($pageTitle);
 
-$baseUrl = '/sys-yii3';
+$baseUrl = \App\Environment::appBasePath();
 $ajaxUrl = $baseUrl . '/qrcode/ajax' . ($isUpdate ? '?id=' . $qrcodeId : '');
 $submitUrl = $isUpdate ? ($baseUrl . '/qrcode/update?id=' . $qrcodeId) : ($baseUrl . '/qrcode/create');
 
@@ -49,8 +49,8 @@ if ($isUpdate && !empty($model->getQrcode())) {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<link rel="stylesheet" href="/sys-yii3/assets/qr/css/qr-code-form.css">
-<link rel="stylesheet" href="/sys-yii3/assets/qr/css/qr-code-overrides.css">
+<link rel="stylesheet" href="<?= \App\Environment::url('/assets/qr/css/qr-code-form.css') ?>">
+<link rel="stylesheet" href="<?= \App\Environment::url('/assets/qr/css/qr-code-overrides.css') ?>">
 
 <!-- RS Sidebar Protection & Studio Style Neutralization -->
 <style>
@@ -126,7 +126,7 @@ if ($isUpdate && !empty($model->getQrcode())) {
         <!-- Page Header -->
         <div class="rs-qr-header rs-d-flex rs-align-items-center rs-justify-content-between rs-flex-wrap rs-gap-3">
             <div>
-                <a href="/sys-yii3/qrcode/index" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-muted" style="text-decoration: none; margin-bottom: 8px; display: inline-block;">
+                <a href="<?= \App\Environment::url('/qrcode/index') ?>" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-muted" style="text-decoration: none; margin-bottom: 8px; display: inline-block;">
                     <i class="fa-solid fa-arrow-left rs-mr-1"></i> Back to QR Codes
                 </a>
                 <h1 class="rs-qr-title" style="margin: 0; font-size: 24px; font-weight: 700; color: var(--rs-primary, #234137);">
@@ -263,7 +263,6 @@ if ($isUpdate && !empty($model->getQrcode())) {
                                                         'mosaic' => 'mosaic',
                                                         'ninja' => 'ninja',
                                                         'rain' => 'rain',
-                                                        'twitter' => 'twitter',
                                                         'youtube' => 'youtube',
                                                     ];
                                                     $selectedTemplate = $model?->getTemplateName() ?? 'default';
@@ -314,7 +313,7 @@ if ($isUpdate && !empty($model->getQrcode())) {
                                                     $galleryLogos = [
                                                         'app-store', 'calender', 'email', 'facebook', 'gmail',
                                                         'google-bussiness', 'instagram', 'linkedin', 'mp3', 'pdf',
-                                                        'phone-call', 'pintrest', 'play-store', 'ratings', 'twitter', 'youtube'
+                                                        'phone-call', 'pintrest', 'play-store', 'ratings', 'youtube'
                                                     ];
                                                     $selectedLogo = $model?->getDefaultLogoName() ?? '';
                                                     foreach ($galleryLogos as $logoKey):
@@ -459,4 +458,4 @@ if ($isUpdate && !empty($model->getQrcode())) {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-<script src="/sys-yii3/assets/qr/js/qr-code-form.js"></script>
+<script src="<?= \App\Environment::url('/assets/qr/js/qr-code-form.js') ?>"></script>

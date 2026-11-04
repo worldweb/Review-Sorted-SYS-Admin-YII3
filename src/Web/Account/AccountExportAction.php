@@ -30,7 +30,7 @@ final class AccountExportAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->responseFactory->createResponse(302)->withHeader('Location', '/sys-yii3/login');
+            return $this->responseFactory->createResponse(302)->withHeader('Location', \App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);

@@ -40,12 +40,12 @@ final class LocationGroupUpdateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         if (!$currentUser->isAdmin() && !$currentUser->isAccountAdmin()) {
@@ -57,7 +57,7 @@ final class LocationGroupUpdateAction
         $queryParams = $request->getQueryParams();
         $id = (int) ($queryParams['id'] ?? 0);
         if ($id <= 0) {
-            return $this->redirect('/sys-yii3/location-group/index');
+            return $this->redirect(\App\Environment::url('/location-group/index'));
         }
 
         $group = $this->groupRepo->findById($id, $context);
@@ -150,9 +150,9 @@ final class LocationGroupUpdateAction
                 try {
                     $this->groupRepo->save($updatedGroup, $validatedKeys);
                     $flash->add('success', sprintf('Location group "%s" updated successfully.', $formData['name']));
-                    return $this->redirect('/sys-yii3/location-group/view?id=' . $id);
+                    return $this->redirect(\App\Environment::url('/location-group/view?id=') . $id);
                 } catch (\Throwable $e) {
-                    $flash->add('error', 'Database write error (SELECT-only connection active): ' . $e->getMessage());
+                    $flash->add('error', 'Database error: ' . $e->getMessage());
                 }
             }
         }

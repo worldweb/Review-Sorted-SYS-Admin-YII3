@@ -12,7 +12,7 @@ use Yiisoft\Db\Query\Query;
 
 /**
  * ReviewRepository.
- * Safe, parameterized, read-only implementation of ReviewRepositoryInterface.
+ * Safe, parameterized implementation of ReviewRepositoryInterface.
  * Strictly enforces TenantContext isolation across all queries.
  */
 final class ReviewRepository implements ReviewRepositoryInterface
@@ -282,7 +282,6 @@ final class ReviewRepository implements ReviewRepositoryInterface
         return [
             1 => 'Google MyBusiness',
             2 => 'Facebook',
-            3 => 'Twitter',
             ReviewSearchFilter::VIRTUAL_SERV_INSTAGRAM => 'Instagram',
         ];
     }
@@ -375,7 +374,6 @@ final class ReviewRepository implements ReviewRepositoryInterface
             $command->execute();
             return true;
         } catch (\Throwable $e) {
-            // Read-only database guard: in rs_readonly mode or if write fails, do not throw 500 error
             return false;
         }
     }

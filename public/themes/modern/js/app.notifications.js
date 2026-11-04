@@ -371,4 +371,4 @@
         NotificationManager.init();
     });
 
-})(jQuery);
+})(typeof jQuery !== 'undefined' ? jQuery : (window.$ || {}));

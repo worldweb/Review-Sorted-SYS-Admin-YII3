@@ -32,12 +32,12 @@ final class FacebookIndexAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $queryParams = $request->getQueryParams();
@@ -48,6 +48,9 @@ final class FacebookIndexAction
         $totalCount = $this->connectionRepo->countFacebookConfigs($context);
         $configs = $this->connectionRepo->findFacebookConfigs($context, $pageSize, $offset);
         $pageCount = max(1, (int) ceil($totalCount / $pageSize));
+
+        $apis = $this->connectionRepo->findApisByService(\App\Domain\SocialConnection\Api::SERVICE_FACEBOOK);
+        $api = $apis[0] ?? null;
 
         $flash = new Flash($this->session);
 
@@ -60,6 +63,7 @@ final class FacebookIndexAction
                 'pageCount' => $pageCount,
                 'pageSize' => $pageSize,
                 'currentUser' => $currentUser,
+                'api' => $api,
                 'flash' => $flash,
                 'csrfToken' => $this->csrfToken?->getValue() ?? '',
             ]);

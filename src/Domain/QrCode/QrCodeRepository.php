@@ -12,7 +12,7 @@ use Yiisoft\Db\Query\Query;
 
 /**
  * QR Code Repository.
- * Safe, parameterized, read-only implementation of QrCodeRepositoryInterface.
+ * Safe, parameterized implementation of QrCodeRepositoryInterface.
  * Strictly enforces TenantContext isolation across all QR code queries.
  */
 final class QrCodeRepository implements QrCodeRepositoryInterface

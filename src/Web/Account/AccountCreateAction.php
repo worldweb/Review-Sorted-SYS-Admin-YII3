@@ -36,7 +36,7 @@ final class AccountCreateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -61,7 +61,15 @@ final class AccountCreateAction
             }
 
             if (empty($errors)) {
-                $infoMessage = 'Validation passed. Database is running in strict read-only mode during Phase 3, so record insertion was prevented.';
+                try {
+                    $newId = $this->accountRepo->createAccount($saveData);
+                    if ($newId > 0) {
+                        return $this->redirect(\App\Environment::url('/accounts/view?id=' . $newId));
+                    }
+                    $errors['general'] = 'Failed to create account.';
+                } catch (\Throwable $e) {
+                    $errors['general'] = 'Failed to create account: ' . $e->getMessage();
+                }
             }
         }
 

@@ -32,7 +32,7 @@ $this->setTitle('Set New Password');
             <p class="rs-auth-subtitle">Create a new secure password for your account.</p>
         </div>
 
-        <form id="reset-password-form" method="post" action="/sys-yii3/reset-password" class="rs-form">
+        <form id="reset-password-form" method="post" action="<?= \App\Environment::url('/reset-password') ?>" class="rs-form">
             <?php if (!empty($csrfToken)): ?>
                 <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
             <?php endif; ?>
@@ -55,7 +55,7 @@ $this->setTitle('Set New Password');
             </div>
 
             <div class="rs-text-center rs-mt-4">
-                <a href="/sys-yii3/login" class="rs-auth-link">Return to sign in</a>
+                <a href="<?= \App\Environment::url('/login') ?>" class="rs-auth-link">Return to sign in</a>
             </div>
         </form>
     </div>

@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 $this->setTitle('Create E-mail Template');
 $template = null;
-$actionUrl = '/sys-yii3/email/template/create';
+$actionUrl = \App\Environment::url('/email/template/create');
 ?>
 
 <div class="rs-page">

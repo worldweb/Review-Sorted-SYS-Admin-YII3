@@ -30,14 +30,14 @@ final class FacebookViewAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
-        $id = (int) ($request->getQueryParams()['id'] ?? 0);
+        $id = (int) ($request->getQueryParams()['id'] ?? $request->getAttribute('id') ?? 0);
         $config = $this->connectionRepo->findById($id, $context);
         if ($config === null || !$config->isFacebook()) {
             (new Flash($this->session))->set('error', 'Facebook connection not found.');
-            return $this->redirect('/sys-yii3/settings/facebook');
+            return $this->redirect(\App\Environment::url('/settings/facebook'));
         }
 
         return $this->viewRenderer

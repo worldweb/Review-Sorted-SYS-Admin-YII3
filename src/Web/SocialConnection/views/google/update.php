@@ -31,7 +31,7 @@ $this->setTitle('Edit Google Location: ' . $model->getDisplayName());
             'subtitle' => 'Configure alerts and display preferences'
         ]) ?>
         <div class="rs-card__body rs-p-4" style="padding: 1.5rem;">
-            <form method="post" action="/sys-yii3/settings/google/update?id=<?= $model->getId() ?>">
+            <form method="post" action="<?= \App\Environment::url('/settings/google/update?id=' . $model->getId()) ?>">
                 <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
 
                 <div class="rs-form-group rs-mb-4" style="margin-bottom: 1.25rem;">
@@ -65,7 +65,7 @@ $this->setTitle('Edit Google Location: ' . $model->getDisplayName());
                 </div>
 
                 <div style="display:flex; justify-content:flex-end; gap:0.5rem; padding-top:1rem; border-top:1px solid #e2e8f0;">
-                    <a href="/sys-yii3/settings/google" class="rs-btn rs-btn--secondary">Cancel</a>
+                    <a href="<?= \App\Environment::url('/settings/google') ?>" class="rs-btn rs-btn--secondary">Cancel</a>
                     <button type="submit" class="rs-btn rs-btn--primary">Save Changes</button>
                 </div>
             </form>

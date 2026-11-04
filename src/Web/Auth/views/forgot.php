@@ -38,7 +38,7 @@ $this->setTitle('Reset Password');
             <p class="rs-auth-subtitle">Enter your email address and we will send you a link to reset your password.</p>
         </div>
 
-        <form id="request-password-reset-form" method="post" action="/sys-yii3/forgot-password" class="rs-form">
+        <form id="request-password-reset-form" method="post" action="<?= \App\Environment::url('/forgot-password') ?>" class="rs-form">
             <?php if (!empty($csrfToken)): ?>
                 <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
             <?php endif; ?>
@@ -53,7 +53,7 @@ $this->setTitle('Reset Password');
             </div>
 
             <div class="rs-text-center rs-mt-4">
-                <a href="/sys-yii3/login" class="rs-auth-link">Return to sign in</a>
+                <a href="<?= \App\Environment::url('/login') ?>" class="rs-auth-link">Return to sign in</a>
             </div>
         </form>
     </div>

@@ -41,7 +41,7 @@ final class QrUpdateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $flash = new Flash($this->session);
@@ -49,7 +49,7 @@ final class QrUpdateAction
         $currentUserId = $context->getUserId();
         $currentUser = $this->userRepo->findById($currentUserId, $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         // Feature Gating: account.qr_code == 1
@@ -86,19 +86,19 @@ final class QrUpdateAction
 
         if ($id <= 0) {
             $flash->set('error', 'Invalid QR Code identifier.');
-            return $this->redirect('/sys-yii3/qrcode/index');
+            return $this->redirect(\App\Environment::url('/qrcode/index'));
         }
 
         $qrCode = $this->qrCodeRepo->findById($id, $context);
         if ($qrCode === null) {
             $flash->set('error', 'The requested QR Code does not exist or you are not authorized to access it.');
-            return $this->redirect('/sys-yii3/qrcode/index');
+            return $this->redirect(\App\Environment::url('/qrcode/index'));
         }
 
         if (strtoupper($request->getMethod()) === 'POST') {
             // Notice of read-only state: database updates require write permissions
             $flash->set('warning', 'QR Code update processed for preview. Saving database modifications requires write permissions, which are deferred in read-only mode.');
-            return $this->redirect('/sys-yii3/qrcode/view?id=' . $id);
+            return $this->redirect(\App\Environment::url('/qrcode/view?id=') . $id);
         }
 
         return $this->viewRenderer

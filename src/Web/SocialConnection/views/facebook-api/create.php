@@ -27,11 +27,11 @@ $this->setTitle('Create Facebook Application');
     <?php endif; ?>
 
     <div class="rs-section">
-        <?= $this->render('_form', [
+        <?= $this->render('facebook-api/_form', [
             'api' => null,
             'errors' => $errors,
             'csrfToken' => $csrfToken,
-            'actionUrl' => '/sys-yii3/settings/facebook-api/create',
+            'actionUrl' => \App\Environment::url('/settings/facebook-api/create'),
         ]) ?>
     </div>
 </div>

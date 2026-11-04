@@ -139,10 +139,10 @@ $totalPages = max(1, (int) ceil($totalItems / $pageSize));
                 </div>
                 <div class="rs-d-flex rs-gap-2">
                     <?php if ($page > 1): ?>
-                        <a href="/sys-yii3/whatsapp/history?page=<?= $page - 1 ?>" class="rs-btn rs-btn--sm rs-btn--outline">Previous</a>
+                        <a href="<?= \App\Environment::url('/whatsapp/history?page=' . ($page - 1)) ?>" class="rs-btn rs-btn--sm rs-btn--outline">Previous</a>
                     <?php endif; ?>
                     <?php if ($page < $totalPages): ?>
-                        <a href="/sys-yii3/whatsapp/history?page=<?= $page + 1 ?>" class="rs-btn rs-btn--sm rs-btn--outline">Next</a>
+                        <a href="<?= \App\Environment::url('/whatsapp/history?page=' . ($page + 1)) ?>" class="rs-btn rs-btn--sm rs-btn--outline">Next</a>
                     <?php endif; ?>
                 </div>
             </div>

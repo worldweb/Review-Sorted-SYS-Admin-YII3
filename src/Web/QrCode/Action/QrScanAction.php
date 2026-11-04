@@ -8,6 +8,7 @@ use App\Domain\Account\AccountRepositoryInterface;
 use App\Domain\QrCode\QrCodeRepositoryInterface;
 use App\Domain\User\UserRepositoryInterface;
 use App\Security\TenantContext;
+use App\Domain\QrCode\QrScanRepositoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -27,6 +28,7 @@ final class QrScanAction
 
     public function __construct(
         private QrCodeRepositoryInterface $qrCodeRepo,
+        private QrScanRepositoryInterface $qrScanRepo,
         private AccountRepositoryInterface $accountRepo,
         private UserRepositoryInterface $userRepo,
         private ResponseFactoryInterface $responseFactory,
@@ -104,10 +106,11 @@ final class QrScanAction
             ?? $serverParams['REMOTE_ADDR']
             ?? '127.0.0.1';
 
-        // Scan tracking boundary: database connection is read-only (rs_readonly)
-        // Log the scan event safely; physical database write is deferred pending write-capable permissions
+        // Record scan event in database
+        $this->qrScanRepo->recordScan($qrId, $userIp);
+
         $this->logger->info(sprintf(
-            'QR Code scan recorded: QR #%d by IP %s. Target URL: %s (DB write deferred in read-only mode).',
+            'QR Code scan recorded: QR #%d by IP %s. Target URL: %s.',
             $qrId,
             $userIp,
             $destinationUrl

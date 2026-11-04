@@ -13,6 +13,7 @@ use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Yiisoft\Csrf\CsrfTokenInterface;
 use Yiisoft\Session\Flash\Flash;
 use Yiisoft\Session\SessionInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
@@ -35,6 +36,7 @@ final class ReviewViewAction
         private SessionInterface $session,
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
+        private ?CsrfTokenInterface $csrfToken = null,
     ) {
     }
 
@@ -42,7 +44,7 @@ final class ReviewViewAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $flash = new Flash($this->session);
@@ -50,7 +52,7 @@ final class ReviewViewAction
         $currentUserId = $context->getUserId();
         $currentUser = $this->userRepo->findById($currentUserId, $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         // Authorization check
@@ -111,7 +113,7 @@ final class ReviewViewAction
                 // Step 1: External Platform Dispatch
                 $dispatchResult = $this->dispatcher->dispatch($review, $replyText);
 
-                $redirectUrl = '/sys-yii3/reviews';
+                $redirectUrl = \App\Environment::url('/reviews');
                 if (!empty($qParam)) {
                     $redirectUrl .= '?' . base64_decode($qParam);
                 }
@@ -162,6 +164,7 @@ final class ReviewViewAction
                 'context' => $context,
                 'flash' => $flash,
                 'q' => $qParam,
+                'csrfToken' => $this->csrfToken?->getValue(),
             ]);
     }
 

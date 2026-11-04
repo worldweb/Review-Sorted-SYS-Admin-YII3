@@ -40,12 +40,12 @@ final class LocationGroupCreateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         if (!$currentUser->isAdmin() && !$currentUser->isAccountAdmin()) {
@@ -153,9 +153,9 @@ final class LocationGroupCreateAction
                 try {
                     $newId = $this->groupRepo->save($newGroup, $validatedKeys);
                     $flash->add('success', sprintf('Location group "%s" created successfully.', $formData['name']));
-                    return $this->redirect('/sys-yii3/location-group/view?id=' . $newId);
+                    return $this->redirect(\App\Environment::url('/location-group/view?id=') . $newId);
                 } catch (\Throwable $e) {
-                    $flash->add('error', 'Database write error (SELECT-only connection active): ' . $e->getMessage());
+                    $flash->add('error', 'Database error: ' . $e->getMessage());
                 }
             }
         }

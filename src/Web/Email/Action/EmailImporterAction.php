@@ -36,12 +36,12 @@ final class EmailImporterAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         if (!$currentUser->isAdmin() && !$currentUser->isAccountAdmin()) {
@@ -53,7 +53,7 @@ final class EmailImporterAction
         $flash = new Flash($this->session);
 
         if ($request->getMethod() !== 'POST') {
-            return $this->redirect('/sys-yii3/email/importer');
+            return $this->redirect(\App\Environment::url('/email/importer'));
         }
 
         $targetAccountId = $context->getScopedAccountId() ?? ($context->getAccountId() ?? $currentUser->getAccountId());
@@ -64,7 +64,7 @@ final class EmailImporterAction
 
         if ($targetAccountId === null || $targetAccountId <= 0) {
             $flash->add('error', 'Cannot import contacts: no tenant account is active.');
-            return $this->redirect('/sys-yii3/email/importer');
+            return $this->redirect(\App\Environment::url('/email/importer'));
         }
 
         $uploadedFiles = $request->getUploadedFiles();
@@ -73,14 +73,14 @@ final class EmailImporterAction
 
         if ($file === null || $file->getError() === UPLOAD_ERR_NO_FILE) {
             $flash->add('error', 'Please select a CSV file to upload.');
-            return $this->redirect('/sys-yii3/email/importer');
+            return $this->redirect(\App\Environment::url('/email/importer'));
         }
 
         $result = $this->csvImportService->parse($file, ['name', 'email', 'type']);
 
         if ($result->hasHeaderError()) {
             $flash->add('error', (string) $result->getHeaderError());
-            return $this->redirect('/sys-yii3/email/importer');
+            return $this->redirect(\App\Environment::url('/email/importer'));
         }
 
         $records = $result->getRecords();
@@ -134,11 +134,11 @@ final class EmailImporterAction
                 $importedCount = $this->emailRepo->saveContactsBatch($validRows, $targetAccountId);
                 $flash->add('success', sprintf('%d emails imported successfully.', $importedCount));
             } catch (\Throwable $e) {
-                $flash->add('error', 'Database write error (SELECT-only connection active): ' . $e->getMessage());
+                $flash->add('error', 'Database error: ' . $e->getMessage());
             }
         }
 
-        return $this->redirect('/sys-yii3/email/importer');
+        return $this->redirect(\App\Environment::url('/email/importer'));
     }
 
     private function redirect(string $url): ResponseInterface

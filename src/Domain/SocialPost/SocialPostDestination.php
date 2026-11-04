@@ -134,6 +134,16 @@ final class SocialPostDestination
         return $this->status === self::STATUS_QUEUED;
     }
 
+    public function isProcessing(): bool
+    {
+        return $this->status === self::STATUS_PROCESSING;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->errorMessage === 'Cancelled by user';
+    }
+
     public function getScheduledAt(): string
     {
         return $this->scheduledAt;

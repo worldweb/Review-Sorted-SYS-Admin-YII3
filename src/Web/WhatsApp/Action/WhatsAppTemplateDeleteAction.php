@@ -33,7 +33,7 @@ final class WhatsAppTemplateDeleteAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -51,7 +51,7 @@ final class WhatsAppTemplateDeleteAction
         }
 
         if ($id <= 0) {
-            return $this->redirect('/sys-yii3/whatsapp/templates');
+            return $this->redirect(\App\Environment::url('/whatsapp/templates'));
         }
 
         $template = $this->whatsappRepo->findTemplateById($id, $context);
@@ -73,10 +73,10 @@ final class WhatsAppTemplateDeleteAction
             $this->whatsappRepo->deleteTemplate($id);
             $flash->add('success', sprintf('Template "%s" deleted successfully.', $template->getName()));
         } catch (\Throwable $e) {
-            $flash->add('error', 'Database write error (SELECT-only connection active): ' . $e->getMessage());
+            $flash->add('error', 'Database error: ' . $e->getMessage());
         }
 
-        return $this->redirect('/sys-yii3/whatsapp/templates');
+        return $this->redirect(\App\Environment::url('/whatsapp/templates'));
     }
 
     private function redirect(string $url): ResponseInterface

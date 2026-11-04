@@ -86,7 +86,7 @@ final class GlobalSearchAction
                     $accItems[] = [
                         'title' => (string) ($r['business_name'] ?? 'Account #' . $r['id']),
                         'subtitle' => 'Workspace / Account',
-                        'url' => '/sys-yii3/accounts/view?id=' . $r['id'],
+                        'url' => \App\Environment::url('/accounts/view?id=' . $r['id']),
                     ];
                 }
                 $categories[] = [
@@ -118,7 +118,7 @@ final class GlobalSearchAction
                     $userItems[] = [
                         'title' => (string) ($u['name'] ?? 'User #' . $u['id']),
                         'subtitle' => (string) ($u['email'] ?? 'User'),
-                        'url' => '/sys-yii3/user/view?id=' . $u['id'],
+                        'url' => \App\Environment::url('/user/view?id=' . $u['id']),
                     ];
                 }
                 $categories[] = [
@@ -151,7 +151,7 @@ final class GlobalSearchAction
                     $revItems[] = [
                         'title' => (string) ($rv['customer_name'] ?? 'Customer Review'),
                         'subtitle' => $snippet ?: 'Customer Feedback',
-                        'url' => '/sys-yii3/reviews/view?id=' . $rv['id'],
+                        'url' => \App\Environment::url('/reviews/view?id=' . $rv['id']),
                     ];
                 }
                 $categories[] = [
@@ -178,21 +178,21 @@ final class GlobalSearchAction
     private function searchNavigation(string $q, bool $isAdmin): array
     {
         $allNav = [
-            ['title' => 'Dashboard', 'subtitle' => 'Application overview and KPIs', 'url' => '/sys-yii3/'],
-            ['title' => 'Reviews & Mentions', 'subtitle' => 'Customer feedback and ratings', 'url' => '/sys-yii3/reviews'],
-            ['title' => 'Social Connections', 'subtitle' => 'Facebook and Google accounts', 'url' => '/sys-yii3/settings/facebook'],
-            ['title' => 'Social Posting', 'subtitle' => 'Compose and schedule multi-channel posts', 'url' => '/sys-yii3/social-post/create'],
-            ['title' => 'E-mails', 'subtitle' => 'Email templates and campaign dispatch', 'url' => '/sys-yii3/email/index'],
-            ['title' => 'WhatsApp Messages', 'subtitle' => 'WhatsApp templates and campaigns', 'url' => '/sys-yii3/whatsapp/index'],
-            ['title' => 'QR Code', 'subtitle' => 'QR Code studio, customization, and landing pages', 'url' => '/sys-yii3/qrcode/index'],
-            ['title' => 'User Management', 'subtitle' => 'Manage administrators and workspace users', 'url' => '/sys-yii3/users'],
-            ['title' => 'Accounts', 'subtitle' => 'Workspace settings and seat allocations', 'url' => '/sys-yii3/accounts'],
-            ['title' => 'Location Groups', 'subtitle' => 'Group social destinations for posting', 'url' => '/sys-yii3/location-group/index'],
+            ['title' => 'Dashboard', 'subtitle' => 'Application overview and KPIs', 'url' => \App\Environment::url('/')],
+            ['title' => 'Reviews & Mentions', 'subtitle' => 'Customer feedback and ratings', 'url' => \App\Environment::url('/reviews')],
+            ['title' => 'Social Connections', 'subtitle' => 'Facebook and Google accounts', 'url' => \App\Environment::url('/settings/facebook')],
+            ['title' => 'Social Posting', 'subtitle' => 'Compose and schedule multi-channel posts', 'url' => \App\Environment::url('/social-post/create')],
+            ['title' => 'E-mails', 'subtitle' => 'Email templates and campaign dispatch', 'url' => \App\Environment::url('/email/index')],
+            ['title' => 'WhatsApp Messages', 'subtitle' => 'WhatsApp templates and campaigns', 'url' => \App\Environment::url('/whatsapp/index')],
+            ['title' => 'QR Code', 'subtitle' => 'QR Code studio, customization, and landing pages', 'url' => \App\Environment::url('/qrcode/index')],
+            ['title' => 'User Management', 'subtitle' => 'Manage administrators and workspace users', 'url' => \App\Environment::url('/users')],
+            ['title' => 'Accounts', 'subtitle' => 'Workspace settings and seat allocations', 'url' => \App\Environment::url('/accounts')],
+            ['title' => 'Location Groups', 'subtitle' => 'Group social destinations for posting', 'url' => \App\Environment::url('/location-group/index')],
         ];
 
         if ($isAdmin) {
-            $allNav[] = ['title' => 'Subscriptions', 'subtitle' => 'Platform subscription plans and tiers', 'url' => '/sys-yii3/subscription/index'];
-            $allNav[] = ['title' => 'Global Settings', 'subtitle' => 'Platform configuration and migration', 'url' => '/sys-yii3/global-settings'];
+            $allNav[] = ['title' => 'Subscriptions', 'subtitle' => 'Platform subscription plans and tiers', 'url' => \App\Environment::url('/subscription/index')];
+            $allNav[] = ['title' => 'Global Settings', 'subtitle' => 'Platform configuration and migration', 'url' => \App\Environment::url('/global-settings')];
         }
 
         $matches = [];

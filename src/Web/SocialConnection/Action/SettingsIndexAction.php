@@ -22,6 +22,6 @@ final class SettingsIndexAction
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
         return $this->responseFactory->createResponse(302)
-            ->withHeader('Location', '/sys-yii3/settings/facebook');
+            ->withHeader('Location', \App\Environment::url('/settings/facebook'));
     }
 }

@@ -124,7 +124,7 @@ if (($migrationStatus['conflictCount'] ?? 0) > 0) {
             </div>
 
             <div class="rs-d-flex rs-justify-content-end">
-                <a href="/sys-yii3/global-settings?section=database_migration" class="rs-btn rs-btn--ghost" style="border: 1px solid #cbd5e1;">
+                <a href="<?= \App\Environment::url('/global-settings?section=database_migration') ?>" class="rs-btn rs-btn--ghost" style="border: 1px solid #cbd5e1;">
                     🔄 Check Status Again
                 </a>
             </div>

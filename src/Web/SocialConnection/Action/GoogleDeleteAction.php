@@ -26,16 +26,16 @@ final class GoogleDeleteAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
-        $id = (int) ($request->getQueryParams()['id'] ?? 0);
+        $id = (int) ($request->getQueryParams()['id'] ?? $request->getAttribute('id') ?? (((array) $request->getParsedBody())['id'] ?? 0));
         $flash = new Flash($this->session);
 
         $this->connectionRepo->deleteConfig($id, $context);
         $flash->set('info', 'Google location connection removed.');
 
-        return $this->redirect('/sys-yii3/settings/google');
+        return $this->redirect(\App\Environment::url('/settings/google'));
     }
 
     private function redirect(string $url): ResponseInterface

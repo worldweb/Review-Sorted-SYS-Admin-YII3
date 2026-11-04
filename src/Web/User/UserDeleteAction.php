@@ -29,7 +29,7 @@ final class UserDeleteAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $queryParams = $request->getQueryParams();
@@ -54,8 +54,13 @@ final class UserDeleteAction
             return $response;
         }
 
-        // Database read-only guard: prevent mutating write
-        return $this->redirect('/sys-yii3/users?msg=' . urlencode('Deletion prevented: Database connection is strictly in read-only mode during Phase 3.'));
+        try {
+            $this->userRepo->deleteUser($targetId);
+        } catch (\Throwable $e) {
+            return $this->redirect(\App\Environment::url('/users?msg=' . urlencode($e->getMessage())));
+        }
+
+        return $this->redirect(\App\Environment::url('/users'));
     }
 
     private function redirect(string $url): ResponseInterface

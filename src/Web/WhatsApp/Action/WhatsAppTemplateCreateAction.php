@@ -42,7 +42,7 @@ final class WhatsAppTemplateCreateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -91,10 +91,10 @@ final class WhatsAppTemplateCreateAction
                 try {
                     $this->whatsappRepo->saveTemplate($newTemplate);
                     $flash->add('success', sprintf('WhatsApp template "%s" created successfully.', $name));
-                    return $this->redirect('/sys-yii3/whatsapp/templates');
+                    return $this->redirect(\App\Environment::url('/whatsapp/templates'));
                 } catch (\Throwable $e) {
-                    $flash->add('error', 'Database write error (SELECT-only connection active): ' . $e->getMessage());
-                    return $this->redirect('/sys-yii3/whatsapp/templates');
+                    $flash->add('error', 'Database error: ' . $e->getMessage());
+                    return $this->redirect(\App\Environment::url('/whatsapp/templates'));
                 }
             }
         }

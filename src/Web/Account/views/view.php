@@ -19,13 +19,15 @@ $businessName = $account->getBusinessName() ?? "Workspace #{$account->getId()}";
 $this->setTitle($businessName);
 $statusClass = $account->isActive() ? 'rs-badge--success' : 'rs-badge--danger';
 
+$url = static fn(string $p): string => \App\Environment::url($p);
+
 // Header Actions
 $actionButtons = [
-    '<a href="/sys-yii3/accounts" class="rs-btn rs-btn--ghost">Back</a>',
-    '<a href="/sys-yii3/accounts/update?id=' . $account->getId() . '" class="rs-btn rs-btn--primary">Edit Workspace</a>',
+    '<a href="' . $url('/accounts') . '" class="rs-btn rs-btn--ghost">Back</a>',
+    '<a href="' . $url('/accounts/update?id=' . $account->getId()) . '" class="rs-btn rs-btn--primary">Edit Workspace</a>',
 ];
 if ($currentUser->isAdmin()) {
-    $actionButtons[] = '<a href="/sys-yii3/accounts/delete?id=' . $account->getId() . '" class="rs-btn rs-btn--danger" onclick="return confirm(\'Are you sure you want to delete this workspace?\');">Delete</a>';
+    $actionButtons[] = '<a href="' . $url('/accounts/delete?id=' . $account->getId()) . '" class="rs-btn rs-btn--danger" onclick="return confirm(\'Are you sure you want to delete this workspace?\');">Delete</a>';
 }
 
 $title = $businessName;
@@ -93,7 +95,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
 <div class="rs-card">
     <div class="rs-card__header" style="padding: 16px 24px; border-bottom: 1px solid var(--rs-border, #E2E8F0); display: flex; justify-content: space-between; align-items: center;">
         <h2 class="rs-card__title" style="margin: 0; font-size: 18px; font-weight: 600; color: var(--rs-primary, #234137);">Team Members (<?= count($members) ?> / <?= $account->getMaxUsers() ?> seats)</h2>
-        <a href="/sys-yii3/user/create-worker" class="rs-btn rs-btn--sm rs-btn--primary" style="text-decoration: none;">+ Add Member</a>
+        <a href="<?= $url('/user/create-worker') ?>" class="rs-btn rs-btn--sm rs-btn--primary" style="text-decoration: none;">+ Add Member</a>
     </div>
     <div class="rs-table-wrapper" style="overflow-x: auto;">
         <table class="rs-table" style="width: 100%; border-collapse: collapse; text-align: left;">
@@ -117,7 +119,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                     <?php foreach ($members as $m): ?>
                         <tr style="border-bottom: 1px solid var(--rs-border, #E2E8F0);">
                             <td style="padding: 12px 24px; font-weight: 600;">
-                                <a href="/sys-yii3/user/view?id=<?= $m->getId() ?>" style="color: var(--rs-primary, #234137); text-decoration: none;">
+                                <a href="<?= $url('/user/view?id=' . $m->getId()) ?>" style="color: var(--rs-primary, #234137); text-decoration: none;">
                                     <?= Html::encode($m->getName()) ?>
                                 </a>
                             </td>
@@ -129,7 +131,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                                 </span>
                             </td>
                             <td style="padding: 12px 24px; text-align: right;">
-                                <a href="/sys-yii3/user/view?id=<?= $m->getId() ?>" class="rs-btn rs-btn--sm rs-btn--ghost" style="text-decoration: none; font-size: 12px;">View</a>
+                                <a href="<?= $url('/user/view?id=' . $m->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--ghost" style="text-decoration: none; font-size: 12px;">View</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>

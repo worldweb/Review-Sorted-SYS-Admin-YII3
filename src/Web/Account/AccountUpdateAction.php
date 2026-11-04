@@ -36,12 +36,12 @@ final class AccountUpdateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $queryParams = $request->getQueryParams();
@@ -98,7 +98,12 @@ final class AccountUpdateAction
             ]);
 
             if (empty($errors)) {
-                $infoMessage = 'Validation passed. Database is running in strict read-only mode during Phase 3, so record update was prevented.';
+                try {
+                    $this->accountRepo->updateAccount($targetId, $saveData);
+                    return $this->redirect(\App\Environment::url('/accounts/view?id=' . $targetId));
+                } catch (\Throwable $e) {
+                    $errors['general'] = 'Failed to update account: ' . $e->getMessage();
+                }
             }
         }
 

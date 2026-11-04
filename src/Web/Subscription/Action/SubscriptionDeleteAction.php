@@ -28,7 +28,7 @@ final class SubscriptionDeleteAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -44,7 +44,7 @@ final class SubscriptionDeleteAction
         $this->subRepo->deletePlan($id);
         $flash->set('info', 'Plan removed.');
 
-        return $this->redirect('/sys-yii3/subscription');
+        return $this->redirect(\App\Environment::url('/subscription'));
     }
 
     private function redirect(string $url): ResponseInterface

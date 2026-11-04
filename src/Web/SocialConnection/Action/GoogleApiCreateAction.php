@@ -33,12 +33,12 @@ final class GoogleApiCreateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
         if ($currentUser === null || !$currentUser->isAdmin()) {
-            return $this->redirect('/sys-yii3/settings/google');
+            return $this->redirect(\App\Environment::url('/settings/google'));
         }
 
         $flash = new Flash($this->session);
@@ -70,7 +70,7 @@ final class GoogleApiCreateAction
 
                 if ($id !== null) {
                     $flash->add('success', 'Google Project successfully added.');
-                    return $this->redirect('/sys-yii3/settings/google-api');
+                    return $this->redirect(\App\Environment::url('/settings/google-api'));
                 } else {
                     $flash->add('error', 'Failed to save Google Project.');
                 }

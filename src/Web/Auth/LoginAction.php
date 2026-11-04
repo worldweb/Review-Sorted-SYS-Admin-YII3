@@ -44,7 +44,7 @@ final class LoginAction
         // If already authenticated, redirect to home
         $userId = $this->session->get(AuthenticationMiddleware::SESSION_AUTH_KEY);
         if ($userId !== null) {
-            return $this->redirect('/sys-yii3/');
+            return $this->redirect(\App\Environment::url('/'));
         }
 
         $appName = $this->settingRepo->get('branding_app_name', 'Reviews Sorted') ?? 'Reviews Sorted';
@@ -70,7 +70,7 @@ final class LoginAction
                     }
 
                     // Create redirect to protected dashboard
-                    $response = $this->redirect('/sys-yii3/');
+                    $response = $this->redirect(\App\Environment::url('/'));
 
                     // If Remember Me was requested, attach signed cookie
                     if ($form->isRememberMe()) {

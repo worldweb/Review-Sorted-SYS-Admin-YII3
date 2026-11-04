@@ -26,7 +26,7 @@ final class GoogleRevokeAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
@@ -35,7 +35,7 @@ final class GoogleRevokeAction
         $this->connectionRepo->unlinkConfig($id, $context);
         $flash->set('info', 'Google location connection has been unlinked.');
 
-        return $this->redirect('/sys-yii3/settings/google');
+        return $this->redirect(\App\Environment::url('/settings/google'));
     }
 
     private function redirect(string $url): ResponseInterface

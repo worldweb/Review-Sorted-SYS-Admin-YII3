@@ -18,7 +18,7 @@ $this->setTitle('Create New Plan');
 $title = 'Create Subscription Plan';
 $description = 'Define a new tier with pricing, seat limits, and platform features.';
 $actions = [
-    '<a href="/sys-yii3/subscription" class="rs-btn rs-btn--outline">← Back to Plans</a>'
+    '<a href="' . \App\Environment::url('/subscription') . '" class="rs-btn rs-btn--outline">← Back to Plans</a>'
 ];
 include __DIR__ . '/../../Shared/Components/_page_header.php';
 ?>

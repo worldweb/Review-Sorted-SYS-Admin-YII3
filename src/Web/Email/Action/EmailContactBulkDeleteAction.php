@@ -33,7 +33,7 @@ final class EmailContactBulkDeleteAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -58,23 +58,23 @@ final class EmailContactBulkDeleteAction
 
         if (empty($ids)) {
             $flash->add('error', 'No contacts selected for deletion.');
-            return $this->redirect('/sys-yii3/email/importer');
+            return $this->redirect(\App\Environment::url('/email/importer'));
         }
 
         $accountId = $context->getScopedAccountId() ?? $currentUser->getAccountId();
         if ($accountId === null || $accountId <= 0) {
             $flash->add('error', 'No active tenant account.');
-            return $this->redirect('/sys-yii3/email/importer');
+            return $this->redirect(\App\Environment::url('/email/importer'));
         }
 
         try {
             $deletedCount = $this->emailRepo->deleteContactsBatch($ids, $accountId);
             $flash->add('success', sprintf('%d contacts deleted successfully.', $deletedCount));
         } catch (\Throwable $e) {
-            $flash->add('error', 'Database write error (SELECT-only connection active): ' . $e->getMessage());
+            $flash->add('error', 'Database error: ' . $e->getMessage());
         }
 
-        return $this->redirect('/sys-yii3/email/importer');
+        return $this->redirect(\App\Environment::url('/email/importer'));
     }
 
     private function redirect(string $url): ResponseInterface

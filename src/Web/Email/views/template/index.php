@@ -34,7 +34,7 @@ $this->setTitle('E-mail Templates');
             <p class="rs-text-muted rs-m-0">Manage reusable HTML templates for email campaigns and automated follow-ups.</p>
         </div>
         <div>
-            <a href="/sys-yii3/email/template/create" class="rs-btn rs-btn--primary">
+            <a href="<?= \App\Environment::url('/email/template/create') ?>" class="rs-btn rs-btn--primary">
                 <i class="fa-solid fa-plus rs-mr-1"></i> Create Template
             </a>
         </div>
@@ -43,7 +43,7 @@ $this->setTitle('E-mail Templates');
     <!-- Search & Toolbar -->
     <div class="rs-card rs-mb-6">
         <div class="rs-card__body rs-p-4">
-            <form method="get" action="/sys-yii3/email/templates" class="rs-d-flex rs-align-items-center rs-gap-3">
+            <form method="get" action="<?= \App\Environment::url('/email/templates') ?>" class="rs-d-flex rs-align-items-center rs-gap-3">
                 <div class="rs-input-group rs-flex-grow-1" style="max-width: 400px;">
                     <input
                         type="text"
@@ -57,7 +57,7 @@ $this->setTitle('E-mail Templates');
                     <i class="fa-solid fa-magnifying-glass rs-mr-1"></i> Filter
                 </button>
                 <?php if ($search !== ''): ?>
-                    <a href="/sys-yii3/email/templates" class="rs-btn rs-btn--ghost rs-text-muted">Clear</a>
+                    <a href="<?= \App\Environment::url('/email/templates') ?>" class="rs-btn rs-btn--ghost rs-text-muted">Clear</a>
                 <?php endif; ?>
             </form>
         </div>
@@ -88,7 +88,7 @@ $this->setTitle('E-mail Templates');
                         <?php foreach ($templates as $tpl): ?>
                             <tr>
                                 <td>
-                                    <a href="/sys-yii3/email/template/view?id=<?= $tpl->getId() ?>" class="rs-font-semibold rs-text-main" style="text-decoration: none;">
+                                    <a href="<?= \App\Environment::url('/email/template/view?id=' . $tpl->getId()) ?>" class="rs-font-semibold rs-text-main" style="text-decoration: none;">
                                         <?= Html::encode($tpl->getName()) ?>
                                     </a>
                                 </td>
@@ -111,14 +111,14 @@ $this->setTitle('E-mail Templates');
                                 </td>
                                 <td style="text-align: right; white-space: nowrap;">
                                     <div class="rs-d-inline-flex rs-align-items-center rs-gap-1">
-                                        <a href="/sys-yii3/email/template/view?id=<?= $tpl->getId() ?>" class="rs-btn rs-btn--sm rs-btn--ghost" title="View details">
+                                        <a href="<?= \App\Environment::url('/email/template/view?id=' . $tpl->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--ghost" title="View details">
                                             View
                                         </a>
-                                        <a href="/sys-yii3/email/template/update?id=<?= $tpl->getId() ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Edit template">
+                                        <a href="<?= \App\Environment::url('/email/template/update?id=' . $tpl->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Edit template">
                                             Edit
                                         </a>
                                         <?php if (!$tpl->isProtected()): ?>
-                                            <form method="post" action="/sys-yii3/email/template/delete" onsubmit="return confirm('Are you sure you want to delete this custom template?');" style="display: inline-block; margin: 0;">
+                                            <form method="post" action="<?= \App\Environment::url('/email/template/delete') ?>" onsubmit="return confirm('Are you sure you want to delete this custom template?');" style="display: inline-block; margin: 0;">
                                                 <input type="hidden" name="id" value="<?= $tpl->getId() ?>">
                                                 <button type="submit" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-danger" title="Delete template">
                                                     Delete

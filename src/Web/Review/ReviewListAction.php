@@ -40,7 +40,7 @@ final class ReviewListAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $flash = new Flash($this->session);
@@ -48,7 +48,7 @@ final class ReviewListAction
         $currentUserId = $context->getUserId();
         $currentUser = $this->userRepo->findById($currentUserId, $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         // Check RBAC permission for reviews (super, admin, account_admin, worker all have access)

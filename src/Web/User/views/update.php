@@ -23,8 +23,8 @@ $pageTitle = $isOwnProfile ? 'My Profile: ' . $user->getName() : 'Update User: '
 $this->setTitle($pageTitle);
 
 $actions = [
-    '<a href="/sys-yii3/user/view?id=' . $user->getId() . '" class="rs-btn rs-btn--secondary">View User</a>',
-    '<a href="/sys-yii3/users" class="rs-btn rs-btn--ghost">Cancel</a>',
+    '<a href="' . \App\Environment::url('/user/view?id=' . $user->getId()) . '" class="rs-btn rs-btn--secondary">View User</a>',
+    '<a href="' . \App\Environment::url('/users') . '" class="rs-btn rs-btn--ghost">Cancel</a>',
 ];
 $title = $pageTitle;
 $description = 'Modify user configuration, credentials, and workspace permissions.';

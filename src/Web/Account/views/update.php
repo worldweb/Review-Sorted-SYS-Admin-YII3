@@ -21,8 +21,8 @@ $businessName = $account->getBusinessName() ?? "Workspace #{$account->getId()}";
 $this->setTitle('Edit Workspace: ' . $businessName);
 
 $actions = [
-    '<a href="/sys-yii3/accounts/view?id=' . $account->getId() . '" class="rs-btn rs-btn--secondary">View Workspace</a>',
-    '<a href="/sys-yii3/accounts" class="rs-btn rs-btn--ghost">Cancel</a>',
+    '<a href="' . \App\Environment::url('/accounts/view?id=' . $account->getId()) . '" class="rs-btn rs-btn--secondary">View Workspace</a>',
+    '<a href="' . \App\Environment::url('/accounts') . '" class="rs-btn rs-btn--ghost">Cancel</a>',
 ];
 $title = 'Edit Workspace: ' . $businessName;
 $description = 'Modify workspace settings, seat limits, and contact details.';

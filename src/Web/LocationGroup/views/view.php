@@ -29,9 +29,9 @@ $totalDests = count($destinations);
 $title = $model->getName();
 $description = 'Location group details and assigned social destinations.';
 $actions = [
-    '<a href="/sys-yii3/location-group/update?id=' . $model->getId() . '" class="rs-btn rs-btn--primary"><i class="fa-solid fa-pencil rs-mr-1"></i> Edit Group</a>',
+    '<a href="' . \App\Environment::url('/location-group/update?id=' . $model->getId()) . '" class="rs-btn rs-btn--primary"><i class="fa-solid fa-pencil rs-mr-1"></i> Edit Group</a>',
     '<button type="button" class="rs-btn rs-btn--outline-danger" onclick="confirmDeleteGroup(' . $model->getId() . ', \'' . Html::encode(addslashes($model->getName())) . '\')"><i class="fa-solid fa-trash rs-mr-1"></i> Delete</button>',
-    '<a href="/sys-yii3/location-group/index" class="rs-btn rs-btn--outline"><i class="fa-solid fa-arrow-left rs-mr-1"></i> Back to Groups</a>',
+    '<a href="' . \App\Environment::url('/location-group/index') . '" class="rs-btn rs-btn--outline"><i class="fa-solid fa-arrow-left rs-mr-1"></i> Back to Groups</a>',
 ];
 include __DIR__ . '/../../Shared/Components/_page_header.php';
 ?>
@@ -108,7 +108,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                         <i class="fa-solid fa-triangle-exclamation" style="font-size: 32px; color: #F59E0B; margin-bottom: 12px;"></i>
                         <p style="margin: 0 0 8px; font-size: 15px; font-weight: 500; color: #1E293B;">No social destinations assigned</p>
                         <p class="rs-text-muted" style="margin: 0 0 16px; font-size: 13px;">This group currently has no active member locations or pages.</p>
-                        <a href="/sys-yii3/location-group/update?id=<?= $model->getId() ?>" class="rs-btn rs-btn--sm rs-btn--primary">
+                        <a href="<?= \App\Environment::url('/location-group/update?id=' . $model->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--primary">
                             Assign Destinations
                         </a>
                     </div>
@@ -193,7 +193,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
         </div>
         <div class="rs-card__footer rs-d-flex rs-justify-content-end rs-gap-2" style="padding: 12px 20px; border-top: 1px solid var(--rs-border, #E2E8F0); background: #F8FAFC;">
             <button type="button" class="rs-btn rs-btn--sm rs-btn--outline" onclick="closeDeleteModal()">Cancel</button>
-            <form id="delete-group-form" method="POST" action="/sys-yii3/location-group/delete" style="margin: 0;">
+            <form id="delete-group-form" method="POST" action="<?= \App\Environment::url('/location-group/delete') ?>" style="margin: 0;">
                 <input type="hidden" name="_csrf" value="<?= Html::encode($effectiveCsrf) ?>">
                 <input type="hidden" name="id" id="delete-group-id" value="">
                 <button type="submit" class="rs-btn rs-btn--sm rs-btn--danger">Delete Group</button>

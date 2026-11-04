@@ -57,7 +57,7 @@ $this->setTitle('Google Accounts');
                 <p class="rs-m-0" style="color: #475569; font-size: 0.95rem; margin: 0;">
                     Authorize Google Business Profile to sync real customer reviews and publish local store posts directly onto Google Maps and Search.
                 </p>
-                <a href="/sys-yii3/settings/google/setup" class="rs-btn rs-btn--primary" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.25rem; font-weight: 600; text-decoration: none; border-radius: 6px;">
+                <a href="<?= \App\Environment::url('/settings/google/setup') ?>" class="rs-btn rs-btn--primary" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.25rem; font-weight: 600; text-decoration: none; border-radius: 6px;">
                     Connect Google Location
                 </a>
             </div>
@@ -69,7 +69,7 @@ $this->setTitle('Google Accounts');
         <?php if (empty($configs)): ?>
             <?= $this->render('../partials/_empty_state', [
                 'message' => 'No Google Business Profile locations found. Authorize your Google account to discover locations.',
-                'actionUrl' => '/sys-yii3/settings/google/setup',
+                'actionUrl' => \App\Environment::url('/settings/google/setup'),
                 'actionLabel' => 'Connect Google Location'
             ]) ?>
         <?php else: ?>
@@ -123,13 +123,13 @@ $this->setTitle('Google Accounts');
                                     </td>
                                     <td style="padding: 14px 16px; text-align: right; white-space: nowrap;">
                                         <div style="display: inline-flex; gap: 6px; justify-content: flex-end;">
-                                            <a href="/sys-yii3/settings/google/view?id=<?= $cfg->getId() ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="View Details">
+                                            <a href="<?= \App\Environment::url('/settings/google/view?id=' . $cfg->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="View Details">
                                                 View
                                             </a>
-                                            <a href="/sys-yii3/settings/google/update?id=<?= $cfg->getId() ?>" class="rs-btn rs-btn--sm rs-btn--secondary" title="Edit Settings">
+                                            <a href="<?= \App\Environment::url('/settings/google/update?id=' . $cfg->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--secondary" title="Edit Settings">
                                                 Edit
                                             </a>
-                                            <a href="/sys-yii3/settings/google/revoke?id=<?= $cfg->getId() ?>" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-danger" onclick="return confirm('Are you sure you want to disconnect this location?');" title="Disconnect">
+                                            <a href="<?= \App\Environment::url('/settings/google/revoke?id=' . $cfg->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-danger" onclick="return confirm('Are you sure you want to disconnect this location?');" title="Disconnect">
                                                 Disconnect
                                             </a>
                                         </div>
@@ -145,7 +145,7 @@ $this->setTitle('Google Accounts');
                         <span style="font-size: 0.875rem; color: #64748b;">Showing <?= count($configs) ?> of <?= $totalCount ?> Google locations</span>
                         <div style="display: flex; gap: 4px;">
                             <?php for ($p = 1; $p <= $pageCount; $p++): ?>
-                                <a href="/sys-yii3/settings/google?page=<?= $p ?>" class="rs-btn rs-btn--sm <?= $p === $page ? 'rs-btn--primary' : 'rs-btn--secondary' ?>" style="min-width: 32px; text-align: center;">
+                                <a href="<?= \App\Environment::url('/settings/google?page=' . $p) ?>" class="rs-btn rs-btn--sm <?= $p === $page ? 'rs-btn--primary' : 'rs-btn--secondary' ?>" style="min-width: 32px; text-align: center;">
                                     <?= $p ?>
                                 </a>
                             <?php endfor; ?>

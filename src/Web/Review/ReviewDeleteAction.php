@@ -35,20 +35,20 @@ final class ReviewDeleteAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $flash = new Flash($this->session);
 
         if ($request->getMethod() !== 'POST') {
             $flash->set('error', 'Method not allowed for review deletion.');
-            return $this->redirect('/sys-yii3/reviews');
+            return $this->redirect(\App\Environment::url('/reviews'));
         }
 
         $currentUserId = $context->getUserId();
         $currentUser = $this->userRepo->findById($currentUserId, $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         // Authorization check: Admin, account admin, or review permission
@@ -58,7 +58,7 @@ final class ReviewDeleteAction
             !$this->accessDecision->getRbac()->can($currentUser, '/reviews/*')
         ) {
             $flash->set('error', 'Forbidden: You do not have permission to delete reviews.');
-            return $this->redirect('/sys-yii3/reviews');
+            return $this->redirect(\App\Environment::url('/reviews'));
         }
 
         $queryParams = $request->getQueryParams();
@@ -70,23 +70,23 @@ final class ReviewDeleteAction
 
         if ($id <= 0) {
             $flash->set('error', 'Invalid review ID.');
-            return $this->redirect('/sys-yii3/reviews');
+            return $this->redirect(\App\Environment::url('/reviews'));
         }
 
         $review = $this->reviewRepo->findById($id, $context);
         if ($review === null) {
             $flash->set('error', 'The requested review does not exist or you do not have permission to delete it.');
-            return $this->redirect('/sys-yii3/reviews');
+            return $this->redirect(\App\Environment::url('/reviews'));
         }
 
         $success = $this->reviewRepo->delete($id, $context);
         if ($success) {
             $flash->set('success', 'Review deleted successfully.');
         } else {
-            $flash->set('error', 'Unable to delete review (database is currently in read-only mode).');
+            $flash->set('error', 'Failed to delete the review.');
         }
 
-        return $this->redirect('/sys-yii3/reviews');
+        return $this->redirect(\App\Environment::url('/reviews'));
     }
 
     private function redirect(string $url): ResponseInterface

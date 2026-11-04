@@ -28,6 +28,7 @@ final class Account
         private ?int $createdAt = null,
         private ?int $updatedAt = null,
         private int $qrCode = 0,
+        private ?string $subscription = null,
     ) {
     }
 
@@ -48,6 +49,7 @@ final class Account
             createdAt: isset($row['created_at']) && $row['created_at'] !== null ? (int) $row['created_at'] : null,
             updatedAt: isset($row['updated_at']) && $row['updated_at'] !== null ? (int) $row['updated_at'] : null,
             qrCode: (int) ($row['qr_code'] ?? 0),
+            subscription: isset($row['subscription']) && $row['subscription'] !== null && $row['subscription'] !== '' ? (string) $row['subscription'] : null,
         );
     }
 
@@ -129,6 +131,11 @@ final class Account
     public function getUpdatedAt(): ?int
     {
         return $this->updatedAt;
+    }
+
+    public function getSubscription(): ?string
+    {
+        return $this->subscription;
     }
 
     public function getQrCode(): int

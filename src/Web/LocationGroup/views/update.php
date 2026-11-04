@@ -23,14 +23,14 @@ use Yiisoft\Html\Html;
  * @var string|null $csrf
  */
 
-$this->setTitle('Edit ' . $model->getName() . ' — Location Group');
+$this->setTitle('Edit Location Group: ' . $model->getName());
 
 // Page Header
 $title = 'Edit Location Group: ' . $model->getName();
-$description = 'Update group details and adjust member social destinations.';
+$description = 'Update group details and synchronize assigned social destinations.';
 $actions = [
-    '<a href="/sys-yii3/location-group/view?id=' . $model->getId() . '" class="rs-btn rs-btn--outline"><i class="fa-solid fa-eye rs-mr-1"></i> View Group</a>',
-    '<a href="/sys-yii3/location-group/index" class="rs-btn rs-btn--outline"><i class="fa-solid fa-arrow-left rs-mr-1"></i> Back to Groups</a>'
+    '<a href="' . \App\Environment::url('/location-group/view?id=' . $model->getId()) . '" class="rs-btn rs-btn--secondary">View Details</a>',
+    '<a href="' . \App\Environment::url('/location-group/index') . '" class="rs-btn rs-btn--secondary">Back to Location Groups</a>'
 ];
 include __DIR__ . '/../../Shared/Components/_page_header.php';
 ?>

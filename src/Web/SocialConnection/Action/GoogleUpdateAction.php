@@ -32,14 +32,14 @@ final class GoogleUpdateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
-        $id = (int) ($request->getQueryParams()['id'] ?? 0);
+        $id = (int) ($request->getQueryParams()['id'] ?? $request->getAttribute('id') ?? (((array) $request->getParsedBody())['id'] ?? 0));
         $config = $this->connectionRepo->findById($id, $context);
         if ($config === null || !$config->isGoogle()) {
             (new Flash($this->session))->set('error', 'Google Business connection not found.');
-            return $this->redirect('/sys-yii3/settings/google');
+            return $this->redirect(\App\Environment::url('/settings/google'));
         }
 
         $flash = new Flash($this->session);
@@ -56,7 +56,7 @@ final class GoogleUpdateAction
 
             if ($updated) {
                 $flash->set('success', 'Google Business settings updated successfully.');
-                return $this->redirect('/sys-yii3/settings/google/view?id=' . $id);
+                return $this->redirect(\App\Environment::url('/settings/google/view?id=') . $id);
             }
 
             $flash->set('error', 'Failed to update Google Business settings (database is currently read-only).');

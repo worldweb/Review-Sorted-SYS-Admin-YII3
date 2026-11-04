@@ -32,7 +32,7 @@ final class EmailTemplateViewAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -42,9 +42,9 @@ final class EmailTemplateViewAction
             return $response;
         }
 
-        $id = (int) ($request->getQueryParams()['id'] ?? 0);
+        $id = (int) ($request->getQueryParams()['id'] ?? $request->getAttribute('id') ?? 0);
         if ($id <= 0) {
-            return $this->redirect('/sys-yii3/email/templates');
+            return $this->redirect(\App\Environment::url('/email/templates'));
         }
 
         $template = $this->emailRepo->findTemplateById($id, $context);

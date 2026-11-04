@@ -20,7 +20,7 @@ $this->setTitle('Subscription Plans');
 
 $actions = [];
 if ($currentUser->isAdmin()) {
-    $actions[] = '<a href="/sys-yii3/subscription/create" class="rs-btn rs-btn--primary rs-d-flex rs-align-items-center rs-gap-2">'
+    $actions[] = '<a href="' . \App\Environment::url('/subscription/create') . '" class="rs-btn rs-btn--primary rs-d-flex rs-align-items-center rs-gap-2">'
         . '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Create New Plan</a>';
 }
 
@@ -103,10 +103,10 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                                 </td>
                                 <td style="text-align: right; white-space: nowrap;">
                                     <div class="rs-d-flex rs-gap-2 rs-justify-content-end">
-                                        <a href="/sys-yii3/subscription/update?id=<?= $p->getId() ?>" class="rs-btn-icon rs-btn-icon--sm" title="Edit Plan">
+                                        <a href="<?= \App\Environment::url('/subscription/update?id=' . $p->getId()) ?>" class="rs-btn-icon rs-btn-icon--sm" title="Edit Plan">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                         </a>
-                                        <a href="/sys-yii3/subscription/delete?id=<?= $p->getId() ?>" class="rs-btn-icon rs-btn-icon--sm rs-text-danger" title="Delete Plan" onclick="return confirm('Are you sure you want to delete this subscription plan?');">
+                                        <a href="<?= \App\Environment::url('/subscription/delete?id=' . $p->getId()) ?>" class="rs-btn-icon rs-btn-icon--sm rs-text-danger" title="Delete Plan" onclick="return confirm('Are you sure you want to delete this subscription plan?');">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                         </a>
                                     </div>

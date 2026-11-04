@@ -11,6 +11,7 @@ use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Yiisoft\Csrf\CsrfTokenInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
 /**
@@ -27,6 +28,7 @@ final class ReviewExportAction
         private AccessDecisionManager $accessDecision,
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
+        private ?CsrfTokenInterface $csrfToken = null,
     ) {
     }
 
@@ -34,13 +36,13 @@ final class ReviewExportAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUserId = $context->getUserId();
         $currentUser = $this->userRepo->findById($currentUserId, $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         // RBAC Authorization
@@ -117,6 +119,7 @@ final class ReviewExportAction
             ->render(__DIR__ . '/views/export', [
                 'currentUser' => $currentUser,
                 'context' => $context,
+                'csrfToken' => $this->csrfToken?->getValue(),
             ]);
     }
 

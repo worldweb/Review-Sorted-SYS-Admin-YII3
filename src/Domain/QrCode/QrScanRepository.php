@@ -12,7 +12,7 @@ use Yiisoft\Db\Query\Query;
 
 /**
  * QR Code Scan Analytics Repository.
- * Safe, parameterized, read-only implementation of QrScanRepositoryInterface.
+ * Safe, parameterized implementation of QrScanRepositoryInterface.
  * Strictly enforces TenantContext isolation across all scan queries by joining QR ownership.
  */
 final class QrScanRepository implements QrScanRepositoryInterface
@@ -180,5 +180,21 @@ final class QrScanRepository implements QrScanRepositoryInterface
             'items' => $items,
             'total' => $total,
         ];
+    }
+
+    public function recordScan(int $qrCodeId, string $userIp): bool
+    {
+        try {
+            $now = time();
+            $this->db->createCommand()->insert('{{%qrcode_scan}}', [
+                'qrcode_id' => $qrCodeId,
+                'user_ip' => $userIp,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ])->execute();
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
     }
 }

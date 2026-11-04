@@ -33,12 +33,12 @@ final class FacebookApiIndexAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
         if ($currentUser === null || !$currentUser->isAdmin()) {
-            return $this->redirect('/sys-yii3/settings/facebook');
+            return $this->redirect(\App\Environment::url('/settings/facebook'));
         }
 
         $apis = $this->connectionRepo->findApisByService(Api::SERVICE_FACEBOOK);

@@ -159,7 +159,7 @@ final class QrAjaxAction
                 @unlink($customLogoDiskPath);
             }
 
-            $baseUrl = rtrim((string) (getenv('APP_BASE_URL') ?: '/sys-yii3'), '/');
+            $baseUrl = rtrim(\App\Environment::appUrl(), '/');
             $webImageUrl = $baseUrl . '/' . ltrim($generationResult['path'], '/');
 
             // Render live preview HTML replicating legacy structure

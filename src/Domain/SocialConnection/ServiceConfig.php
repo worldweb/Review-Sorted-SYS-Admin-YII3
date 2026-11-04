@@ -52,6 +52,7 @@ final class ServiceConfig
         private ?int $createdAt = null,
         private ?int $updatedAt = null,
         private array $subServices = [],
+        private ?string $accountBusinessName = null,
     ) {
     }
 
@@ -76,6 +77,8 @@ final class ServiceConfig
             emailLowReview: isset($row['email_low_review']) ? (string) $row['email_low_review'] : null,
             createdAt: isset($row['created_at']) ? (int) $row['created_at'] : null,
             updatedAt: isset($row['updated_at']) ? (int) $row['updated_at'] : null,
+            subServices: [],
+            accountBusinessName: isset($row['account_business_name']) ? (string) $row['account_business_name'] : null,
         );
     }
 
@@ -198,6 +201,11 @@ final class ServiceConfig
     public function getUpdatedAt(): ?int
     {
         return $this->updatedAt;
+    }
+
+    public function getAccountBusinessName(): ?string
+    {
+        return $this->accountBusinessName;
     }
 
     /**

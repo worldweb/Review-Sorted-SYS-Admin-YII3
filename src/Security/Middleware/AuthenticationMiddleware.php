@@ -30,15 +30,10 @@ final class AuthenticationMiddleware implements MiddlewareInterface
      * Public paths that do not require an authenticated session.
      */
     private const PUBLIC_PATHS = [
-        '/sys-yii3/login',
         '/login',
-        '/sys-yii3/forgot-password',
         '/forgot-password',
-        '/sys-yii3/reset-password',
         '/reset-password',
-        '/sys-yii3/new-client',
         '/new-client',
-        '/sys-yii3/qrcode/scan',
         '/qrcode/scan',
     ];
 
@@ -122,18 +117,22 @@ final class AuthenticationMiddleware implements MiddlewareInterface
             $this->tenantContextProvider->reset();
         }
 
-        $isPublic = $this->isPublicPath($path);
-        $isLoginPath = $path === '/sys-yii3/login' || $path === '/login';
+        $base = \App\Environment::appBasePath();
+        $loginUrl = \App\Environment::url('/login');
+        $homeUrl = \App\Environment::url('/');
+
+        $isPublic = $this->isPublicPath($path, $base);
+        $isLoginPath = $path === $loginUrl || $path === '/login' || ($base !== '' && $path === $base . '/login');
 
         // 5. Route Protection Rules
         // Authenticated users trying to access login page are redirected to dashboard (matches Yii 2 behavior)
         if ($authenticatedUser !== null && $isLoginPath) {
-            return $this->createRedirectResponse('/sys-yii3/');
+            return $this->createRedirectResponse($homeUrl);
         }
 
         // Unauthenticated guests accessing protected routes are redirected to login
         if ($authenticatedUser === null && !$isPublic) {
-            return $this->createRedirectResponse('/sys-yii3/login');
+            return $this->createRedirectResponse($loginUrl);
         }
 
         return $handler->handle($request);
@@ -142,13 +141,13 @@ final class AuthenticationMiddleware implements MiddlewareInterface
     /**
      * Determines whether a path is public or a static asset.
      */
-    private function isPublicPath(string $path): bool
+    private function isPublicPath(string $path, string $base = ''): bool
     {
         // Allow static assets
         if (
-            str_starts_with($path, '/sys-yii3/assets/') ||
+            str_starts_with($path, ($base !== '' ? $base : '') . '/assets/') ||
             str_starts_with($path, '/assets/') ||
-            str_starts_with($path, '/sys-yii3/themes/') ||
+            str_starts_with($path, ($base !== '' ? $base : '') . '/themes/') ||
             str_starts_with($path, '/themes/') ||
             str_ends_with($path, '.ico') ||
             str_ends_with($path, '.svg') ||
@@ -162,6 +161,12 @@ final class AuthenticationMiddleware implements MiddlewareInterface
         foreach (self::PUBLIC_PATHS as $publicPath) {
             if ($path === $publicPath || rtrim($path, '/') === $publicPath) {
                 return true;
+            }
+            if ($base !== '') {
+                $basePublic = $base . '/' . ltrim($publicPath, '/');
+                if ($path === $basePublic || rtrim($path, '/') === $basePublic) {
+                    return true;
+                }
             }
         }
 

@@ -36,12 +36,12 @@ $statusClass = $user->isActive() ? 'rs-badge--success' : 'rs-badge--danger';
             </div>
         </div>
         <div class="rs-page-header__actions rs-d-flex rs-gap-3">
-            <a href="/sys-yii3/users" class="rs-btn rs-btn--ghost">Back to Users</a>
+            <a href="<?= \App\Environment::url('/users') ?>" class="rs-btn rs-btn--ghost">Back to Users</a>
             <?php if ($canEdit): ?>
-                <a href="/sys-yii3/user/update?id=<?= $user->getId() ?>" class="rs-btn rs-btn--primary">Update</a>
+                <a href="<?= \App\Environment::url('/user/update?id=' . $user->getId()) ?>" class="rs-btn rs-btn--primary">Update</a>
             <?php endif; ?>
             <?php if ($canDelete): ?>
-                <a href="/sys-yii3/user/delete?id=<?= $user->getId() ?>" class="rs-btn rs-btn--danger" onclick="return confirm('Are you sure you want to permanently delete this user?');">Delete</a>
+                <a href="<?= \App\Environment::url('/user/delete?id=' . $user->getId()) ?>" class="rs-btn rs-btn--danger" onclick="return confirm('Are you sure you want to permanently delete this user?');">Delete</a>
             <?php endif; ?>
         </div>
     </div>
@@ -82,7 +82,7 @@ $statusClass = $user->isActive() ? 'rs-badge--success' : 'rs-badge--danger';
                         <th style="width: 220px; text-align: left; padding: 14px 24px; color: var(--rs-text-muted, #64748b); font-size: 14px; font-weight: 600;">Workspace / Account</th>
                         <td style="padding: 14px 24px; font-size: 14px;">
                             <?php if ($account !== null): ?>
-                                <a href="/sys-yii3/accounts/view?id=<?= $account->getId() ?>" style="color: var(--rs-primary, #234137); text-decoration: none; font-weight: 600;">
+                                <a href="<?= \App\Environment::url('/accounts/view?id=' . $account->getId()) ?>" style="color: var(--rs-primary, #234137); text-decoration: none; font-weight: 600;">
                                     <?= Html::encode($account->getBusinessName()) ?> (#<?= $account->getId() ?>)
                                 </a>
                             <?php elseif ($user->getAccountId() !== null): ?>

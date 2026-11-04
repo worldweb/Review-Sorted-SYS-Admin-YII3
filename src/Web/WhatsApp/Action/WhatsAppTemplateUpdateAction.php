@@ -42,7 +42,7 @@ final class WhatsAppTemplateUpdateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -60,7 +60,7 @@ final class WhatsAppTemplateUpdateAction
         }
 
         if ($id <= 0) {
-            return $this->redirect('/sys-yii3/whatsapp/templates');
+            return $this->redirect(\App\Environment::url('/whatsapp/templates'));
         }
 
         $template = $this->whatsappRepo->findTemplateById($id, $context);
@@ -99,10 +99,10 @@ final class WhatsAppTemplateUpdateAction
                 try {
                     $this->whatsappRepo->saveTemplate($updatedTemplate);
                     $flash->add('success', sprintf('WhatsApp template "%s" updated successfully.', $name));
-                    return $this->redirect('/sys-yii3/whatsapp/template/view?id=' . $template->getId());
+                    return $this->redirect(\App\Environment::url('/whatsapp/template/view?id=') . $template->getId());
                 } catch (\Throwable $e) {
-                    $flash->add('error', 'Database write error (SELECT-only connection active): ' . $e->getMessage());
-                    return $this->redirect('/sys-yii3/whatsapp/template/view?id=' . $template->getId());
+                    $flash->add('error', 'Database error: ' . $e->getMessage());
+                    return $this->redirect(\App\Environment::url('/whatsapp/template/view?id=') . $template->getId());
                 }
             }
         }

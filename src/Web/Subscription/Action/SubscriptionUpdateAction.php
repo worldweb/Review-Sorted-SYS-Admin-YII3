@@ -32,7 +32,7 @@ final class SubscriptionUpdateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -46,7 +46,7 @@ final class SubscriptionUpdateAction
         $plan = $this->subRepo->findPlanById($id);
         if ($plan === null) {
             (new Flash($this->session))->set('error', 'Plan not found.');
-            return $this->redirect('/sys-yii3/subscription');
+            return $this->redirect(\App\Environment::url('/subscription'));
         }
 
         $flash = new Flash($this->session);
@@ -69,10 +69,10 @@ final class SubscriptionUpdateAction
 
             if ($updated) {
                 $flash->set('success', 'Plan updated successfully.');
-                return $this->redirect('/sys-yii3/subscription');
+                return $this->redirect(\App\Environment::url('/subscription'));
             }
 
-            $flash->set('error', 'Notice: Database is in read-only mode (rs_readonly). In live production, changes will be saved.');
+            $flash->set('error', 'Failed to update plan.');
         }
 
         return $this->viewRenderer

@@ -19,7 +19,7 @@ use Yiisoft\Html\Html;
  */
 
 $this->setTitle('Edit Template: ' . $template->getName());
-$actionUrl = '/sys-yii3/whatsapp/template/update?id=' . $template->getId();
+$actionUrl = \App\Environment::url('/whatsapp/template/update?id=') . $template->getId();
 $accounts = [];
 $targetAccountId = $template->getAccountId();
 ?>

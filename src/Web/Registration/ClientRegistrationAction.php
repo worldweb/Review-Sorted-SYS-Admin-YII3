@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Web\Registration;
 
+use App\Domain\Account\AccountRepositoryInterface;
+use App\Domain\Account\AccountSaveData;
 use App\Domain\Setting\SettingRepositoryInterface;
+use App\Domain\User\User;
 use App\Domain\User\UserRepositoryInterface;
+use App\Domain\User\UserSaveData;
 use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -22,6 +26,7 @@ final class ClientRegistrationAction
     public function __construct(
         private SettingRepositoryInterface $settingRepo,
         private UserRepositoryInterface $userRepo,
+        private AccountRepositoryInterface $accountRepo,
         private TenantContextProviderInterface $tenantContextProvider,
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
@@ -33,13 +38,13 @@ final class ClientRegistrationAction
     {
         $context = $this->tenantContextProvider->get();
         if (!$context->isGuest()) {
-            return $this->redirect('/sys-yii3/');
+            return $this->redirect(\App\Environment::url('/'));
         }
 
         // Check if self-registration is enabled in SystemSettings
         $allowRegistration = $this->settingRepo->getBool('app_allow_client_self_registration', true);
         if (!$allowRegistration) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $appName = $this->settingRepo->get('branding_app_name', 'Reviews Sorted') ?? 'Reviews Sorted';
@@ -83,7 +88,27 @@ final class ClientRegistrationAction
             }
 
             if (empty($errors)) {
-                $infoMessage = 'Registration validated successfully! Database is running in strict read-only mode during Phase 3, so record creation and auto-login was prevented.';
+                try {
+                    $accountId = $this->accountRepo->createAccount(new AccountSaveData(
+                        businessName: $businessName,
+                        firstName: $firstName,
+                        email: $email,
+                        status: 1,
+                    ));
+
+                    $this->userRepo->createUser(new UserSaveData(
+                        name: $firstName,
+                        email: $email,
+                        password: $password,
+                        role: User::ROLE_ACCOUNT_ADMIN,
+                        status: User::STATUS_ACTIVE,
+                        accountId: $accountId,
+                    ));
+
+                    return $this->redirect(\App\Environment::url('/login?registered=1'));
+                } catch (\Throwable $e) {
+                    $errors['general'] = 'Registration failed: ' . $e->getMessage();
+                }
             }
         }
 

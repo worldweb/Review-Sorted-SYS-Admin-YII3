@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 $this->setTitle('Create WhatsApp Template');
 $template = null;
-$actionUrl = '/sys-yii3/whatsapp/template/create';
+$actionUrl = \App\Environment::url('/whatsapp/template/create');
 ?>
 
 <div class="rs-page">

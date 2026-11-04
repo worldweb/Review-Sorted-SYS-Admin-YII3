@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Environment;
 use App\Web;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 
 return [
-    Group::create('/sys-yii3')
+    Group::create(Environment::appBasePath())
         ->routes(
             Route::get('[/]')
                 ->action(Web\HomePage\Action::class)
@@ -76,6 +77,9 @@ return [
             Route::methods(['GET', 'POST'], '/accounts/delete')
                 ->action(Web\Account\AccountDeleteAction::class)
                 ->name('accounts_delete'),
+            Route::methods(['GET', 'POST'], '/accounts/subscribe')
+                ->action(Web\Account\AccountSubscribeAction::class)
+                ->name('accounts_subscribe'),
 
             // Reviews & Mentions Routes
             Route::get('/reviews')

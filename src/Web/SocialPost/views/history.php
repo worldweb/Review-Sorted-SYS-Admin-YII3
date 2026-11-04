@@ -25,7 +25,7 @@ $this->setTitle('Publishing History');
             <h2 class="rs-h1 rs-m-0">Publishing History &amp; Delivery Log</h2>
             <p class="rs-text-sm rs-text-muted rs-mb-0 rs-mt-1">Audit trail of all dispatched posts across connected social channels.</p>
         </div>
-        <a href="/sys-yii3/social-post/create" class="rs-btn rs-btn--primary">Create Social Post</a>
+        <a href="<?= \App\Environment::url('/social-post/create') ?>" class="rs-btn rs-btn--primary">Create Social Post</a>
     </div>
 
     <div class="rs-card">
@@ -93,7 +93,7 @@ $this->setTitle('Publishing History');
                                         <?php endif; ?>
                                     </td>
                                     <td style="text-align: right; white-space: nowrap;">
-                                        <a href="/sys-yii3/social-post/view?id=<?= $p->getId() ?>" class="rs-btn rs-btn--sm rs-btn--outline">
+                                        <a href="<?= \App\Environment::url('/social-post/view?id=' . $p->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--outline">
                                             Details
                                         </a>
                                     </td>
@@ -110,7 +110,7 @@ $this->setTitle('Publishing History');
                         </div>
                         <div class="rs-d-flex rs-gap-1 rs-align-items-center">
                             <?php for ($pg = 1; $pg <= $pageCount; $pg++): ?>
-                                <a href="/sys-yii3/social-post/history?page=<?= $pg ?>" class="rs-btn rs-btn--sm <?= $pg === $page ? 'rs-btn--primary' : 'rs-btn--secondary' ?>" style="min-width: 32px; text-align: center;">
+                                <a href="<?= \App\Environment::url('/social-post/history?page=' . $pg) ?>" class="rs-btn rs-btn--sm <?= $pg === $page ? 'rs-btn--primary' : 'rs-btn--secondary' ?>" style="min-width: 32px; text-align: center;">
                                     <?= $pg ?>
                                 </a>
                             <?php endfor; ?>

@@ -28,11 +28,11 @@ $this->setTitle('Update Facebook App: ' . $api->getLabel());
     <?php endif; ?>
 
     <div class="rs-section">
-        <?= $this->render('_form', [
+        <?= $this->render('facebook-api/_form', [
             'api' => $api,
             'errors' => $errors,
             'csrfToken' => $csrfToken,
-            'actionUrl' => '/sys-yii3/settings/facebook-api/update?id=' . $api->getId(),
+            'actionUrl' => \App\Environment::url('/settings/facebook-api/update?id=') . $api->getId(),
         ]) ?>
     </div>
 </div>

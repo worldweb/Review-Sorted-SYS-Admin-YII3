@@ -12,6 +12,7 @@ use Yiisoft\Html\Html;
  */
 
 $this->setTitle('WhatsApp Template: ' . $template->getName());
+?>
 <div class="rs-page">
     <!-- Page Header -->
     <div class="rs-page-header rs-d-flex rs-align-items-center rs-justify-content-between rs-mb-6">
@@ -20,18 +21,18 @@ $this->setTitle('WhatsApp Template: ' . $template->getName());
             <p class="rs-text-muted rs-m-0">View WhatsApp message template details and plain-text preview.</p>
         </div>
         <div class="rs-d-flex rs-gap-2">
-            <a href="/sys-yii3/whatsapp/template/update?id=<?= $template->getId() ?>" class="rs-btn rs-btn--primary">
+            <a href="<?= \App\Environment::url('/whatsapp/template/update?id=' . $template->getId()) ?>" class="rs-btn rs-btn--primary">
                 <i class="fa-solid fa-pen-to-square rs-mr-1"></i> Edit Template
             </a>
             <?php if (!$template->isProtected()): ?>
-                <form method="post" action="/sys-yii3/whatsapp/template/delete" onsubmit="return confirm('Are you sure you want to delete this template?');" style="display:inline-block; margin:0;">
+                <form method="post" action="<?= \App\Environment::url('/whatsapp/template/delete') ?>" onsubmit="return confirm('Are you sure you want to delete this template?');" style="display:inline-block; margin:0;">
                     <input type="hidden" name="id" value="<?= $template->getId() ?>">
                     <button type="submit" class="rs-btn rs-btn--outline rs-text-danger">
                         <i class="fa-solid fa-trash rs-mr-1"></i> Delete
                     </button>
                 </form>
             <?php endif; ?>
-            <a href="/sys-yii3/whatsapp/templates" class="rs-btn rs-btn--ghost">
+            <a href="<?= \App\Environment::url('/whatsapp/templates') ?>" class="rs-btn rs-btn--ghost">
                 <i class="fa-solid fa-arrow-left rs-mr-1"></i> Back to Templates
             </a>
         </div>

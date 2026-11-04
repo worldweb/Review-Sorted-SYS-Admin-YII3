@@ -8,6 +8,7 @@ use Yiisoft\Html\Html;
  * @var \Yiisoft\View\WebView $this
  * @var \App\Domain\User\User $currentUser
  * @var \App\Security\TenantContextInterface $context
+ * @var string|null $csrfToken
  */
 
 $this->setTitle('Export Reviews');
@@ -20,7 +21,7 @@ $this->setTitle('Export Reviews');
             <p class="rs-text-muted rs-m-0 rs-mt-1">Download review and customer feedback data in CSV format.</p>
         </div>
         <div>
-            <a href="/sys-yii3/reviews" class="rs-btn rs-btn--outline">
+            <a href="<?= \App\Environment::url('/reviews') ?>" class="rs-btn rs-btn--outline">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 Back to Reviews
             </a>
@@ -32,11 +33,15 @@ $this->setTitle('Export Reviews');
             <h3 class="rs-card__title">Export Options</h3>
         </div>
         <div class="rs-card__body rs-p-6">
-            <form method="POST" action="/sys-yii3/reviews/export" class="rs-form">
+            <form method="POST" action="<?= \App\Environment::url('/reviews/export') ?>" class="rs-form">
+                <?php if (!empty($csrfToken)): ?>
+                    <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
+                <?php endif; ?>
+
                 <!-- Date Range Selection -->
                 <div class="rs-form-group rs-mb-4">
                     <label class="rs-label rs-mb-2">Date Range</label>
-                    <select class="rs-select rs-input rs-w-100" name="date_range" id="export-date-range">
+                    <select class="rs-select rs-input rs-w-100" name="ReviewSearchExport[date_range]" id="export-date-range">
                         <option value="30">Last 30 days</option>
                         <option value="60">Last 60 days</option>
                         <option value="90">Last 90 days</option>
@@ -75,7 +80,7 @@ $this->setTitle('Export Reviews');
                 </div>
 
                 <div class="rs-d-flex rs-justify-content-end rs-gap-3 rs-pt-3" style="border-top: 1px solid var(--rs-border, #e2e8f0);">
-                    <a href="/sys-yii3/reviews" class="rs-btn rs-btn--outline">Cancel</a>
+                    <a href="<?= \App\Environment::url('/reviews') ?>" class="rs-btn rs-btn--outline">Cancel</a>
                     <button type="submit" class="rs-btn rs-btn--primary">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         Generate Export

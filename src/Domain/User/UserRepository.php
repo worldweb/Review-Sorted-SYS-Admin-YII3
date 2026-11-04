@@ -11,7 +11,7 @@ use Yiisoft\Db\Query\Query;
 
 /**
  * User Repository Implementation.
- * Provides safe, parameterized, read-only queries for User domain entities
+ * Provides safe, parameterized queries and CRUD persistence for User domain entities
  * with automatic tenant boundary protection.
  */
 final class UserRepository implements UserRepositoryInterface
@@ -332,22 +332,105 @@ final class UserRepository implements UserRepositoryInterface
 
     public function createUser(UserSaveData $data): int
     {
-        throw new \RuntimeException(
-            'Database write operation (createUser) blocked: Database connection is strictly in read-only mode during Phase 3.'
-        );
+        $now = time();
+        $passwordHash = null;
+        if ($data->password !== null && $data->password !== '') {
+            $passwordHash = password_hash($data->password, PASSWORD_DEFAULT);
+        }
+
+        $authKey = bin2hex(random_bytes(16));
+
+        $this->db->createCommand()->insert('{{%user}}', [
+            'name' => $data->name,
+            'email' => $data->email,
+            'password_hash' => $passwordHash,
+            'auth_key' => $authKey,
+            'status' => $data->status,
+            'account_id' => $data->accountId,
+            'owner_id' => $data->ownerId,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ])->execute();
+
+        $userId = (int) $this->db->getLastInsertID('{{%user}}');
+
+        if ($userId > 0 && !empty($data->role)) {
+            $this->db->createCommand()->insert('{{%auth_assignment}}', [
+                'item_name' => $data->role,
+                'user_id' => (string) $userId,
+                'created_at' => $now,
+            ])->execute();
+        }
+
+        return $userId;
     }
 
     public function updateUser(int $id, UserSaveData $data): bool
     {
-        throw new \RuntimeException(
-            'Database write operation (updateUser) blocked: Database connection is strictly in read-only mode during Phase 3.'
-        );
+        $now = time();
+        $fields = [
+            'name' => $data->name,
+            'email' => $data->email,
+            'status' => $data->status,
+            'updated_at' => $now,
+        ];
+
+        if ($data->accountId !== null) {
+            $fields['account_id'] = $data->accountId;
+        }
+
+        if ($data->password !== null && $data->password !== '') {
+            $fields['password_hash'] = password_hash($data->password, PASSWORD_DEFAULT);
+        }
+
+        $affected = $this->db->createCommand()->update(
+            '{{%user}}',
+            $fields,
+            ['id' => $id]
+        )->execute();
+
+        if (!empty($data->role)) {
+            $hasAssignment = (new Query($this->db))
+                ->from('{{%auth_assignment}}')
+                ->where(['user_id' => (string) $id])
+                ->exists();
+
+            if ($hasAssignment) {
+                $this->db->createCommand()->update(
+                    '{{%auth_assignment}}',
+                    ['item_name' => $data->role],
+                    ['user_id' => (string) $id]
+                )->execute();
+            } else {
+                $this->db->createCommand()->insert('{{%auth_assignment}}', [
+                    'item_name' => $data->role,
+                    'user_id' => (string) $id,
+                    'created_at' => $now,
+                ])->execute();
+            }
+        }
+
+        return $affected >= 0;
     }
 
     public function deleteUser(int $id): bool
     {
-        throw new \RuntimeException(
-            'Database write operation (deleteUser) blocked: Database connection is strictly in read-only mode during Phase 3.'
-        );
+        // Guard against deleting super admin
+        $user = $this->findById($id);
+        if ($user !== null && $user->isSuperAdmin()) {
+            throw new \RuntimeException('Cannot delete the super admin.');
+        }
+
+        $this->db->createCommand()->delete(
+            '{{%auth_assignment}}',
+            ['user_id' => (string) $id]
+        )->execute();
+
+        $affected = $this->db->createCommand()->delete(
+            '{{%user}}',
+            ['id' => $id]
+        )->execute();
+
+        return $affected > 0;
     }
 }

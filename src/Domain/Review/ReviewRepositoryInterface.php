@@ -47,7 +47,7 @@ interface ReviewRepositoryInterface
     public function getServiceConfigOptions(?TenantContextInterface $context = null): array;
 
     /**
-     * Returns standard service channel options (Google, Facebook, Twitter, Instagram).
+     * Returns standard service channel options (Google, Facebook, Instagram).
      *
      * @return array<int, string>
      */

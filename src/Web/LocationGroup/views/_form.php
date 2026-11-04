@@ -33,17 +33,15 @@ $totalAvailable = count($googleItems) + count($facebookItems) + count($instagram
 $hasSelectedAccount = !empty($formData['account_id']);
 ?>
 
-<form method="POST" action="<?= $isEdit ? '/sys-yii3/location-group/update?id=' . (int) ($formData['id'] ?? 0) : '/sys-yii3/location-group/create' ?>" id="location-group-form">
+<form method="POST" action="<?= $isEdit ? \App\Environment::url('/location-group/update?id=' . (int) ($formData['id'] ?? 0)) : \App\Environment::url('/location-group/create') ?>" id="location-group-form">
     <input type="hidden" name="_csrf" value="<?= Html::encode($effectiveCsrf) ?>">
 
-    <!-- Card 1: Group Settings -->
+    <!-- Card 1: Account Selection & Group Details -->
     <div class="rs-card rs-mb-5">
-        <div class="rs-card__header" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
-            <h3 style="margin: 0; font-size: 15px; font-weight: 600;">
-                <i class="fa-solid fa-sliders rs-mr-1" style="color: #64748B;"></i> Group Settings
-            </h3>
+        <div class="rs-card__header">
+            <h3 class="rs-card__title">Group Details</h3>
         </div>
-        <div class="rs-card__body" style="padding: 20px;">
+        <div class="rs-card__body">
                     
                     <!-- Account Selection -->
                     <div style="margin-bottom: 16px;">
@@ -304,11 +302,11 @@ $hasSelectedAccount = !empty($formData['account_id']);
         </div>
 
     <!-- Form Actions Footer -->
-    <div class="rs-card" style="padding: 16px 20px; background: #F8FAFC; border-top: 1px solid var(--rs-border, #E2E8F0);">
-        <div class="rs-d-flex rs-justify-content-end rs-gap-3">
-            <a href="/sys-yii3/location-group/index" class="rs-btn rs-btn--outline">Cancel</a>
+    <div class="rs-card rs-mt-4" style="padding: 16px 20px; background: #F8FAFC; border-top: 1px solid var(--rs-border, #E2E8F0);">
+        <div class="rs-d-flex rs-justify-content-end rs-gap-3" style="display: flex; justify-content: flex-end; gap: 12px;">
+            <a href="<?= \App\Environment::url('/location-group/index') ?>" class="rs-btn rs-btn--secondary">Cancel</a>
             <button type="submit" class="rs-btn rs-btn--primary">
-                <?= $isEdit ? '<i class="fa-solid fa-check rs-mr-1"></i> Update Location Group' : '<i class="fa-solid fa-plus rs-mr-1"></i> Create Location Group' ?>
+                <?= $isEdit ? 'Update Location Group' : 'Create Location Group' ?>
             </button>
         </div>
     </div>
@@ -400,7 +398,7 @@ function loadDestinationsForAccount(accountId) {
     if (actions) actions.style.display = 'none';
     if (loading) loading.style.display = 'block';
 
-    const url = '/sys-yii3/location-group/destinations?accountId=' + encodeURIComponent(accountId);
+    const url = '<?= \App\Environment::url('/location-group/destinations') ?>?accountId=' + encodeURIComponent(accountId);
 
     fetch(url, {
         headers: {

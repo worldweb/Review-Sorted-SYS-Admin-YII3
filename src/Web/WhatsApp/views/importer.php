@@ -33,8 +33,8 @@ $endItem = min($total, $currentPage * $pageSize);
 $title = 'WhatsApp Contacts & Import';
 $description = 'Manage WhatsApp recipient phone directory and import contacts via CSV.';
 $actions = [
-    '<a href="/sys-yii3/whatsapp/importer/sample" class="rs-btn rs-btn--outline"><i class="fa-solid fa-download rs-mr-1"></i> Download Sample CSV</a>',
-    '<a href="/sys-yii3/whatsapp/send" class="rs-btn rs-btn--primary"><i class="fa-brands fa-whatsapp rs-mr-1"></i> Send Campaign</a>'
+    '<a href="' . \App\Environment::url('/whatsapp/importer/sample') . '" class="rs-btn rs-btn--outline"><i class="fa-solid fa-download rs-mr-1"></i> Download Sample CSV</a>',
+    '<a href="' . \App\Environment::url('/whatsapp/send') . '" class="rs-btn rs-btn--primary"><i class="fa-brands fa-whatsapp rs-mr-1"></i> Send Campaign</a>'
 ];
 include __DIR__ . '/../../Shared/Components/_page_header.php';
 ?>
@@ -49,7 +49,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
         <h3 class="rs-card__title">Select CSV file to upload</h3>
     </div>
     <div class="rs-card__body rs-p-6">
-                <form method="POST" action="/sys-yii3/whatsapp/importer" enctype="multipart/form-data">
+                <form method="POST" action="<?= \App\Environment::url('/whatsapp/importer') ?>" enctype="multipart/form-data">
                     <input type="hidden" name="_csrf" value="<?= Html::encode($effectiveCsrf) ?>">
                     <?php if ($accountId !== null && $context->isUnrestricted()): ?>
                         <input type="hidden" name="account_id" value="<?= $accountId ?>">
@@ -81,7 +81,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                     </div>
 
                     <div class="rs-d-flex rs-justify-content-between rs-align-items-center">
-                        <a href="/sys-yii3/whatsapp/importer/sample" class="rs-text-primary" style="font-size: 13px; text-decoration: none;">
+                        <a href="<?= \App\Environment::url('/whatsapp/importer/sample') ?>" class="rs-text-primary" style="font-size: 13px; text-decoration: none;">
                             <i class="fa-solid fa-circle-down rs-mr-1"></i> Sample CSV
                         </a>
                         <button type="submit" class="rs-btn rs-btn--primary">
@@ -203,15 +203,15 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                     </div>
                     <div class="rs-d-flex rs-gap-1">
                         <?php if ($currentPage > 1): ?>
-                            <a href="/sys-yii3/whatsapp/importer?page=<?= $currentPage - 1 ?>" class="rs-btn rs-btn--sm rs-btn--outline">Previous</a>
+                            <a href="<?= \App\Environment::url('/whatsapp/importer?page=' . ($currentPage - 1)) ?>" class="rs-btn rs-btn--sm rs-btn--outline">Previous</a>
                         <?php endif; ?>
                         <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-                            <a href="/sys-yii3/whatsapp/importer?page=<?= $p ?>" class="rs-btn rs-btn--sm <?= $p === $currentPage ? 'rs-btn--primary' : 'rs-btn--outline' ?>">
+                            <a href="<?= \App\Environment::url('/whatsapp/importer?page=' . $p) ?>" class="rs-btn rs-btn--sm <?= $p === $currentPage ? 'rs-btn--primary' : 'rs-btn--outline' ?>">
                                 <?= $p ?>
                             </a>
                         <?php endfor; ?>
                         <?php if ($currentPage < $totalPages): ?>
-                            <a href="/sys-yii3/whatsapp/importer?page=<?= $currentPage + 1 ?>" class="rs-btn rs-btn--sm rs-btn--outline">Next</a>
+                            <a href="<?= \App\Environment::url('/whatsapp/importer?page=' . ($currentPage + 1)) ?>" class="rs-btn rs-btn--sm rs-btn--outline">Next</a>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -232,7 +232,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
         </div>
         <div class="rs-card__footer rs-d-flex rs-justify-content-end rs-gap-2" style="padding: 12px 20px; border-top: 1px solid var(--rs-border, #E2E8F0); background: #F8FAFC;">
             <button type="button" class="rs-btn rs-btn--sm rs-btn--outline" onclick="closeDeleteModal()">Cancel</button>
-            <form method="POST" action="/sys-yii3/whatsapp/contact/delete" style="margin: 0;">
+            <form method="POST" action="<?= \App\Environment::url('/whatsapp/contact/delete') ?>" style="margin: 0;">
                 <input type="hidden" name="_csrf" value="<?= Html::encode($effectiveCsrf) ?>">
                 <input type="hidden" name="id" id="delete-contact-id" value="">
                 <button type="submit" class="rs-btn rs-btn--sm rs-btn--danger">Delete</button>
@@ -254,7 +254,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
         </div>
         <div class="rs-card__footer rs-d-flex rs-justify-content-end rs-gap-2" style="padding: 12px 20px; border-top: 1px solid var(--rs-border, #E2E8F0); background: #F8FAFC;">
             <button type="button" class="rs-btn rs-btn--sm rs-btn--outline" onclick="closeBulkDeleteModal()">Cancel</button>
-            <form method="POST" action="/sys-yii3/whatsapp/contact/delete-bulk" style="margin: 0;">
+            <form method="POST" action="<?= \App\Environment::url('/whatsapp/contact/delete-bulk') ?>" style="margin: 0;">
                 <input type="hidden" name="_csrf" value="<?= Html::encode($effectiveCsrf) ?>">
                 <input type="hidden" name="ids" id="bulk-delete-ids" value="">
                 <button type="submit" class="rs-btn rs-btn--sm rs-btn--danger">Delete All Selected</button>

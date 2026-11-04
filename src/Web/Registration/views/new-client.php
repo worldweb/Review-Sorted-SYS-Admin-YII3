@@ -185,7 +185,7 @@ $eyeOffIcon = '<svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 
 
         <div class="new-client-card">
             <div class="new-client-card-inner">
-                <form method="post" action="/sys-yii3/new-client" class="rs-form" enctype="multipart/form-data" id="form-signup">
+                <form method="post" action="<?= \App\Environment::url('/new-client') ?>" class="rs-form" enctype="multipart/form-data" id="form-signup">
                     <?php if (!empty($csrfToken)): ?>
                         <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
                     <?php endif; ?>
@@ -315,7 +315,7 @@ $eyeOffIcon = '<svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 
         
         <div class="new-client-footer">
             Already have an account? 
-            <a href="/sys-yii3/login" class="rs-auth-link">Sign in</a>
+            <a href="<?= \App\Environment::url('/login') ?>" class="rs-auth-link">Sign in</a>
         </div>
         
     </div>

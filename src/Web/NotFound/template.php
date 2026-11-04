@@ -40,7 +40,7 @@ $path = $currentRoute->getUri()?->getPath() ?? 'unknown';
             <p style="margin: 0;">Please contact platform support if you believe this is in error.</p>
         </div>
 
-        <a href="/sys-yii3/" class="rs-btn rs-btn--primary rs-btn--block rs-btn--lg" style="text-decoration: none;">
+        <a href="<?= \App\Environment::url('/') ?>" class="rs-btn rs-btn--primary rs-btn--block rs-btn--lg" style="text-decoration: none;">
             Return to Dashboard
         </a>
     </div>

@@ -32,14 +32,14 @@ final class SocialPostUpdateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
         $post = $this->postRepo->findById($id, $context);
         if ($post === null) {
             (new Flash($this->session))->set('error', 'Post not found.');
-            return $this->redirect('/sys-yii3/social-post');
+            return $this->redirect(\App\Environment::url('/social-post'));
         }
 
         $flash = new Flash($this->session);
@@ -56,7 +56,7 @@ final class SocialPostUpdateAction
 
             if ($updated) {
                 $flash->set('success', 'Post updated successfully.');
-                return $this->redirect('/sys-yii3/social-post/view?id=' . $id);
+                return $this->redirect(\App\Environment::url('/social-post/view?id=') . $id);
             }
 
             $flash->set('error', 'Unable to update post (database is currently read-only).');

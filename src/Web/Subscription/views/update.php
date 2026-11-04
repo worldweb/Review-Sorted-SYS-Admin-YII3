@@ -14,32 +14,32 @@ use Yiisoft\Html\Html;
  * @var Yiisoft\View\WebView $this
  */
 
-$this->setTitle('Edit Plan: ' . $model->getPlanName());
+$planTitle = 'Update Plan: ' . $model->getPlanName();
+$this->setTitle($planTitle);
 
-$title = 'Edit Plan: ' . $model->getPlanName();
+$title = $planTitle;
 $description = 'Modify pricing tiers, usage limits, features, and active status.';
 $actions = [
-    '<a href="/sys-yii3/subscription" class="rs-btn rs-btn--outline">← Back to Plans</a>'
+    '<a href="' . \App\Environment::url('/subscription') . '" class="rs-btn rs-btn--outline">← Back to Plans</a>'
 ];
 include __DIR__ . '/../../Shared/Components/_page_header.php';
 ?>
 
 <div class="rs-page">
+    <?php if ($flash->has('success')): ?>
+        <div class="rs-alert rs-alert--success rs-mb-4" role="alert">
+            <?= Html::encode((string) $flash->get('success')) ?>
+        </div>
+    <?php endif; ?>
+
     <?php if ($flash->has('error')): ?>
         <div class="rs-alert rs-alert--danger rs-mb-4" role="alert">
             <?= Html::encode((string) $flash->get('error')) ?>
         </div>
     <?php endif; ?>
 
-    <div class="rs-card" style="max-width: 800px; margin: 0 auto;">
-        <div class="rs-card__header" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
-            <h3 class="rs-card__title" style="margin: 0; font-size: 1.05rem; font-weight: 700;">Plan Properties</h3>
-        </div>
-        <div class="rs-card__body rs-p-6" style="padding: 24px;">
-            <?= $this->render('_form', [
-                'model' => $model,
-                'csrfToken' => $csrfToken,
-            ]) ?>
-        </div>
-    </div>
+    <?= $this->render('_form', [
+        'model' => $model,
+        'csrfToken' => $csrfToken,
+    ]) ?>
 </div>

@@ -19,7 +19,7 @@ use Yiisoft\Html\Html;
 
 $this->setTitle('Bulk Reply Results');
 
-$backUrl = '/sys-yii3/reviews';
+$backUrl = \App\Environment::url('/reviews');
 if (!empty($q)) {
     $backUrl .= '?' . $q;
 }
@@ -75,21 +75,20 @@ $unsavedCount = $platformAcceptedCount - $localSavedCount;
         </div>
     <?php endif; ?>
 
-    <!-- Outcomes Data Table Card -->
+    <!-- Results Table Card -->
     <div class="rs-card rs-mb-6">
         <div class="rs-card__header rs-py-3">
-            <h3 class="rs-card__title" style="font-size: 15px;">Live Dispatch & Persistence Details</h3>
+            <h3 class="rs-card__title" style="font-size: 15px;">Dispatch Outcome</h3>
         </div>
         <div class="rs-table-wrapper">
-            <table class="rs-table rs-w-100" style="margin: 0;">
+            <table class="rs-table rs-table--hover rs-w-100" style="margin: 0;">
                 <thead>
                     <tr>
-                        <th style="width: 16%;">Alias</th>
-                        <th style="width: 10%;">Channel</th>
-                        <th style="width: 14%;">Customer</th>
-                        <th style="width: 24%;">Review Text</th>
-                        <th style="width: 18%;">Platform Dispatch</th>
-                        <th class="rs-text-center" style="width: 18%;">Local Database</th>
+                        <th style="width: 20%;">Customer</th>
+                        <th style="width: 100px;">Rating</th>
+                        <th>Review Text</th>
+                        <th style="width: 140px;">Date</th>
+                        <th class="rs-text-center" style="width: 140px;">Reply Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -108,18 +107,13 @@ $unsavedCount = $platformAcceptedCount - $localSavedCount;
                         $isLocalSaved = $rowResult['local_saved'];
                         $objId = $rowResult['obj_id'];
                         $error = $rowResult['error'];
-                        $cfgLabel = $item->getServiceConfigLabel() ?? 'Page';
-                        $servLabel = $item->getServiceLabel() ?? 'Channel';
                         ?>
                         <tr>
                             <td>
-                                <span class="rs-font-medium" style="font-size: 13px;"><?= Html::encode($cfgLabel) ?></span>
+                                <span class="rs-font-medium"><?= Html::encode($item->getCustomerName()) ?></span>
                             </td>
                             <td>
-                                <span class="rs-text-sm"><?= Html::encode($servLabel) ?></span>
-                            </td>
-                            <td>
-                                <span class="rs-font-semibold rs-text-sm"><?= Html::encode($item->getCustomerName()) ?></span>
+                                <?= $item->getReviewRate() ? Html::encode((string)$item->getReviewRate()) . ' ★' : '-' ?>
                             </td>
                             <td>
                                 <div class="rs-text-sm" style="max-height: 3.5em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
@@ -127,10 +121,12 @@ $unsavedCount = $platformAcceptedCount - $localSavedCount;
                                 </div>
                             </td>
                             <td>
+                                <span class="rs-text-xs rs-text-muted"><?= date('d/m/Y H:i', strtotime($item->getReviewDate())) ?></span>
+                            </td>
+                            <td class="rs-text-center">
                                 <?php if ($isExternalSuccess): ?>
                                     <span class="rs-badge rs-badge--success" style="font-size: 12px; padding: 4px 8px;">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 3px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                        Accepted
+                                        Sent
                                     </span>
                                     <?php if ($objId !== null): ?>
                                         <div class="rs-text-xs rs-text-muted rs-mt-1" style="font-family: monospace; word-break: break-all;">
@@ -139,29 +135,13 @@ $unsavedCount = $platformAcceptedCount - $localSavedCount;
                                     <?php endif; ?>
                                 <?php else: ?>
                                     <span class="rs-badge rs-badge--danger" style="font-size: 12px; padding: 4px 8px;" title="<?= Html::encode($error ?? 'Failed') ?>">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 3px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                                        Failed
+                                        Error sending
                                     </span>
                                     <?php if ($error !== null): ?>
                                         <div class="rs-text-xs rs-text-danger rs-mt-1" style="word-break: break-word;">
                                             <?= Html::encode($error) ?>
                                         </div>
                                     <?php endif; ?>
-                                <?php endif; ?>
-                            </td>
-                            <td class="rs-text-center">
-                                <?php if ($isLocalSaved): ?>
-                                    <span class="rs-badge rs-badge--success" style="font-size: 12px; padding: 4px 8px;">
-                                        Saved
-                                    </span>
-                                <?php elseif ($isExternalSuccess): ?>
-                                    <span class="rs-badge rs-badge--warning" style="font-size: 12px; padding: 4px 8px;" title="Local save prevented by read-only database mode">
-                                        Unsaved (Read-Only DB)
-                                    </span>
-                                <?php else: ?>
-                                    <span class="rs-badge rs-badge--soft" style="font-size: 12px; padding: 4px 8px; color: #94a3b8;">
-                                        Not Attempted
-                                    </span>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -171,7 +151,7 @@ $unsavedCount = $platformAcceptedCount - $localSavedCount;
         </div>
         <div class="rs-card__footer rs-p-4 rs-d-flex rs-justify-content-between rs-align-items-center">
             <span class="rs-text-sm rs-text-muted">Completed sequential execution.</span>
-            <a href="<?= Html::encode($backUrl) ?>" class="rs-btn rs-btn--outline">Back to Reviews</a>
+            <a href="<?= Html::encode($backUrl) ?>" class="rs-btn rs-btn--primary">Back to Reviews</a>
         </div>
     </div>
 </div>

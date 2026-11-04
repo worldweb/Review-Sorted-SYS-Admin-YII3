@@ -18,6 +18,10 @@ use Yiisoft\Html\Html;
  * @var Yiisoft\Router\UrlGeneratorInterface $urlGenerator
  */
 
+$baseUrl = isset($aliases) ? (string) $aliases->get('@baseUrl') : '/';
+$base = ($baseUrl !== '' && $baseUrl !== '/') ? rtrim($baseUrl, '/') : '';
+$themeUrl = $base . '/themes/modern';
+
 $pageTitle = $this->getTitle();
 if (empty($pageTitle)) {
     $pageTitle = $applicationParams->name;
@@ -32,7 +36,7 @@ $this->beginPage();
 <head>
     <meta charset="<?= Html::encode($applicationParams->charset) ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="/sys-yii3/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="<?= $base ?>/favicon.ico" type="image/x-icon">
     <?php if (!empty($csrf)): ?>
         <meta name="csrf-token" content="<?= Html::encode($csrf) ?>">
     <?php endif; ?>
@@ -44,16 +48,16 @@ $this->beginPage();
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700;900&display=swap" rel="stylesheet">
 
     <!-- Modern Theme CSS Stylesheets -->
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/variables.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/base.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/typography.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/layout.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/buttons.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/forms.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/cards.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/alerts.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/utilities.css">
-    <link rel="stylesheet" href="/sys-yii3/themes/modern/css/responsive.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/variables.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/base.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/typography.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/layout.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/buttons.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/forms.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/cards.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/alerts.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/utilities.css">
+    <link rel="stylesheet" href="<?= $themeUrl ?>/css/responsive.css">
 
     <style>
         .rs-auth-layout {

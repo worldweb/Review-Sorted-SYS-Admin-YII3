@@ -88,7 +88,7 @@ declare(strict_types=1);
         </div>
 
         <div class="rs-card__footer rs-d-flex rs-justify-content-end rs-gap-3" style="padding: 16px 24px; border-top: 1px solid var(--rs-border-muted, #CED4DA); display: flex; justify-content: flex-end; gap: 12px;">
-            <a href="/sys-yii3/users" class="rs-btn rs-btn--outline" style="text-decoration: none;">Cancel</a>
+            <a href="<?= \App\Environment::url('/users') ?>" class="rs-btn rs-btn--outline" style="text-decoration: none;">Cancel</a>
             <button type="submit" class="rs-btn rs-btn--primary">Save Account Admin</button>
         </div>
     </form>

@@ -41,7 +41,7 @@ final class LogoutAction
         // 4. Create redirect response to login page
         $response = $this->responseFactory
             ->createResponse(302)
-            ->withHeader('Location', '/sys-yii3/login');
+            ->withHeader('Location', \App\Environment::url('/login'));
 
         // 5. Invalidate remember-me cookie
         return $this->rememberMeService->clearRememberCookie($response);

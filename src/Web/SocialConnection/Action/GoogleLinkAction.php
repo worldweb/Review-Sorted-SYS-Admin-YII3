@@ -26,13 +26,13 @@ final class GoogleLinkAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $flash = new Flash($this->session);
         $flash->set('info', 'Google location linking completed.');
 
-        return $this->redirect('/sys-yii3/settings/google');
+        return $this->redirect(\App\Environment::url('/settings/google'));
     }
 
     private function redirect(string $url): ResponseInterface

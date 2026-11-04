@@ -32,7 +32,7 @@ final class SubscriptionCreateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -65,10 +65,10 @@ final class SubscriptionCreateAction
 
                 if ($id !== null) {
                     $flash->set('success', 'Plan created successfully.');
-                    return $this->redirect('/sys-yii3/subscription');
+                    return $this->redirect(\App\Environment::url('/subscription'));
                 }
 
-                $flash->set('error', 'Notice: Database is in read-only mode (rs_readonly). In live production, plan will be stored.');
+                $flash->set('error', 'Failed to create plan.');
             }
         }
 

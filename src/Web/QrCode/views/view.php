@@ -52,8 +52,8 @@ if (!empty($qrImagePath)) {
     if (str_starts_with($qrImagePath, 'http://') || str_starts_with($qrImagePath, 'https://')) {
         $qrImageWebUrl = $qrImagePath;
     } else {
-        $baseUrl = '/sys-yii3';
-        $localDiskPath = 'C:/xampp/htdocs/sys-yii3/public/' . ltrim($qrImagePath, '/');
+        $baseUrl = \App\Environment::appBasePath();
+        $localDiskPath = rtrim(\App\Environment::publicDir(), '/\\') . '/' . ltrim($qrImagePath, '/\\');
         if (file_exists($localDiskPath)) {
             $qrImageWebUrl = $baseUrl . '/' . ltrim($qrImagePath, '/');
         } else {
@@ -69,7 +69,7 @@ $effectiveCsrf = $csrfToken ?? $csrf ?? '';
     <!-- 1. Header Section -->
     <div class="rs-page-header rs-d-flex rs-align-items-center rs-justify-content-between rs-mb-6 rs-flex-wrap rs-gap-4" style="margin-bottom: 24px;">
         <div class="rs-d-flex rs-align-items-center rs-gap-3 rs-flex-wrap">
-            <a href="/sys-yii3/qrcode/index" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-muted" style="text-decoration: none;">
+            <a href="<?= \App\Environment::url('/qrcode/index') ?>" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-muted" style="text-decoration: none;">
                 <i class="fa-solid fa-arrow-left rs-mr-1"></i> Back to QR Codes
             </a>
             <h1 class="rs-page-title rs-m-0" style="font-size: 24px; font-weight: 700; color: var(--rs-primary, #234137); margin: 0;">
@@ -78,7 +78,7 @@ $effectiveCsrf = $csrfToken ?? $csrf ?? '';
             <span class="rs-badge <?= $badgeClass ?>"><?= Html::encode($statusText) ?></span>
         </div>
         <div class="rs-page-header__actions rs-d-flex rs-gap-3">
-            <a href="/sys-yii3/qrcode/update?id=<?= $model->getId() ?>" class="rs-btn rs-btn--outline">
+            <a href="<?= \App\Environment::url('/qrcode/update?id=' . $model->getId()) ?>" class="rs-btn rs-btn--outline">
                 <i class="fa-solid fa-pen-to-square rs-mr-1"></i> Edit Settings
             </a>
         </div>
@@ -200,10 +200,10 @@ $effectiveCsrf = $csrfToken ?? $csrf ?? '';
                     <?php endif; ?>
 
                     <div class="rs-d-flex rs-gap-2 rs-justify-content-center">
-                        <a href="/sys-yii3/qrcode/download?id=<?= $model->getId() ?>&format=png" class="rs-btn rs-btn--secondary rs-btn--sm" title="Download High-Resolution PNG">
+                        <a href="<?= \App\Environment::url('/qrcode/download?id=' . $model->getId() . '&format=png') ?>" class="rs-btn rs-btn--secondary rs-btn--sm" title="Download High-Resolution PNG">
                             <i class="fa-solid fa-download rs-mr-1"></i> PNG
                         </a>
-                        <a href="/sys-yii3/qrcode/download?id=<?= $model->getId() ?>&format=jpg" class="rs-btn rs-btn--secondary rs-btn--sm" title="Download High-Resolution JPG">
+                        <a href="<?= \App\Environment::url('/qrcode/download?id=' . $model->getId() . '&format=jpg') ?>" class="rs-btn rs-btn--secondary rs-btn--sm" title="Download High-Resolution JPG">
                             <i class="fa-solid fa-download rs-mr-1"></i> JPG
                         </a>
                     </div>
@@ -221,7 +221,7 @@ $effectiveCsrf = $csrfToken ?? $csrf ?? '';
                     <p class="rs-text-sm rs-text-muted" style="margin: 0 0 16px 0; font-size: 13px;">
                         Deleting this QR Code permanently removes its scan history and redirection configurations.
                     </p>
-                    <form method="POST" action="/sys-yii3/qrcode/delete?id=<?= $model->getId() ?>" onsubmit="return confirm('Are you absolutely sure you want to delete this QR code?');" style="margin: 0;">
+                    <form method="POST" action="<?= \App\Environment::url('/qrcode/delete?id=' . $model->getId()) ?>" onsubmit="return confirm('Are you absolutely sure you want to delete this QR code?');" style="margin: 0;">
                         <?php if (!empty($effectiveCsrf)): ?>
                             <input type="hidden" name="_csrf" value="<?= Html::encode($effectiveCsrf) ?>">
                         <?php endif; ?>

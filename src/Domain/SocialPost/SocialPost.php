@@ -159,29 +159,118 @@ final class SocialPost
         return $this->accountBusinessName;
     }
 
-    public function getOverallStatus(): string
+    public function isEditable(): bool
+    {
+        if ($this->postType !== self::TYPE_SCHEDULED) {
+            return false;
+        }
+
+        if (empty($this->scheduledAt) || strtotime($this->scheduledAt) <= time()) {
+            return false;
+        }
+
+        if (empty($this->destinations)) {
+            return false;
+        }
+
+        foreach ($this->destinations as $dest) {
+            if ($dest->getStatus() !== SocialPostDestination::STATUS_QUEUED) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function isCancelled(): bool
     {
         if (empty($this->destinations)) {
-            return $this->isScheduled() ? 'scheduled' : 'draft';
+            return false;
         }
 
-        $allPublished = true;
-        $anyFailed = false;
-        foreach ($this->destinations as $d) {
-            if ($d->isFailed()) {
-                $anyFailed = true;
-            }
-            if (!$d->isPublished()) {
-                $allPublished = false;
+        foreach ($this->destinations as $dest) {
+            if ($dest->getStatus() !== SocialPostDestination::STATUS_FAILED || $dest->getErrorMessage() !== 'Cancelled by user') {
+                return false;
             }
         }
 
-        if ($allPublished) {
-            return 'published';
+        return true;
+    }
+
+    /**
+     * @return array{total: int, published: int, processing: int, queued: int, failed: int, cancelled: int}
+     */
+    public function getPublishingProgress(): array
+    {
+        $total = count($this->destinations);
+        $published = 0;
+        $processing = 0;
+        $queued = 0;
+        $failed = 0;
+        $cancelled = 0;
+
+        foreach ($this->destinations as $dest) {
+            if ($dest->getErrorMessage() === 'Cancelled by user') {
+                $cancelled++;
+            } elseif ($dest->getStatus() === SocialPostDestination::STATUS_PUBLISHED) {
+                $published++;
+            } elseif ($dest->getStatus() === SocialPostDestination::STATUS_PROCESSING) {
+                $processing++;
+            } elseif ($dest->getStatus() === SocialPostDestination::STATUS_FAILED) {
+                $failed++;
+            } else {
+                $queued++;
+            }
         }
-        if ($anyFailed) {
-            return 'partial_failure';
+
+        return [
+            'total' => $total,
+            'published' => $published,
+            'processing' => $processing,
+            'queued' => $queued,
+            'failed' => $failed,
+            'cancelled' => $cancelled,
+        ];
+    }
+
+    public function getDerivedStatus(): string
+    {
+        if (empty($this->destinations)) {
+            return 'no_destinations';
         }
-        return 'queued';
+
+        if ($this->isCancelled()) {
+            return 'cancelled';
+        }
+
+        $statuses = array_map(static fn($d) => $d->getStatus(), $this->destinations);
+        $unique = array_unique($statuses);
+
+        if (count($unique) === 1 && reset($unique) === SocialPostDestination::STATUS_PUBLISHED) {
+            return SocialPostDestination::STATUS_PUBLISHED;
+        }
+
+        if (in_array(SocialPostDestination::STATUS_PUBLISHED, $statuses, true) && (in_array(SocialPostDestination::STATUS_FAILED, $statuses, true) || in_array(SocialPostDestination::STATUS_QUEUED, $statuses, true))) {
+            return 'partially_published';
+        }
+
+        if (count($unique) === 1 && reset($unique) === SocialPostDestination::STATUS_FAILED) {
+            return SocialPostDestination::STATUS_FAILED;
+        }
+
+        if (in_array(SocialPostDestination::STATUS_PROCESSING, $statuses, true)) {
+            return SocialPostDestination::STATUS_PROCESSING;
+        }
+
+        if ($this->postType === self::TYPE_SCHEDULED && !empty($this->scheduledAt) && strtotime($this->scheduledAt) > time()) {
+            return self::TYPE_SCHEDULED;
+        }
+
+        return SocialPostDestination::STATUS_QUEUED;
+    }
+
+    public function getOverallStatus(): string
+    {
+        return $this->getDerivedStatus();
     }
 }

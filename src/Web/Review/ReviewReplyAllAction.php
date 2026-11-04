@@ -13,6 +13,7 @@ use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Yiisoft\Csrf\CsrfTokenInterface;
 use Yiisoft\Session\Flash\Flash;
 use Yiisoft\Session\SessionInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
@@ -34,6 +35,7 @@ final class ReviewReplyAllAction
         private SessionInterface $session,
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
+        private ?CsrfTokenInterface $csrfToken = null,
     ) {
     }
 
@@ -41,7 +43,7 @@ final class ReviewReplyAllAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $flash = new Flash($this->session);
@@ -49,7 +51,7 @@ final class ReviewReplyAllAction
         $currentUserId = $context->getUserId();
         $currentUser = $this->userRepo->findById($currentUserId, $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         // Authorization check
@@ -59,7 +61,7 @@ final class ReviewReplyAllAction
             !$this->accessDecision->getRbac()->can($currentUser, '/reviews/*')
         ) {
             $flash->set('error', 'Forbidden: You do not have permission to reply to reviews.');
-            return $this->redirect('/sys-yii3/reviews');
+            return $this->redirect(\App\Environment::url('/reviews'));
         }
 
         $queryParams = $request->getQueryParams();
@@ -80,7 +82,7 @@ final class ReviewReplyAllAction
 
         if (empty($ids)) {
             $flash->set('error', 'Please select at least 1 review to reply.');
-            return $this->redirect('/sys-yii3/reviews');
+            return $this->redirect(\App\Environment::url('/reviews'));
         }
 
         // Load reviews scoped by tenant context and TYPE_REVIEW
@@ -88,7 +90,7 @@ final class ReviewReplyAllAction
 
         if (empty($reviews)) {
             $flash->set('error', 'No matching valid reviews found for the specified IDs.');
-            return $this->redirect('/sys-yii3/reviews');
+            return $this->redirect(\App\Environment::url('/reviews'));
         }
 
         // Handle POST submission
@@ -103,6 +105,7 @@ final class ReviewReplyAllAction
                     'replyText' => $replyText,
                     'q' => $qParam,
                     'flash' => $flash,
+                    'csrfToken' => $this->csrfToken?->getValue(),
                 ]);
             }
 
@@ -210,6 +213,7 @@ final class ReviewReplyAllAction
             'replyText' => '',
             'q' => $qParam,
             'flash' => $flash,
+            'csrfToken' => $this->csrfToken?->getValue(),
         ]);
     }
 

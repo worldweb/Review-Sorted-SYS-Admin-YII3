@@ -36,7 +36,7 @@ $eyeOffIcon = '<svg id="icon-eye-off" width="18" height="18" viewBox="0 0 24 24"
             <p class="rs-auth-subtitle"><?= Html::encode($title) ?></p>
         </div>
 
-        <form id="login-form" method="post" action="/sys-yii3/login" class="rs-form">
+        <form id="login-form" method="post" action="<?= \App\Environment::url('/login') ?>" class="rs-form">
             <?php if (!empty($csrfToken)): ?>
                 <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
             <?php endif; ?>
@@ -62,7 +62,7 @@ $eyeOffIcon = '<svg id="icon-eye-off" width="18" height="18" viewBox="0 0 24 24"
                     <input type="checkbox" name="rememberMe" value="1" class="rs-checkbox" <?= $rememberMe ? 'checked' : '' ?>>
                     <span class="rs-checkbox-label">Remember me</span>
                 </label>
-                <a href="/sys-yii3/forgot-password" class="rs-auth-link">Forgot password?</a>
+                <a href="<?= \App\Environment::url('/forgot-password') ?>" class="rs-auth-link">Forgot password?</a>
             </div>
 
             <div class="rs-form-group rs-mb-4">
@@ -72,7 +72,7 @@ $eyeOffIcon = '<svg id="icon-eye-off" width="18" height="18" viewBox="0 0 24 24"
             <?php if ($allowRegistration): ?>
                 <div class="rs-text-center rs-font-size-sm">
                     <span class="rs-text-secondary">Don't have an account?</span>
-                    <a href="/sys-yii3/new-client" class="rs-auth-link rs-ml-1">Create an account</a>
+                    <a href="<?= \App\Environment::url('/new-client') ?>" class="rs-auth-link rs-ml-1">Create an account</a>
                 </div>
             <?php endif; ?>
         </form>

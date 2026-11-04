@@ -42,7 +42,7 @@ final class EmailSendAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -194,10 +194,10 @@ final class EmailSendAction
                     }
 
                     $flash->add('success', sprintf('%d emails queued for delivery.', $queuedCount));
-                    return $this->redirect('/sys-yii3/email/queue');
+                    return $this->redirect(\App\Environment::url('/email/queue'));
                 } catch (\Throwable $e) {
-                    $flash->add('error', 'Database write error (SELECT-only connection active): ' . $e->getMessage());
-                    return $this->redirect('/sys-yii3/email/send');
+                    $flash->add('error', 'Database error: ' . $e->getMessage());
+                    return $this->redirect(\App\Environment::url('/email/send'));
                 }
             }
         }

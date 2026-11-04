@@ -55,7 +55,7 @@ final class SocialPostRepository implements SocialPostRepositoryInterface
         return $post->withDestinations($destinations);
     }
 
-    public function findAllPosts(?TenantContextInterface $context = null, int $limit = 20, int $offset = 0, ?string $typeFilter = null): array
+    public function findAllPosts(?TenantContextInterface $context = null, int $limit = 20, int $offset = 0, ?string $typeFilter = null, array $filters = []): array
     {
         $ctx = $context ?? $this->tenantContextProvider?->get();
         $query = (new Query($this->db))
@@ -83,33 +83,98 @@ final class SocialPostRepository implements SocialPostRepositoryInterface
             $query->andWhere(['sp.post_type' => $typeFilter]);
         }
 
+        if (!empty($filters['q'])) {
+            $q = trim((string) $filters['q']);
+            if (is_numeric($q)) {
+                $query->andWhere(['or', ['sp.id' => (int) $q], ['sp.account_id' => (int) $q]]);
+            } else {
+                $query->andWhere(['or', ['like', 'sp.content', $q], ['like', 'a.business_name', $q]]);
+            }
+        }
+
+        if (!empty($filters['date_from'])) {
+            $query->andWhere(['>=', 'sp.scheduled_at', $filters['date_from'] . ' 00:00:00']);
+        }
+        if (!empty($filters['date_to'])) {
+            $query->andWhere(['<=', 'sp.scheduled_at', $filters['date_to'] . ' 23:59:59']);
+        }
+
         $rows = $query->all();
         $posts = [];
         foreach ($rows as $row) {
             $p = SocialPost::fromDatabaseRow($row);
             $destinations = $this->findDestinationsForPost($p->getId());
+
+            if (!empty($filters['platform'])) {
+                $plat = (string) $filters['platform'];
+                $hasPlat = false;
+                foreach ($destinations as $dest) {
+                    if ($dest->getPlatform() === $plat) {
+                        $hasPlat = true;
+                        break;
+                    }
+                }
+                if (!$hasPlat) {
+                    continue;
+                }
+            }
+
+            if (!empty($filters['status'])) {
+                $st = (string) $filters['status'];
+                $hasSt = false;
+                foreach ($destinations as $dest) {
+                    if ($st === 'cancelled' && $dest->getErrorMessage() === 'Cancelled by user') {
+                        $hasSt = true;
+                        break;
+                    } elseif ($dest->getStatus() === $st && $dest->getErrorMessage() !== 'Cancelled by user') {
+                        $hasSt = true;
+                        break;
+                    }
+                }
+                if (!$hasSt) {
+                    continue;
+                }
+            }
+
             $posts[] = $p->withDestinations($destinations);
         }
 
         return $posts;
     }
 
-    public function countPosts(?TenantContextInterface $context = null, ?string $typeFilter = null): int
+    public function countPosts(?TenantContextInterface $context = null, ?string $typeFilter = null, array $filters = []): int
     {
         $ctx = $context ?? $this->tenantContextProvider?->get();
         $query = (new Query($this->db))
-            ->from('{{%social_post}}');
+            ->from(['sp' => '{{%social_post}}'])
+            ->leftJoin(['a' => '{{%account}}'], 'a.id = sp.account_id');
 
         if ($ctx !== null && !$ctx->isUnrestricted()) {
             $accessible = $ctx->getAccessibleAccountIds();
             if (empty($accessible)) {
                 return 0;
             }
-            $query->andWhere(['in', 'account_id', $accessible]);
+            $query->andWhere(['in', 'sp.account_id', $accessible]);
         }
 
         if (!empty($typeFilter)) {
-            $query->andWhere(['post_type' => $typeFilter]);
+            $query->andWhere(['sp.post_type' => $typeFilter]);
+        }
+
+        if (!empty($filters['q'])) {
+            $q = trim((string) $filters['q']);
+            if (is_numeric($q)) {
+                $query->andWhere(['or', ['sp.id' => (int) $q], ['sp.account_id' => (int) $q]]);
+            } else {
+                $query->andWhere(['or', ['like', 'sp.content', $q], ['like', 'a.business_name', $q]]);
+            }
+        }
+
+        if (!empty($filters['date_from'])) {
+            $query->andWhere(['>=', 'sp.scheduled_at', $filters['date_from'] . ' 00:00:00']);
+        }
+        if (!empty($filters['date_to'])) {
+            $query->andWhere(['<=', 'sp.scheduled_at', $filters['date_to'] . ' 23:59:59']);
         }
 
         return (int) $query->count();
@@ -154,7 +219,7 @@ final class SocialPostRepository implements SocialPostRepositoryInterface
             foreach ($destinations as $dest) {
                 $this->db->createCommand()->insert('{{%social_post_destination}}', [
                     'social_post_id' => $postId,
-                    'account_id' => $data['account_id'],
+                    'account_id' => $dest['account_id'] ?? $data['account_id'],
                     'platform' => $dest['platform'],
                     'service_config_id' => $dest['service_config_id'] ?? null,
                     'sub_service_id' => $dest['sub_service_id'] ?? null,

@@ -42,7 +42,7 @@ final class EmailTemplateCreateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -88,10 +88,10 @@ final class EmailTemplateCreateAction
                 try {
                     $newId = $this->emailRepo->saveTemplate($newTemplate);
                     $flash->add('success', sprintf('Email template "%s" created successfully.', $name));
-                    return $this->redirect('/sys-yii3/email/templates');
+                    return $this->redirect(\App\Environment::url('/email/templates'));
                 } catch (\Throwable $e) {
-                    $flash->add('error', 'Database write error (SELECT-only connection active): ' . $e->getMessage());
-                    return $this->redirect('/sys-yii3/email/templates');
+                    $flash->add('error', 'Database error: ' . $e->getMessage());
+                    return $this->redirect(\App\Environment::url('/email/templates'));
                 }
             }
         }

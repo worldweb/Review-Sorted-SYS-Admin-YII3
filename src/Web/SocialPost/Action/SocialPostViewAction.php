@@ -10,6 +10,7 @@ use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Yiisoft\Csrf\CsrfTokenInterface;
 use Yiisoft\Session\Flash\Flash;
 use Yiisoft\Session\SessionInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
@@ -23,6 +24,7 @@ final class SocialPostViewAction
         private SessionInterface $session,
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
+        private ?CsrfTokenInterface $csrfToken = null,
     ) {
     }
 
@@ -30,14 +32,14 @@ final class SocialPostViewAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
-        $id = (int) ($request->getQueryParams()['id'] ?? 0);
+        $id = (int) ($request->getQueryParams()['id'] ?? $request->getAttribute('id') ?? 0);
         $post = $this->postRepo->findById($id, $context);
         if ($post === null) {
             (new Flash($this->session))->set('error', 'Post not found.');
-            return $this->redirect('/sys-yii3/social-post');
+            return $this->redirect(\App\Environment::url('/social-post'));
         }
 
         $flash = new Flash($this->session);
@@ -47,6 +49,7 @@ final class SocialPostViewAction
             ->render('view', [
                 'model' => $post,
                 'flash' => $flash,
+                'csrfToken' => $this->csrfToken?->getValue() ?? '',
             ]);
     }
 

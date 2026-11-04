@@ -34,7 +34,7 @@ final class GlobalSettingsIndexAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -77,7 +77,7 @@ final class GlobalSettingsIndexAction
                     $flash->set('info', $result['message']);
                 }
 
-                return $this->redirect('/sys-yii3/global-settings?section=roles&target_role=' . urlencode($targetRole));
+                return $this->redirect(\App\Environment::url('/global-settings?section=roles&target_role=' . urlencode($targetRole)));
             }
 
             // Handle General/Security Settings Save
@@ -92,10 +92,10 @@ final class GlobalSettingsIndexAction
             if ($allSuccess && !empty($settingsData)) {
                 $flash->set('success', 'Global settings updated successfully.');
             } else {
-                $flash->set('info', 'Notice: Database is in read-only mode (rs_readonly). In live production, settings changes will be persisted.');
+                $flash->set('error', 'Failed to update settings.');
             }
 
-            return $this->redirect('/sys-yii3/global-settings?section=' . urlencode($section));
+            return $this->redirect(\App\Environment::url('/global-settings?section=' . urlencode($section)));
         }
 
         $allSettings = $this->settingRepo->getAll();

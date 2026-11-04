@@ -20,7 +20,7 @@ $this->setTitle('Edit Post #' . $model->getId());
             <div class="rs-text-muted rs-mt-1">Modify content and scheduling options for this dispatch.</div>
         </div>
         <div class="rs-d-flex rs-gap-2">
-            <a href="/sys-yii3/social-post/view?id=<?= $model->getId() ?>" class="rs-btn rs-btn--secondary">
+            <a href="<?= \App\Environment::url('/social-post/view?id=' . $model->getId()) ?>" class="rs-btn rs-btn--secondary">
                 Cancel
             </a>
         </div>
@@ -37,7 +37,7 @@ $this->setTitle('Edit Post #' . $model->getId());
             <h3 class="rs-card__title">Post Content &amp; Details</h3>
         </div>
         <div class="rs-card__body rs-p-6">
-            <form method="post" action="/sys-yii3/social-post/update?id=<?= $model->getId() ?>" class="rs-form">
+            <form method="post" action="<?= \App\Environment::url('/social-post/update?id=' . $model->getId()) ?>" class="rs-form">
                 <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
 
                 <div class="rs-form-group rs-mb-5">
@@ -52,7 +52,7 @@ $this->setTitle('Edit Post #' . $model->getId());
                 </div>
 
                 <div class="rs-d-flex rs-justify-content-between rs-align-items-center rs-mt-6 rs-pt-4 rs-border-top" style="border-top: 1px solid var(--rs-border, #E2E8F0);">
-                    <a href="/sys-yii3/social-post/view?id=<?= $model->getId() ?>" class="rs-btn rs-btn--secondary">Cancel</a>
+                    <a href="<?= \App\Environment::url('/social-post/view?id=' . $model->getId()) ?>" class="rs-btn rs-btn--secondary">Cancel</a>
                     <button type="submit" class="rs-btn rs-btn--primary rs-px-6">Update Post</button>
                 </div>
             </form>

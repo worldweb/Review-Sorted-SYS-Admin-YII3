@@ -33,12 +33,12 @@ final class FacebookApiCreateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
         if ($currentUser === null || !$currentUser->isAdmin()) {
-            return $this->redirect('/sys-yii3/settings/facebook');
+            return $this->redirect(\App\Environment::url('/settings/facebook'));
         }
 
         $flash = new Flash($this->session);
@@ -70,7 +70,7 @@ final class FacebookApiCreateAction
 
                 if ($id !== null) {
                     $flash->add('success', 'Facebook Application successfully added.');
-                    return $this->redirect('/sys-yii3/settings/facebook-api');
+                    return $this->redirect(\App\Environment::url('/settings/facebook-api'));
                 } else {
                     $flash->add('error', 'Failed to save Facebook Application.');
                 }

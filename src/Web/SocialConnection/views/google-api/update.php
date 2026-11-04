@@ -28,11 +28,11 @@ $this->setTitle('Update Google Project: ' . $api->getLabel());
     <?php endif; ?>
 
     <div class="rs-section">
-        <?= $this->render('_form', [
+        <?= $this->render('google-api/_form', [
             'api' => $api,
             'errors' => $errors,
             'csrfToken' => $csrfToken,
-            'actionUrl' => '/sys-yii3/settings/google-api/update?id=' . $api->getId(),
+            'actionUrl' => \App\Environment::url('/settings/google-api/update?id=') . $api->getId(),
         ]) ?>
     </div>
 </div>

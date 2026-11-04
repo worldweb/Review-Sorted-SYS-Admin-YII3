@@ -34,14 +34,14 @@ $endItem = min($total, $currentPage * $pageSize);
 $title = 'QR Codes';
 $description = 'Manage static and dynamic QR codes, landing pages, and scan analytics.';
 $actions = [
-    '<a href="/sys-yii3/qrcode/create" class="rs-btn rs-btn--primary"><i class="fa-solid fa-plus rs-mr-1"></i> Create QR Code</a>'
+    '<a href="' . \App\Environment::url('/qrcode/create') . '" class="rs-btn rs-btn--primary"><i class="fa-solid fa-plus rs-mr-1"></i> Create QR Code</a>'
 ];
 include __DIR__ . '/../../Shared/Components/_page_header.php';
 ?>
 
 <div class="rs-card">
     <div class="rs-card__header rs-d-flex rs-justify-content-between rs-align-items-center rs-flex-wrap rs-gap-3" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
-        <form method="GET" action="/sys-yii3/qrcode/index" class="rs-d-flex rs-align-items-center rs-gap-2" style="margin: 0;">
+        <form method="GET" action="<?= \App\Environment::url('/qrcode/index') ?>" class="rs-d-flex rs-align-items-center rs-gap-2" style="margin: 0;">
             <div class="rs-input-group" style="width: 320px; max-width: 100%;">
                 <input
                     type="text"
@@ -55,7 +55,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                 >
             </div>
             <?php if (!empty($search)): ?>
-                <a href="/sys-yii3/qrcode/index" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-muted" title="Clear filter">Clear</a>
+                <a href="<?= \App\Environment::url('/qrcode/index') ?>" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-muted" title="Clear filter">Clear</a>
             <?php endif; ?>
         </form>
 
@@ -73,9 +73,9 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                     <?= !empty($search) ? 'No QR codes match your search criteria.' : 'Create your first branded QR code to direct clients to your review profiles or custom URLs.' ?>
                 </p>
                 <?php if (empty($search)): ?>
-                    <a href="/sys-yii3/qrcode/create" class="rs-btn rs-btn--primary">Create QR Code</a>
+                    <a href="<?= \App\Environment::url('/qrcode/create') ?>" class="rs-btn rs-btn--primary">Create QR Code</a>
                 <?php else: ?>
-                    <a href="/sys-yii3/qrcode/index" class="rs-btn rs-btn--outline">Reset Search</a>
+                    <a href="<?= \App\Environment::url('/qrcode/index') ?>" class="rs-btn rs-btn--outline">Reset Search</a>
                 <?php endif; ?>
             </div>
         <?php else: ?>
@@ -102,7 +102,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                         <tr style="border-bottom: 1px solid var(--rs-border, #E2E8F0);">
                             <td style="padding: 14px 16px;">
                                 <div class="rs-font-semibold rs-text-main" style="font-size: 14px;">
-                                    <a href="/sys-yii3/qrcode/view?id=<?= $model->getId() ?>" style="color: var(--rs-primary, #234137); text-decoration: none;">
+                                    <a href="<?= \App\Environment::url('/qrcode/view?id=' . $model->getId()) ?>" style="color: var(--rs-primary, #234137); text-decoration: none;">
                                         <?= Html::encode($model->getName() ?? ('QR Code #' . $model->getId())) ?>
                                     </a>
                                 </div>
@@ -132,13 +132,13 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                             </td>
                             <td style="padding: 14px 16px; text-align: right; white-space: nowrap;">
                                 <div class="rs-d-flex rs-align-items-center rs-justify-content-end rs-gap-2">
-                                    <a href="/sys-yii3/qrcode/view?id=<?= $model->getId() ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="View details and scan analytics">
+                                    <a href="<?= \App\Environment::url('/qrcode/view?id=' . $model->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="View details and scan analytics">
                                         Analytics
                                     </a>
-                                    <a href="/sys-yii3/qrcode/update?id=<?= $model->getId() ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Edit QR code configuration">
+                                    <a href="<?= \App\Environment::url('/qrcode/update?id=' . $model->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Edit QR code configuration">
                                         Edit
                                     </a>
-                                    <form method="POST" action="/sys-yii3/qrcode/delete?id=<?= $model->getId() ?>" style="display: inline; margin: 0;" onsubmit="return confirm('Are you sure you want to delete this QR code?');">
+                                    <form method="POST" action="<?= \App\Environment::url('/qrcode/delete?id=' . $model->getId()) ?>" style="display: inline; margin: 0;" onsubmit="return confirm('Are you sure you want to delete this QR code?');">
                                         <?php 
                                         $effectiveCsrf = $csrfToken ?? $csrf ?? '';
                                         if (!empty($effectiveCsrf)): 
@@ -166,21 +166,21 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                 <?php if ($totalPages > 1): ?>
                     <div class="rs-pagination rs-d-flex rs-gap-1">
                         <?php if ($currentPage > 1): ?>
-                            <a href="/sys-yii3/qrcode/index?page=<?= $currentPage - 1 ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>" class="rs-btn rs-btn--sm rs-btn--outline">&laquo; Prev</a>
+                            <a href="<?= \App\Environment::url('/qrcode/index?page=' . ($currentPage - 1) . (!empty($search) ? '&search=' . urlencode($search) : '')) ?>" class="rs-btn rs-btn--sm rs-btn--outline">&laquo; Prev</a>
                         <?php endif; ?>
 
                         <?php for ($p = 1; $p <= $totalPages; $p++): ?>
                             <?php if ($p === $currentPage): ?>
                                 <span class="rs-btn rs-btn--sm rs-btn--primary" style="cursor: default;"><?= $p ?></span>
                             <?php elseif ($p === 1 || $p === $totalPages || abs($p - $currentPage) <= 2): ?>
-                                <a href="/sys-yii3/qrcode/index?page=<?= $p ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>" class="rs-btn rs-btn--sm rs-btn--outline"><?= $p ?></a>
+                                <a href="<?= \App\Environment::url('/qrcode/index?page=' . $p . (!empty($search) ? '&search=' . urlencode($search) : '')) ?>" class="rs-btn rs-btn--sm rs-btn--outline"><?= $p ?></a>
                             <?php elseif (abs($p - $currentPage) === 3): ?>
                                 <span class="rs-text-muted rs-px-2" style="line-height: 32px;">...</span>
                             <?php endif; ?>
                         <?php endfor; ?>
 
                         <?php if ($currentPage < $totalPages): ?>
-                            <a href="/sys-yii3/qrcode/index?page=<?= $currentPage + 1 ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>" class="rs-btn rs-btn--sm rs-btn--outline">Next &raquo;</a>
+                            <a href="<?= \App\Environment::url('/qrcode/index?page=' . ($currentPage + 1) . (!empty($search) ? '&search=' . urlencode($search) : '')) ?>" class="rs-btn rs-btn--sm rs-btn--outline">Next &raquo;</a>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>

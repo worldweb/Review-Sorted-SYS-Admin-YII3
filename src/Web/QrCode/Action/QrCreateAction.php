@@ -40,7 +40,7 @@ final class QrCreateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $flash = new Flash($this->session);
@@ -48,7 +48,7 @@ final class QrCreateAction
         $currentUserId = $context->getUserId();
         $currentUser = $this->userRepo->findById($currentUserId, $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         // Feature Gating: account.qr_code == 1
@@ -100,7 +100,7 @@ final class QrCreateAction
 
                     // Notice of read-only database state: write operations require write-capable connection
                     $flash->set('warning', 'QR Code preview generated. Saving new records requires write permissions, which are deferred in read-only mode.');
-                    return $this->redirect('/sys-yii3/qrcode/index');
+                    return $this->redirect(\App\Environment::url('/qrcode/index'));
                 } catch (Throwable $e) {
                     $flash->set('error', 'Failed to generate QR code: ' . $e->getMessage());
                 }

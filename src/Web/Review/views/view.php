@@ -14,6 +14,7 @@ use Yiisoft\Html\Html;
  * @var \App\Security\TenantContextInterface $context
  * @var \Yiisoft\Session\Flash\FlashInterface|null $flash
  * @var string|null $q
+ * @var string|null $csrfToken
  */
 
 $customerDisplay = !empty(trim($review->getCustomerName())) ? $review->getCustomerName() : 'Anonymous User';
@@ -87,13 +88,14 @@ if (isset($extra['attachment']['media']['image'])) {
     $img = '<img src="' . Html::encode($extra['media']) . '" class="rs-review-image rs-mt-4" style="max-width: 100%; border-radius: 8px;" />';
 }
 
-$backUrl = '/sys-yii3/reviews';
-if (!empty($q)) {
-    $backUrl .= '?' . base64_decode($q);
+$decodedQ = !empty($q) ? trim(base64_decode($q)) : '';
+$backUrl = \App\Environment::url('/reviews');
+if ($decodedQ !== '') {
+    $backUrl .= '?' . $decodedQ;
 }
 ?>
 
-<link rel="stylesheet" href="/sys-yii3/themes/modern/css/view.css">
+<link rel="stylesheet" href="<?= \App\Environment::url('/themes/modern/css/view.css') ?>">
 
 <div class="rs-page rs-p-6">
     <?php if (isset($flash)): ?>
@@ -131,7 +133,7 @@ if (!empty($q)) {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                     Back to Reviews
                 </a>
-                <form method="POST" action="/sys-yii3/reviews/delete" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this review? This action cannot be undone.');">
+                <form method="POST" action="<?= \App\Environment::url('/reviews/delete') ?>" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this review? This action cannot be undone.');">
                     <input type="hidden" name="id" value="<?= $review->getId() ?>">
                     <button type="submit" class="rs-btn rs-btn--outline rs-btn--danger-outline" title="Delete Review">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -144,7 +146,7 @@ if (!empty($q)) {
 
     <!-- Main Content Grid -->
     <div class="rs-dashboard-grid">
-        <!-- LEFT COLUMN: Main Details & Composer (8 cols) -->
+        <!-- LEFT COLUMN: Main Details & Insights (8 cols) -->
         <div class="rs-col-span-8 rs-d-flex rs-flex-column rs-gap-5">
             <!-- Customer Review Card -->
             <div class="rs-card rs-customer-review-card">
@@ -183,80 +185,6 @@ if (!empty($q)) {
                     </div>
                 </div>
             </div>
-
-            <!-- Single Review Reply Composer Card -->
-            <?php
-            $isPlugin = str_contains(strtolower($platformDisplay), 'plugin');
-            $canReplyDirectly = $review->getType() !== Review::TYPE_MENTION && $review->isServiceReady() && !$isPlugin;
-            ?>
-
-            <?php if ($canReplyDirectly): ?>
-                <div class="rs-card rs-reply-composer-card">
-                    <div class="rs-card__header rs-py-3 rs-d-flex rs-justify-content-between rs-align-items-center">
-                        <h3 class="rs-card__title" style="font-size: 16px;">
-                            <?= $review->getType() === Review::TYPE_POST_REPLY ? 'Reply Comment' : 'Reply Review' ?>
-                        </h3>
-                        <?php if ($review->getType() === Review::TYPE_POST_REPLY && isset($extra['url'])): ?>
-                            <a href="<?= Html::encode($extra['url']) ?>" target="_blank" rel="noopener noreferrer" class="rs-btn rs-btn--sm rs-btn--outline">
-                                View Post on Facebook ↗
-                            </a>
-                        <?php endif; ?>
-                    </div>
-                    <div class="rs-card__body rs-p-6">
-                        <form id="single-reply-form" method="POST" action="/sys-yii3/reviews/view?id=<?= $review->getId() ?>" class="rs-form">
-                            <input type="hidden" name="id" value="<?= $review->getId() ?>">
-                            <div class="rs-form-group rs-mb-4">
-                                <label for="single_reply_text" class="rs-label rs-font-semibold rs-mb-2">Your Response <span class="rs-text-danger">*</span></label>
-                                <textarea id="single_reply_text" name="reply_text" rows="8" class="rs-input rs-w-100" style="resize: vertical; font-family: inherit; line-height: 1.5;" placeholder="Write a professional, personalized reply to <?= Html::encode($customerDisplay) ?>..." required></textarea>
-                            </div>
-
-                            <div class="rs-d-flex rs-justify-content-between rs-align-items-center">
-                                <span class="rs-text-xs rs-text-muted">
-                                    This reply will be published directly to <strong><?= Html::encode($platformDisplay) ?></strong> and saved to the conversation history.
-                                </span>
-                                <button type="submit" id="btn-submit-single-reply" class="rs-btn rs-btn--primary">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                                    Send Reply
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            <?php else: ?>
-                <!-- Platform Notice Card for Mentions / Plugins / Unconnected services matching Yii 2 -->
-                <div class="rs-card rs-p-5" style="background-color: var(--rs-bg-app, #f8fafc); border: 1px solid var(--rs-border, #e2e8f0);">
-                    <div class="rs-d-flex rs-align-items-start rs-gap-3">
-                        <div class="rs-text-primary" style="margin-top: 2px;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                        </div>
-                        <div>
-                            <h4 class="rs-font-bold rs-text-sm rs-text-main rs-m-0 rs-mb-1">
-                                <?php if ($review->getType() === Review::TYPE_MENTION): ?>
-                                    Social Mention Interaction
-                                <?php elseif (!$review->isServiceReady()): ?>
-                                    Channel Configuration Required
-                                <?php else: ?>
-                                    External Platform Reply
-                                <?php endif; ?>
-                            </h4>
-                            <p class="rs-text-muted rs-text-xs rs-m-0 rs-mb-3">
-                                <?php if ($review->getType() === Review::TYPE_MENTION): ?>
-                                    Mentions cannot be replied to via automated API. Please engage directly with the user on their native platform.
-                                <?php elseif (!$review->isServiceReady()): ?>
-                                    This channel is not currently authorized with active API credentials. Re-authenticate in channel settings to enable direct replies.
-                                <?php else: ?>
-                                    This channel uses an external plugin integration. Manage responses through the plugin interface.
-                                <?php endif; ?>
-                            </p>
-                            <?php if (isset($extra['url']) && is_string($extra['url']) && $extra['url'] !== ''): ?>
-                                <a href="<?= Html::encode($extra['url']) ?>" target="_blank" rel="noopener noreferrer" class="rs-btn rs-btn--sm rs-btn--outline">
-                                    Open Post on Native Platform ↗
-                                </a>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
 
             <!-- Review Insights Card -->
             <div class="rs-card rs-review-insights-card">
@@ -341,8 +269,86 @@ if (!empty($q)) {
             <?php endif; ?>
         </div>
 
-        <!-- RIGHT COLUMN: Timeline (4 cols) -->
+        <!-- RIGHT COLUMN: Reply Composer & Timeline (4 cols) -->
         <div class="rs-col-span-4 rs-d-flex rs-flex-column rs-gap-5">
+            <!-- Single Review Reply Composer Card -->
+            <?php
+            $isPlugin = str_contains(strtolower($platformDisplay), 'plugin');
+            $canReplyDirectly = $review->getType() !== Review::TYPE_MENTION && $review->isServiceReady() && !$isPlugin;
+            ?>
+
+            <?php if ($canReplyDirectly): ?>
+                <div class="rs-card rs-reply-composer-card">
+                    <div class="rs-card__header rs-py-3 rs-d-flex rs-justify-content-between rs-align-items-center">
+                        <h3 class="rs-card__title" style="font-size: 16px;">
+                            <?= $review->getType() === Review::TYPE_POST_REPLY ? 'Reply Comment' : 'Reply Review' ?>
+                        </h3>
+                        <?php if ($review->getType() === Review::TYPE_POST_REPLY && isset($extra['url'])): ?>
+                            <a href="<?= Html::encode($extra['url']) ?>" target="_blank" rel="noopener noreferrer" class="rs-btn rs-btn--sm rs-btn--outline">
+                                View Post on Facebook ↗
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                    <div class="rs-card__body rs-p-6">
+                        <form id="single-reply-form" method="POST" action="<?= \App\Environment::url('/reviews/view?id=' . $review->getId()) ?>" class="rs-form">
+                            <?php if (!empty($csrfToken)): ?>
+                                <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
+                            <?php endif; ?>
+                            <input type="hidden" name="id" value="<?= $review->getId() ?>">
+                            <input type="hidden" name="q" value="<?= Html::encode($q ?? '') ?>">
+                            <div class="rs-form-group rs-mb-4">
+                                <label for="single_reply_text" class="rs-label rs-font-semibold rs-mb-2">Your Response <span class="rs-text-danger">*</span></label>
+                                <textarea id="single_reply_text" name="reply_text" rows="8" class="rs-input rs-w-100" style="resize: vertical; font-family: inherit; line-height: 1.5;" placeholder="Write a professional, personalized reply to <?= Html::encode($customerDisplay) ?>..." required></textarea>
+                            </div>
+
+                            <div class="rs-d-flex rs-justify-content-between rs-align-items-center">
+                                <span class="rs-text-xs rs-text-muted">
+                                    This reply will be published directly to <strong><?= Html::encode($platformDisplay) ?></strong>.
+                                </span>
+                                <button type="submit" id="btn-submit-single-reply" class="rs-btn rs-btn--primary">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                    Send Reply
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            <?php else: ?>
+                <!-- Platform Notice Card for Mentions / Plugins / Unconnected services matching Yii 2 -->
+                <div class="rs-card rs-p-5" style="background-color: var(--rs-bg-app, #f8fafc); border: 1px solid var(--rs-border, #e2e8f0);">
+                    <div class="rs-d-flex rs-align-items-start rs-gap-3">
+                        <div class="rs-text-primary" style="margin-top: 2px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        </div>
+                        <div>
+                            <h4 class="rs-font-bold rs-text-sm rs-text-main rs-m-0 rs-mb-1">
+                                <?php if ($review->getType() === Review::TYPE_MENTION): ?>
+                                    Social Mention Interaction
+                                <?php elseif (!$review->isServiceReady()): ?>
+                                    Channel Configuration Required
+                                <?php else: ?>
+                                    External Platform Reply
+                                <?php endif; ?>
+                            </h4>
+                            <p class="rs-text-muted rs-text-xs rs-m-0 rs-mb-3">
+                                <?php if ($review->getType() === Review::TYPE_MENTION): ?>
+                                    Mentions cannot be replied to via automated API. Please engage directly with the user on their native platform.
+                                <?php elseif (!$review->isServiceReady()): ?>
+                                    This channel is not currently authorized with active API credentials. Re-authenticate in channel settings to enable direct replies.
+                                <?php else: ?>
+                                    This channel uses an external plugin integration. Manage responses through the plugin interface.
+                                <?php endif; ?>
+                            </p>
+                            <?php if (isset($extra['url']) && is_string($extra['url']) && $extra['url'] !== ''): ?>
+                                <a href="<?= Html::encode($extra['url']) ?>" target="_blank" rel="noopener noreferrer" class="rs-btn rs-btn--sm rs-btn--outline">
+                                    Open Post on Native Platform ↗
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <!-- Activity Timeline Card -->
             <div class="rs-card rs-timeline-card">
                 <div class="rs-card__header rs-py-3">

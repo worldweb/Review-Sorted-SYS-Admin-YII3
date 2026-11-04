@@ -26,14 +26,14 @@ final class FacebookSetupAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $flash = new Flash($this->session);
         // OAuth authorization simulation in read-only environment
         $flash->set('info', 'Facebook OAuth authorization flow initiated. In this environment, existing connected pages are managed in read-only mode.');
 
-        return $this->redirect('/sys-yii3/settings/facebook');
+        return $this->redirect(\App\Environment::url('/settings/facebook'));
     }
 
     private function redirect(string $url): ResponseInterface

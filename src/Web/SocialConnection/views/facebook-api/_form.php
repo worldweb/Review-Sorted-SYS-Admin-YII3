@@ -67,7 +67,7 @@ $apiKeyVal = $api?->getApiKey() ?? '';
 
             <!-- Action Row -->
             <div class="rs-d-flex rs-justify-content-between rs-align-items-center rs-mt-6">
-                <a href="<?= $isUpdate ? '/sys-yii3/settings/facebook-api/view?id=' . $api->getId() : '/sys-yii3/settings/facebook-api' ?>" class="rs-btn rs-btn--outline">Cancel</a>
+                <a href="<?= $isUpdate ? \App\Environment::url('/settings/facebook-api/view?id=') . $api->getId() : \App\Environment::url('/settings/facebook-api') ?>" class="rs-btn rs-btn--outline">Cancel</a>
                 <button type="submit" class="rs-btn rs-btn--primary rs-px-6"><?= $isUpdate ? 'Save Changes' : 'Create Application' ?></button>
             </div>
         </form>

@@ -40,10 +40,10 @@ $this->setTitle('Reviews Sorted — Dashboard');
             </div>
             <div style="display: flex; align-items: center; gap: 12px;">
                 <span style="display: inline-block; background: <?= $dbConnected ? '#D1FAE5' : '#FEE2E2' ?>; color: <?= $dbConnected ? '#065F46' : '#991B1B' ?>; font-size: 0.8rem; font-weight: 600; padding: 6px 14px; border-radius: 9999px;">
-                    <?= $dbConnected ? '● Online & Read-Only Enforced' : '● Database Error' ?>
+                    <?= $dbConnected ? '● Online &amp; Operational' : '● Database Error' ?>
                 </span>
                 <?php if ($currentUser !== null): ?>
-                    <a href="/sys-yii3/logout" style="display: inline-block; background: #EF4444; color: #ffffff; text-decoration: none; font-size: 0.85rem; font-weight: 600; padding: 8px 16px; border-radius: 6px; transition: background 0.15s ease;">
+                    <a href="<?= \App\Environment::url('/logout') ?>" style="display: inline-block; background: #EF4444; color: #ffffff; text-decoration: none; font-size: 0.85rem; font-weight: 600; padding: 8px 16px; border-radius: 6px; transition: background 0.15s ease;">
                         Sign Out
                     </a>
                 <?php endif; ?>
@@ -84,17 +84,17 @@ $this->setTitle('Reviews Sorted — Dashboard');
                     </div>
                 <?php endif; ?>
 
-                <!-- Module Navigation Links (Phase 3 User Management & RBAC) -->
+                <!-- Module Navigation Links (User Management & RBAC) -->
                 <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid #CED4DA; display: flex; gap: 12px; flex-wrap: wrap;">
                     <?php if ($currentUser->isAdmin() || $currentUser->isAccountAdmin()): ?>
-                        <a href="/sys-yii3/users" style="display: inline-flex; align-items: center; background: #234137; color: #ffffff; text-decoration: none; font-size: 0.9rem; font-weight: 600; padding: 8px 16px; border-radius: 6px;">
+                        <a href="<?= \App\Environment::url('/users') ?>" style="display: inline-flex; align-items: center; background: #234137; color: #ffffff; text-decoration: none; font-size: 0.9rem; font-weight: 600; padding: 8px 16px; border-radius: 6px;">
                             Manage Users
                         </a>
-                        <a href="/sys-yii3/accounts" style="display: inline-flex; align-items: center; background: #ffffff; color: #234137; border: 1px solid #234137; text-decoration: none; font-size: 0.9rem; font-weight: 600; padding: 8px 16px; border-radius: 6px;">
+                        <a href="<?= \App\Environment::url('/accounts') ?>" style="display: inline-flex; align-items: center; background: #ffffff; color: #234137; border: 1px solid #234137; text-decoration: none; font-size: 0.9rem; font-weight: 600; padding: 8px 16px; border-radius: 6px;">
                             Workspaces &amp; Billing
                         </a>
                     <?php endif; ?>
-                    <a href="/sys-yii3/user/view?id=<?= $currentUser->getId() ?>" style="display: inline-flex; align-items: center; background: #F3F4F6; color: #1F2937; text-decoration: none; font-size: 0.9rem; font-weight: 600; padding: 8px 16px; border-radius: 6px;">
+                    <a href="<?= \App\Environment::url('/user/view?id=' . $currentUser->getId()) ?>" style="display: inline-flex; align-items: center; background: #F3F4F6; color: #1F2937; text-decoration: none; font-size: 0.9rem; font-weight: 600; padding: 8px 16px; border-radius: 6px;">
                         My Profile
                     </a>
                 </div>
@@ -127,15 +127,15 @@ $this->setTitle('Reviews Sorted — Dashboard');
             </div>
         </div>
 
-        <!-- Database Safety Information -->
+        <!-- Database Connection Information -->
         <div style="background: #FAFAFA; border: 1px solid #E5E7EB; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
-            <h3 style="margin: 0 0 12px 0; font-size: 1rem; color: #1A2F26; font-weight: 600;">Database Connection (Read-Only Enforced)</h3>
+            <h3 style="margin: 0 0 12px 0; font-size: 1rem; color: #1A2F26; font-weight: 600;">Database Connection (Environment Configured)</h3>
             <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                 <tr>
                     <td style="padding: 6px 0; color: #7B8A8B; width: 180px;">Status:</td>
                     <td style="padding: 6px 0;">
                         <?php if ($dbConnected): ?>
-                            <span style="color: #065F46; font-weight: 600;">Connected (MySQL user rs_readonly — SELECT only)</span>
+                            <span style="color: #065F46; font-weight: 600;">Connected (MySQL host: <?= Html::encode(\App\Environment::dbHost()) ?>, database: <?= Html::encode(\App\Environment::dbName()) ?>)</span>
                         <?php else: ?>
                             <span style="color: #991B1B; font-weight: 600;">Failed to connect</span>
                         <?php endif; ?>
@@ -166,7 +166,7 @@ $this->setTitle('Reviews Sorted — Dashboard');
             <strong>Parallel Coexistence Confirmed:</strong>
             <ul style="margin: 8px 0 0 0; padding-left: 20px;">
                 <li>Existing Yii 2 application: <a href="/sys/" style="color: #234137; font-weight: 700;">http://localhost/sys/</a> (Source of Truth — 100% pristine)</li>
-                <li>New Yii 3 application: <a href="/sys-yii3/" style="color: #234137; font-weight: 700;">http://localhost/sys-yii3/</a> (Independent Yii 3 Foundation)</li>
+                <li>New Yii 3 application: <a href="<?= \App\Environment::url('/') ?>" style="color: #234137; font-weight: 700;"><?= \App\Environment::url('/') ?></a> (Independent Yii 3 Foundation)</li>
             </ul>
         </div>
     </div>

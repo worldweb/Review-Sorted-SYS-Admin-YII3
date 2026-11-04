@@ -37,7 +37,7 @@ final class UserCreateAccAdminAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -84,7 +84,15 @@ final class UserCreateAccAdminAction
             }
 
             if (empty($errors)) {
-                $infoMessage = 'Validation passed. Database is running in strict read-only mode during Phase 3, so record insertion was prevented.';
+                try {
+                    $newUserId = $this->userRepo->createUser($saveData);
+                    if ($newUserId > 0) {
+                        return $this->redirect(\App\Environment::url('/users/view?id=' . $newUserId));
+                    }
+                    $errors['general'] = 'Failed to create account administrator.';
+                } catch (\Throwable $e) {
+                    $errors['general'] = 'Failed to create account administrator: ' . $e->getMessage();
+                }
             }
         }
 

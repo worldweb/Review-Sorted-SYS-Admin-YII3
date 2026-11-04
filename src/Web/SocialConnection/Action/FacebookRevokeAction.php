@@ -26,7 +26,7 @@ final class FacebookRevokeAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
@@ -35,7 +35,7 @@ final class FacebookRevokeAction
         $this->connectionRepo->unlinkConfig($id, $context);
         $flash->set('info', 'Facebook connection has been unlinked.');
 
-        return $this->redirect('/sys-yii3/settings/facebook');
+        return $this->redirect(\App\Environment::url('/settings/facebook'));
     }
 
     private function redirect(string $url): ResponseInterface

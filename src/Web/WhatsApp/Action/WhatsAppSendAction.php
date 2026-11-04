@@ -42,7 +42,7 @@ final class WhatsAppSendAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
@@ -149,10 +149,10 @@ final class WhatsAppSendAction
                     }
 
                     $flash->add('success', sprintf('%d WhatsApp messages queued for delivery.', $queuedCount));
-                    return $this->redirect('/sys-yii3/whatsapp/history');
+                    return $this->redirect(\App\Environment::url('/whatsapp/history'));
                 } catch (\Throwable $e) {
-                    $flash->add('error', 'Database write error (SELECT-only connection active): ' . $e->getMessage());
-                    return $this->redirect('/sys-yii3/whatsapp/send');
+                    $flash->add('error', 'Database error: ' . $e->getMessage());
+                    return $this->redirect(\App\Environment::url('/whatsapp/send'));
                 }
             }
         }

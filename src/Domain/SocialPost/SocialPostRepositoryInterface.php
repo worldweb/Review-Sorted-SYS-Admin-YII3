@@ -19,14 +19,17 @@ interface SocialPostRepositoryInterface
     /**
      * Find all posts for the current tenant context.
      *
+     * @param array<string, mixed> $filters
      * @return array<int, SocialPost>
      */
-    public function findAllPosts(?TenantContextInterface $context = null, int $limit = 20, int $offset = 0, ?string $typeFilter = null): array;
+    public function findAllPosts(?TenantContextInterface $context = null, int $limit = 20, int $offset = 0, ?string $typeFilter = null, array $filters = []): array;
 
     /**
      * Count total posts matching criteria.
+     *
+     * @param array<string, mixed> $filters
      */
-    public function countPosts(?TenantContextInterface $context = null, ?string $typeFilter = null): int;
+    public function countPosts(?TenantContextInterface $context = null, ?string $typeFilter = null, array $filters = []): int;
 
     /**
      * Find pending queued destinations ready to be published.

@@ -9,7 +9,7 @@ use Yiisoft\Db\Query\Query;
 
 /**
  * System Settings Repository Implementation.
- * Provides safe, parameterized, read-only configuration lookups with request-level memory caching.
+ * Provides safe, parameterized configuration lookups and persistence with request-level memory caching.
  */
 final class SettingRepository implements SettingRepositoryInterface
 {

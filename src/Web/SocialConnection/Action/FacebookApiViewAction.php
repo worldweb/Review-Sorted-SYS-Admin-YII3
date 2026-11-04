@@ -33,18 +33,18 @@ final class FacebookApiViewAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
         if ($currentUser === null || !$currentUser->isAdmin()) {
-            return $this->redirect('/sys-yii3/settings/facebook');
+            return $this->redirect(\App\Environment::url('/settings/facebook'));
         }
 
-        $id = (int) ($request->getQueryParams()['id'] ?? 0);
+        $id = (int) ($request->getQueryParams()['id'] ?? $request->getAttribute('id') ?? 0);
         $api = $this->connectionRepo->findApiById($id);
         if ($api === null || $api->getServiceId() !== Api::SERVICE_FACEBOOK) {
-            return $this->redirect('/sys-yii3/settings/facebook-api');
+            return $this->redirect(\App\Environment::url('/settings/facebook-api'));
         }
 
         $flash = new Flash($this->session);

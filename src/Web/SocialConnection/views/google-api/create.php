@@ -27,11 +27,11 @@ $this->setTitle('Create Google Project');
     <?php endif; ?>
 
     <div class="rs-section">
-        <?= $this->render('_form', [
+        <?= $this->render('google-api/_form', [
             'api' => null,
             'errors' => $errors,
             'csrfToken' => $csrfToken,
-            'actionUrl' => '/sys-yii3/settings/google-api/create',
+            'actionUrl' => \App\Environment::url('/settings/google-api/create'),
         ]) ?>
     </div>
 </div>

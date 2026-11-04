@@ -32,12 +32,12 @@ final class SocialPostIndexAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
         if ($currentUser === null) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $queryParams = $request->getQueryParams();
@@ -51,8 +51,16 @@ final class SocialPostIndexAction
         $pageSize = 15;
         $offset = ($page - 1) * $pageSize;
 
-        $totalCount = $this->postRepo->countPosts($context, $typeFilter);
-        $posts = $this->postRepo->findAllPosts($context, $pageSize, $offset, $typeFilter);
+        $filters = [
+            'q' => $q,
+            'status' => $status,
+            'platform' => $platform,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
+        ];
+
+        $totalCount = $this->postRepo->countPosts($context, $typeFilter, $filters);
+        $posts = $this->postRepo->findAllPosts($context, $pageSize, $offset, $typeFilter, $filters);
         $pageCount = max(1, (int) ceil($totalCount / $pageSize));
 
         $flash = new Flash($this->session);

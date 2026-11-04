@@ -38,7 +38,7 @@ use Yiisoft\Html\Html;
             <label style="font-size: 12px; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">
                 Configuring Role:
             </label>
-            <select class="rs-input rs-select" style="font-weight: 600; color: #0f172a; width: 100%;" onchange="location.href = '/sys-yii3/global-settings?section=roles&target_role=' + encodeURIComponent(this.value);">
+            <select class="rs-input rs-select" style="font-weight: 600; color: #0f172a; width: 100%;" onchange="location.href = <?= json_encode(\App\Environment::url('/global-settings?section=roles&target_role=')) ?> + encodeURIComponent(this.value);">
                 <?php foreach ($roleOptions as $roleKey => $roleLabel): ?>
                     <option value="<?= Html::encode($roleKey) ?>" <?= $targetRole === $roleKey ? 'selected' : '' ?>>
                         <?= Html::encode($roleLabel) ?> (<?= Html::encode($roleKey) ?>)
@@ -49,7 +49,7 @@ use Yiisoft\Html\Html;
     </div>
 
     <!-- MAIN ROLE PERMISSIONS FORM -->
-    <form id="role-permissions-form" action="/sys-yii3/global-settings?section=roles&target_role=<?= urlencode($targetRole) ?>" method="post">
+    <form id="role-permissions-form" action="<?= \App\Environment::url('/global-settings?section=roles&target_role=' . urlencode($targetRole)) ?>" method="post">
         <?php if (!empty($csrfToken)): ?>
             <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
         <?php endif; ?>

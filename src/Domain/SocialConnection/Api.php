@@ -12,7 +12,6 @@ final class Api
 {
     public const SERVICE_GOOGLE = 1;
     public const SERVICE_FACEBOOK = 2;
-    public const SERVICE_TWITTER = 3;
 
     public function __construct(
         private int $id,

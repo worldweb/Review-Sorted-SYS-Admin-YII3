@@ -33,18 +33,18 @@ final class GoogleApiUpdateAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
         if ($currentUser === null || !$currentUser->isAdmin()) {
-            return $this->redirect('/sys-yii3/settings/google');
+            return $this->redirect(\App\Environment::url('/settings/google'));
         }
 
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
         $api = $this->connectionRepo->findApiById($id);
         if ($api === null || $api->getServiceId() !== Api::SERVICE_GOOGLE) {
-            return $this->redirect('/sys-yii3/settings/google-api');
+            return $this->redirect(\App\Environment::url('/settings/google-api'));
         }
 
         $flash = new Flash($this->session);
@@ -76,7 +76,7 @@ final class GoogleApiUpdateAction
 
                 if ($saved !== null) {
                     $flash->add('success', 'Google Project successfully updated.');
-                    return $this->redirect('/sys-yii3/settings/google-api/view?id=' . $id);
+                    return $this->redirect(\App\Environment::url('/settings/google-api/view?id=') . $id);
                 } else {
                     $flash->add('error', 'Failed to update Google Project.');
                 }

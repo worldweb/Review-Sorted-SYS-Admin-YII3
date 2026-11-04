@@ -26,16 +26,16 @@ final class FacebookDeleteAction
     {
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
-            return $this->redirect('/sys-yii3/login');
+            return $this->redirect(\App\Environment::url('/login'));
         }
 
-        $id = (int) ($request->getQueryParams()['id'] ?? 0);
+        $id = (int) ($request->getQueryParams()['id'] ?? $request->getAttribute('id') ?? (((array) $request->getParsedBody())['id'] ?? 0));
         $flash = new Flash($this->session);
 
         $this->connectionRepo->deleteConfig($id, $context);
         $flash->set('info', 'Facebook connection removed.');
 
-        return $this->redirect('/sys-yii3/settings/facebook');
+        return $this->redirect(\App\Environment::url('/settings/facebook'));
     }
 
     private function redirect(string $url): ResponseInterface

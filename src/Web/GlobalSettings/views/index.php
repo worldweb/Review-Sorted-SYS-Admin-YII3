@@ -55,7 +55,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
         <?php foreach ($sections as $sKey => $sInfo): ?>
             <?php $isActive = $section === $sKey; ?>
             <a
-                href="/sys-yii3/global-settings?section=<?= urlencode($sKey) ?>"
+                href="<?= \App\Environment::url('/global-settings?section=' . urlencode($sKey)) ?>"
                 class="rs-settings-tab-btn <?= $isActive ? 'active' : '' ?>"
             >
                 <span><?= $sInfo['icon'] ?></span>
@@ -82,7 +82,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                 </h3>
             </div>
             <div class="rs-card__body rs-p-6" style="padding: 24px;">
-                <form method="post" action="/sys-yii3/global-settings?section=<?= urlencode($section) ?>" class="rs-form">
+                <form method="post" action="<?= \App\Environment::url('/global-settings?section=' . urlencode($section)) ?>" class="rs-form">
                     <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
 
                     <?= $this->render('_' . $section, [
