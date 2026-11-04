@@ -21,7 +21,7 @@ use Yiisoft\Html\Html;
 $this->setTitle('Send WhatsApp Messages');
 
 $actions = [
-    '<a href="' . \App\Environment::url('/whatsapp/templates') . '" class="rs-btn rs-btn--ghost">Cancel</a>'
+    (string) Html::a('Cancel', \App\Environment::url('/whatsapp/templates'), ['class' => 'rs-btn rs-btn--ghost']),
 ];
 $title = 'Send WhatsApp Messages';
 $description = 'Send WhatsApp templates to individual contacts or a contact list.';
@@ -55,7 +55,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                     <h4 class="rs-font-bold rs-text-main rs-mb-3" style="font-size: 1rem; border-bottom: 1px solid var(--rs-border, #E2E8F0); padding-bottom: 8px;">
                         Target
                     </h4>
-                    
+
                     <?php if (isset($errors['recipients'])): ?>
                         <div class="rs-alert rs-alert--danger rs-mb-4" role="alert">
                             <?= Html::encode($errors['recipients']) ?>
@@ -143,8 +143,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                             rows="6"
                             class="rs-input rs-textarea-input rs-w-100 <?= isset($errors['message']) ? 'rs-input--error' : '' ?>"
                             required
-                            placeholder="Write message text or select a template above..."
-                        ><?= Html::encode($formData['message'] ?? '') ?></textarea>
+                            placeholder="Write message text or select a template above..."><?= Html::encode($formData['message'] ?? '') ?></textarea>
                         <?php if (isset($errors['message'])): ?>
                             <div class="rs-text-danger rs-mt-1" style="font-size: 0.8rem;"><?= Html::encode($errors['message']) ?></div>
                         <?php endif; ?>
@@ -158,8 +157,7 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                                 type="button"
                                 class="rs-badge rs-badge--default"
                                 onclick="insertWhatsAppTag('<?= Html::encode($tag) ?>')"
-                                style="cursor: pointer; margin-right: 4px; margin-bottom: 4px; border: 1px solid var(--rs-border, #CBD5E1); background: #fff;"
-                            >
+                                style="cursor: pointer; margin-right: 4px; margin-bottom: 4px; border: 1px solid var(--rs-border, #CBD5E1); background: #fff;">
                                 <code><?= Html::encode($tag) ?></code>
                             </button>
                         <?php endforeach; ?>
@@ -178,26 +176,26 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
 </div>
 
 <script>
-function onTemplateChange(templateId) {
-    if (!templateId) return;
-    const div = document.getElementById('tpl-' + templateId);
-    const textarea = document.getElementById('campaign-message');
-    if (div && textarea) {
-        const parser = new DOMParser();
-        const decoded = parser.parseFromString(div.innerHTML, 'text/html').body.textContent || div.innerHTML;
-        textarea.value = decoded;
+    function onTemplateChange(templateId) {
+        if (!templateId) return;
+        const div = document.getElementById('tpl-' + templateId);
+        const textarea = document.getElementById('campaign-message');
+        if (div && textarea) {
+            const parser = new DOMParser();
+            const decoded = parser.parseFromString(div.innerHTML, 'text/html').body.textContent || div.innerHTML;
+            textarea.value = decoded;
+        }
     }
-}
 
-function insertWhatsAppTag(tag) {
-    const textarea = document.getElementById('campaign-message');
-    if (!textarea) return;
-    const start = textarea.selectionStart || 0;
-    const end = textarea.selectionEnd || 0;
-    const val = textarea.value;
-    textarea.value = val.substring(0, start) + tag + val.substring(end);
-    textarea.focus();
-    const newPos = start + tag.length;
-    textarea.setSelectionRange(newPos, newPos);
-}
+    function insertWhatsAppTag(tag) {
+        const textarea = document.getElementById('campaign-message');
+        if (!textarea) return;
+        const start = textarea.selectionStart || 0;
+        const end = textarea.selectionEnd || 0;
+        const val = textarea.value;
+        textarea.value = val.substring(0, start) + tag + val.substring(end);
+        textarea.focus();
+        const newPos = start + tag.length;
+        textarea.setSelectionRange(newPos, newPos);
+    }
 </script>

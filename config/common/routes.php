@@ -357,7 +357,7 @@ return [
             Route::get('/social-post/delete')
                 ->action(Web\SocialPost\Action\SocialPostDeleteAction::class)
                 ->name('social_post_delete'),
-            Route::get('/social-post/retry')
+            Route::post('/social-post/retry')
                 ->action(Web\SocialPost\Action\SocialPostRetryAction::class)
                 ->name('social_post_retry'),
 
@@ -706,7 +706,7 @@ return [
     Route::get('/social-post/delete')
         ->action(Web\SocialPost\Action\SocialPostDeleteAction::class)
         ->name('root_social_post_delete'),
-    Route::get('/social-post/retry')
+    Route::post('/social-post/retry')
         ->action(Web\SocialPost\Action\SocialPostRetryAction::class)
         ->name('root_social_post_retry'),
 

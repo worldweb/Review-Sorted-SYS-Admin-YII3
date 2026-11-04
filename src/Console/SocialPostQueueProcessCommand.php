@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console;
 
-use App\Domain\SocialPost\SocialPostRepositoryInterface;
+use App\Domain\SocialPost\Service\SocialPostQueueWorkerService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,7 +19,7 @@ use Yiisoft\Yii\Console\ExitCode;
 final class SocialPostQueueProcessCommand extends Command
 {
     public function __construct(
-        private SocialPostRepositoryInterface $postRepo,
+        private SocialPostQueueWorkerService $workerService,
     ) {
         parent::__construct();
     }
@@ -40,9 +40,27 @@ final class SocialPostQueueProcessCommand extends Command
         $batchSize = max(1, (int) $input->getOption('batch-size'));
         $output->writeln(sprintf('<info>Starting social post queue worker (batch size: %d)...</info>', $batchSize));
 
-        $pending = $this->postRepo->findPendingDestinations($batchSize);
-        $output->writeln(sprintf('<info>Found %d pending destinations scheduled for delivery.</info>', count($pending)));
+        $stats = $this->workerService->processBatchDetailed($batchSize);
+
+        if ($stats['recovered_stale'] > 0) {
+            $output->writeln(sprintf('<comment>Recovered %d stale processing destination(s).</comment>', $stats['recovered_stale']));
+        }
+
+        if ($stats['claimed'] === 0) {
+            $output->writeln('<info>Queue worker completed: No pending destinations eligible for processing (resolvers inactive or queue empty).</info>');
+            return ExitCode::OK;
+        }
+
+        $output->writeln(sprintf(
+            '<info>Batch summary: %d claimed | %d published | %d retried | %d failed | %d quarantined ambiguous</info>',
+            $stats['claimed'],
+            $stats['published'],
+            $stats['retried'],
+            $stats['failed'],
+            $stats['ambiguous']
+        ));
 
         return ExitCode::OK;
     }
 }
+

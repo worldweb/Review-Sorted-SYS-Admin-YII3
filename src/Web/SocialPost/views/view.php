@@ -240,8 +240,13 @@ $hasActiveJobs = ($progress['queued'] > 0 || $progress['processing'] > 0);
                                         <?php
                                         $count = (int) $d->getRetryCount();
                                         $label = 'Attempt #' . ($count + 1);
+                                        $isAmbiguous = str_starts_with($d->getErrorMessage() ?? '', 'Ambiguous delivery:');
                                         if ($d->isFailed() && $d->getErrorMessage() !== 'Cancelled by user') {
-                                            $label .= ' <span class="rs-badge rs-badge--warning" style="font-size:10px;">Retry Available</span>';
+                                            if ($isAmbiguous) {
+                                                $label .= ' <span class="rs-badge rs-badge--danger" style="font-size:10px;">Ambiguous Failure</span>';
+                                            } else {
+                                                $label .= ' <span class="rs-badge rs-badge--warning" style="font-size:10px;">Retry Available</span>';
+                                            }
                                         } elseif ($d->isPublished()) {
                                             $label .= ' <span class="rs-badge rs-badge--success" style="font-size:10px;">Completed</span>';
                                         }
@@ -259,12 +264,75 @@ $hasActiveJobs = ($progress['queued'] > 0 || $progress['processing'] > 0);
                                     </td>
                                     <td style="text-align: right; white-space: nowrap;">
                                         <?php if ($d->isFailed() && $d->getErrorMessage() !== 'Cancelled by user'): ?>
-                                            <form method="post" action="<?= \App\Environment::url('/social-post/retry?id=' . $model->getId()) ?>" style="display: inline-block; margin: 0;">
-                                                <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
-                                                <button type="submit" class="rs-btn rs-btn--secondary rs-btn--sm" onclick="return confirm('Are you sure you want to retry publishing to this destination?');">
-                                                    <span class="glyphicon glyphicon-repeat"></span> Retry
+                                            <?php if ($isAmbiguous): ?>
+                                                <?php
+                                                $elapsed = time() - $d->getUpdatedAt();
+                                                $remainingSeconds = max(0, 900 - $elapsed);
+                                                $isCooldownActive = $remainingSeconds > 0;
+                                                $remainingMinutes = (int) ceil($remainingSeconds / 60);
+                                                ?>
+                                                <button type="button" class="rs-btn rs-btn--warning rs-btn--sm" onclick="openAmbiguousModal(<?= $d->getId() ?>)">
+                                                    <span class="glyphicon glyphicon-alert"></span> Verify & Override
                                                 </button>
-                                            </form>
+
+                                                <!-- Ambiguous Override Modal Dialog -->
+                                                <div id="ambiguous-modal-<?= $d->getId() ?>" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem; text-align: left; white-space: normal;">
+                                                    <div style="background: #ffffff; width: 100%; max-width: 580px; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column;">
+                                                        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #fef2f2;">
+                                                            <h4 style="margin: 0; color: #991b1b; font-weight: 700; font-size: 1.1rem;">
+                                                                <span class="glyphicon glyphicon-warning-sign"></span> Review Ambiguous Delivery — Destination #<?= $d->getId() ?>
+                                                            </h4>
+                                                            <button type="button" style="border: none; background: none; font-size: 1.5rem; cursor: pointer; color: #64748b; line-height: 1;" onclick="closeAmbiguousModal(<?= $d->getId() ?>)">&times;</button>
+                                                        </div>
+                                                        <div style="padding: 1.5rem; font-size: 14px; line-height: 1.5;">
+                                                            <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 12px 16px; margin-bottom: 15px; color: #9f1239;">
+                                                                <strong>Warning:</strong> A network timeout occurred during delivery. The post may have been created on this platform even though our system never received confirmation. Please check your social feed directly. If you retry, a duplicate post may be created.
+                                                            </div>
+
+                                                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 15px;">
+                                                                <div style="font-weight: 600; color: #334155; margin-bottom: 4px;">Destination Details:</div>
+                                                                <div><strong>Platform:</strong> <?= ucfirst($plat) ?></div>
+                                                                <div><strong>Target:</strong> <?= Html::encode($d->getDestinationName() ?? ('#' . $d->getAccountId())) ?></div>
+                                                                <div><strong>Original Error:</strong> <code style="word-break: break-all; color: #dc2626;"><?= Html::encode($d->getErrorMessage()) ?></code></div>
+                                                            </div>
+
+                                                            <?php if ($isCooldownActive): ?>
+                                                                <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 12px 16px; margin-bottom: 15px; color: #854d0e;">
+                                                                    <strong>Operational Settling Cooldown Active:</strong><br>
+                                                                    Please wait approximately <strong><?= $remainingMinutes ?> more minute(s)</strong> (<?= $remainingSeconds ?>s) for remote processing queues and replication lag to settle before retrying. The server will reject override requests while cooldown is active.
+                                                                </div>
+                                                            <?php endif; ?>
+
+                                                            <form method="post" action="<?= \App\Environment::url('/social-post/retry?id=' . $model->getId()) ?>">
+                                                                <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
+                                                                <input type="hidden" name="destination_id" value="<?= $d->getId() ?>">
+
+                                                                <div style="background: #fafaf9; border: 1px solid #e7e5e4; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+                                                                    <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; margin: 0; font-weight: normal; color: #1c1917;">
+                                                                        <input type="checkbox" name="confirm_remote_absent" value="1" required style="margin-top: 3px;" <?= $isCooldownActive ? 'disabled' : '' ?>>
+                                                                        <span>I have inspected the external <?= ucfirst($plat) ?> channel directly and confirm that this post was <strong>NOT</strong> published remotely. I accept responsibility for any duplicate posting risk.</span>
+                                                                    </label>
+                                                                </div>
+
+                                                                <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                                                                    <button type="button" class="rs-btn rs-btn--secondary" onclick="closeAmbiguousModal(<?= $d->getId() ?>)">Cancel</button>
+                                                                    <button type="submit" class="rs-btn rs-btn--danger" <?= $isCooldownActive ? 'disabled title="Cooldown active. Server will reject."' : '' ?>>
+                                                                        <span class="glyphicon glyphicon-repeat"></span> Confirm & Override Retry
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php else: ?>
+                                                <form method="post" action="<?= \App\Environment::url('/social-post/retry?id=' . $model->getId()) ?>" style="display: inline-block; margin: 0;">
+                                                    <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
+                                                    <input type="hidden" name="destination_id" value="<?= $d->getId() ?>">
+                                                    <button type="submit" class="rs-btn rs-btn--secondary rs-btn--sm" onclick="return confirm('Are you sure you want to retry publishing to this destination?');">
+                                                        <span class="glyphicon glyphicon-repeat"></span> Retry
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
                                         <?php else: ?>
                                             -
                                         <?php endif; ?>
@@ -278,3 +346,18 @@ $hasActiveJobs = ($progress['queued'] > 0 || $progress['processing'] > 0);
         </div>
     </div>
 </div>
+
+<script>
+function openAmbiguousModal(id) {
+    var el = document.getElementById('ambiguous-modal-' + id);
+    if (el) {
+        el.style.display = 'flex';
+    }
+}
+function closeAmbiguousModal(id) {
+    var el = document.getElementById('ambiguous-modal-' + id);
+    if (el) {
+        el.style.display = 'none';
+    }
+}
+</script>

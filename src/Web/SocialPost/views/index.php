@@ -259,12 +259,19 @@ $this->setTitle('Social Publishing History');
                                                     </form>
                                                 <?php endif; ?>
                                                 <?php if ($d->isFailed() && $d->getErrorMessage() !== 'Cancelled by user'): ?>
-                                                    <form method="post" action="<?= \App\Environment::url('/social-post/retry?id=' . $p->getId()) ?>" style="display: inline-block; margin: 0;">
-                                                        <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
-                                                        <button type="submit" class="rs-btn rs-btn--secondary rs-btn--sm" onclick="return confirm('Are you sure you want to retry publishing to this destination?');">
-                                                            <span class="glyphicon glyphicon-repeat"></span> Retry
-                                                        </button>
-                                                    </form>
+                                                    <?php if (str_starts_with($d->getErrorMessage() ?? '', 'Ambiguous delivery:')): ?>
+                                                        <a href="<?= \App\Environment::url('/social-post/view?id=' . $p->getId()) ?>" class="rs-btn rs-btn--warning rs-btn--sm" title="Ambiguous network failure requires verification before override">
+                                                            <span class="glyphicon glyphicon-alert"></span> Review & Override
+                                                        </a>
+                                                    <?php else: ?>
+                                                        <form method="post" action="<?= \App\Environment::url('/social-post/retry?id=' . $p->getId()) ?>" style="display: inline-block; margin: 0;">
+                                                            <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
+                                                            <input type="hidden" name="destination_id" value="<?= $d->getId() ?>">
+                                                            <button type="submit" class="rs-btn rs-btn--secondary rs-btn--sm" onclick="return confirm('Are you sure you want to retry publishing to this destination?');">
+                                                                <span class="glyphicon glyphicon-repeat"></span> Retry
+                                                            </button>
+                                                        </form>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
                                             </td>
                                         </tr>

@@ -97,4 +97,29 @@ return [
     // Outbound Queue Workers
     \App\Domain\Email\Service\EmailQueueWorkerService::class => \App\Domain\Email\Service\EmailQueueWorkerService::class,
     \App\Domain\WhatsApp\Service\WhatsAppQueueWorkerService::class => \App\Domain\WhatsApp\Service\WhatsAppQueueWorkerService::class,
+
+    // Social Publishing & Queue Worker Services
+    \App\Domain\SocialPost\Service\SocialMediaUrlResolverInterface::class => \App\Infrastructure\SocialPost\Service\SocialMediaUrlResolver::class,
+    \App\Infrastructure\SocialPost\Service\SocialMediaUrlResolver::class => \App\Infrastructure\SocialPost\Service\SocialMediaUrlResolver::class,
+
+    \App\Domain\SocialPost\Client\MetaGraphApiClientInterface::class => \App\Infrastructure\SocialPost\Client\MetaGraphApiClient::class,
+    \App\Infrastructure\SocialPost\Client\MetaGraphApiClient::class => \App\Infrastructure\SocialPost\Client\MetaGraphApiClient::class,
+
+    \App\Domain\SocialPost\Resolver\FacebookPlatformResolver::class => \App\Domain\SocialPost\Resolver\FacebookPlatformResolver::class,
+    \App\Domain\SocialPost\Resolver\InstagramPlatformResolver::class => \App\Domain\SocialPost\Resolver\InstagramPlatformResolver::class,
+
+    \App\Domain\SocialPost\Service\SocialPlatformResolverFactory::class => static fn (
+        \App\Domain\SocialPost\Resolver\FacebookPlatformResolver $fbResolver,
+        \App\Domain\SocialPost\Resolver\InstagramPlatformResolver $igResolver,
+    ): \App\Domain\SocialPost\Service\SocialPlatformResolverFactory => new \App\Domain\SocialPost\Service\SocialPlatformResolverFactory([
+        $fbResolver,
+        $igResolver,
+    ]),
+    \App\Domain\SocialPost\Service\SocialPlatformResolverFactoryInterface::class => static fn (
+        \App\Domain\SocialPost\Service\SocialPlatformResolverFactory $factory,
+    ): \App\Domain\SocialPost\Service\SocialPlatformResolverFactoryInterface => $factory,
+
+    \App\Domain\SocialPost\Service\SocialPostingServiceInterface::class => \App\Domain\SocialPost\Service\SocialPostingService::class,
+    \App\Domain\SocialPost\Service\SocialPostingService::class => \App\Domain\SocialPost\Service\SocialPostingService::class,
+    \App\Domain\SocialPost\Service\SocialPostQueueWorkerService::class => \App\Domain\SocialPost\Service\SocialPostQueueWorkerService::class,
 ];

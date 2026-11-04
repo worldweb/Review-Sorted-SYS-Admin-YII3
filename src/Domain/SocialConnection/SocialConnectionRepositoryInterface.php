@@ -41,6 +41,11 @@ interface SocialConnectionRepositoryInterface
     public function countGoogleConfigs(?TenantContextInterface $context = null): int;
 
     /**
+     * Find a single SubService by ID, scoped to tenant context if not super admin.
+     */
+    public function findSubServiceById(int $id, ?TenantContextInterface $context = null): ?SubService;
+
+    /**
      * Find all linked Instagram sub-services for a given ServiceConfig ID.
      *
      * @return array<int, SubService>

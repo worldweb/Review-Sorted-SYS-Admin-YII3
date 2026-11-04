@@ -146,6 +146,37 @@ final class SocialConnectionRepository implements SocialConnectionRepositoryInte
         return (int) $query->count();
     }
 
+    public function findSubServiceById(int $id, ?TenantContextInterface $context = null): ?SubService
+    {
+        $ctx = $context ?? $this->tenantContextProvider?->get();
+        if ($ctx !== null && $ctx->isGuest()) {
+            return null;
+        }
+
+        $query = (new Query($this->db))
+            ->select(['sub.*'])
+            ->from(['sub' => '{{%sub_service}}'])
+            ->innerJoin(['sc' => '{{%service_config}}'], 'sc.id = sub.service_config_id')
+            ->where(['sub.id' => $id]);
+
+        if ($ctx !== null && !$ctx->isUnrestricted()) {
+            $accessible = $ctx->getAccessibleAccountIds();
+            if (empty($accessible)) {
+                return null;
+            }
+            $query->andWhere(['in', 'sub.account_id', $accessible]);
+            $query->andWhere(['in', 'sc.account_id', $accessible]);
+        }
+
+        /** @var array<string, mixed>|false $row */
+        $row = $query->one();
+        if ($row === null || $row === false) {
+            return null;
+        }
+
+        return SubService::fromDatabaseRow($row);
+    }
+
     public function findSubServicesForConfig(int $serviceConfigId): array
     {
         $rows = (new Query($this->db))

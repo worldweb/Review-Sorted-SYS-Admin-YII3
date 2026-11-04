@@ -7,6 +7,7 @@ namespace App\Domain\SocialPost;
 use App\Security\TenantContextInterface;
 use App\Security\TenantContextProviderInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
+use Yiisoft\Db\Expression\Expression;
 use Yiisoft\Db\Query\Query;
 
 final class SocialPostRepository implements SocialPostRepositoryInterface
@@ -185,12 +186,19 @@ final class SocialPostRepository implements SocialPostRepositoryInterface
         return (int) ($query->scalar() ?? 0);
     }
 
-    public function findPendingDestinations(int $limit = 20): array
+    public function findPendingDestinations(int $limit = 20, array $supportedPlatforms = []): array
     {
+        if (empty($supportedPlatforms)) {
+            // Step 1 Foundation: When no platform resolvers are registered, return empty list immediately.
+            // Queued destinations remain untouched in 'queued' status.
+            return [];
+        }
+
         $rows = (new Query($this->db))
             ->from('{{%social_post_destination}}')
             ->where(['status' => SocialPostDestination::STATUS_QUEUED])
             ->andWhere(['<=', 'scheduled_at', date('Y-m-d H:i:s')])
+            ->andWhere(['platform' => $supportedPlatforms])
             ->orderBy(['id' => SORT_ASC])
             ->limit($limit)
             ->all();
@@ -201,6 +209,240 @@ final class SocialPostRepository implements SocialPostRepositoryInterface
         }
 
         return $destinations;
+    }
+
+    public function claimPendingDestination(int $id, string $lockTime): bool
+    {
+        $now = time();
+        $affected = $this->db->createCommand(
+            'UPDATE {{%social_post_destination}} ' .
+            'SET status = :proc, locked_at = :lockTime, updated_at = :now ' .
+            'WHERE id = :id AND status = :queued',
+            [
+                ':proc' => SocialPostDestination::STATUS_PROCESSING,
+                ':lockTime' => $lockTime,
+                ':now' => $now,
+                ':id' => $id,
+                ':queued' => SocialPostDestination::STATUS_QUEUED,
+            ]
+        )->execute();
+
+        return $affected > 0;
+    }
+
+    public function releaseClaimedDestination(int $id, string $lockTime): bool
+    {
+        $now = time();
+        $affected = $this->db->createCommand(
+            'UPDATE {{%social_post_destination}} ' .
+            'SET status = :queued, locked_at = NULL, updated_at = :now ' .
+            'WHERE id = :id AND status = :proc AND locked_at = :lockTime',
+            [
+                ':queued' => SocialPostDestination::STATUS_QUEUED,
+                ':now' => $now,
+                ':id' => $id,
+                ':proc' => SocialPostDestination::STATUS_PROCESSING,
+                ':lockTime' => $lockTime,
+            ]
+        )->execute();
+
+        return $affected > 0;
+    }
+
+    public function recoverStaleDestinations(int $timeoutMinutes = 15): int
+    {
+        $staleThreshold = date('Y-m-d H:i:s', time() - ($timeoutMinutes * 60));
+        $now = time();
+        $nowDate = date('Y-m-d H:i:s');
+
+        // Path 1: If remote_post_id exists, recover as published
+        $recoveredPublished = $this->db->createCommand(
+            'UPDATE {{%social_post_destination}} ' .
+            'SET status = :pub, published_at = COALESCE(published_at, :nowDate), locked_at = NULL, updated_at = :now ' .
+            'WHERE status = :proc AND locked_at <= :staleThreshold AND remote_post_id IS NOT NULL',
+            [
+                ':pub' => SocialPostDestination::STATUS_PUBLISHED,
+                ':nowDate' => $nowDate,
+                ':now' => $now,
+                ':proc' => SocialPostDestination::STATUS_PROCESSING,
+                ':staleThreshold' => $staleThreshold,
+            ]
+        )->execute();
+
+        // Path 2: If remote_post_id is null, mark failed with ambiguous delivery prefix and stamp updated_at
+        $recoveredAmbiguous = $this->db->createCommand(
+            'UPDATE {{%social_post_destination}} ' .
+            'SET status = :failed, error_message = :err, locked_at = NULL, updated_at = :now ' .
+            'WHERE status = :proc AND locked_at <= :staleThreshold AND remote_post_id IS NULL',
+            [
+                ':failed' => SocialPostDestination::STATUS_FAILED,
+                ':err' => 'Ambiguous delivery: Worker lease expired during processing',
+                ':now' => $now,
+                ':proc' => SocialPostDestination::STATUS_PROCESSING,
+                ':staleThreshold' => $staleThreshold,
+            ]
+        )->execute();
+
+        return $recoveredPublished + $recoveredAmbiguous;
+    }
+
+    public function markDestinationPublished(int $id, string $remotePostId, string $lockTime): bool
+    {
+        $now = time();
+        $publishedAt = date('Y-m-d H:i:s');
+
+        $affected = $this->db->createCommand(
+            'UPDATE {{%social_post_destination}} ' .
+            'SET status = :pub, remote_post_id = :remoteId, published_at = :pubAt, error_message = NULL, locked_at = NULL, updated_at = :now ' .
+            'WHERE id = :id AND status = :proc AND locked_at = :lockTime',
+            [
+                ':pub' => SocialPostDestination::STATUS_PUBLISHED,
+                ':remoteId' => $remotePostId,
+                ':pubAt' => $publishedAt,
+                ':now' => $now,
+                ':id' => $id,
+                ':proc' => SocialPostDestination::STATUS_PROCESSING,
+                ':lockTime' => $lockTime,
+            ]
+        )->execute();
+
+        return $affected > 0;
+    }
+
+    public function markDestinationFailed(int $id, string $errorMessage, string $lockTime, bool $isAmbiguous = false): bool
+    {
+        $now = time();
+        $finalError = $errorMessage;
+        if ($isAmbiguous && !str_starts_with($finalError, 'Ambiguous delivery:')) {
+            $finalError = 'Ambiguous delivery: ' . $finalError;
+        }
+
+        $affected = $this->db->createCommand(
+            'UPDATE {{%social_post_destination}} ' .
+            'SET status = :failed, error_message = :err, locked_at = NULL, updated_at = :now ' .
+            'WHERE id = :id AND status = :proc AND locked_at = :lockTime',
+            [
+                ':failed' => SocialPostDestination::STATUS_FAILED,
+                ':err' => $finalError,
+                ':now' => $now,
+                ':id' => $id,
+                ':proc' => SocialPostDestination::STATUS_PROCESSING,
+                ':lockTime' => $lockTime,
+            ]
+        )->execute();
+
+        return $affected > 0;
+    }
+
+    public function rescheduleDestination(int $id, int $retryCount, int $delaySeconds, string $lockTime): bool
+    {
+        $now = time();
+        $nextScheduledAt = date('Y-m-d H:i:s', $now + $delaySeconds);
+
+        $affected = $this->db->createCommand(
+            'UPDATE {{%social_post_destination}} ' .
+            'SET status = :queued, retry_count = :retries, scheduled_at = :schedAt, locked_at = NULL, updated_at = :now ' .
+            'WHERE id = :id AND status = :proc AND locked_at = :lockTime',
+            [
+                ':queued' => SocialPostDestination::STATUS_QUEUED,
+                ':retries' => $retryCount,
+                ':schedAt' => $nextScheduledAt,
+                ':now' => $now,
+                ':id' => $id,
+                ':proc' => SocialPostDestination::STATUS_PROCESSING,
+                ':lockTime' => $lockTime,
+            ]
+        )->execute();
+
+        return $affected > 0;
+    }
+
+    public function findDestinationById(int $destinationId, ?TenantContextInterface $context = null): ?SocialPostDestination
+    {
+        $ctx = $context ?? $this->tenantContextProvider?->get();
+        $query = (new Query($this->db))
+            ->select([
+                'spd.*',
+                'destination_name' => 'COALESCE(sc.label, sub.name, spd.platform)',
+            ])
+            ->from(['spd' => '{{%social_post_destination}}'])
+            ->leftJoin(['sc' => '{{%service_config}}'], 'sc.id = spd.service_config_id')
+            ->leftJoin(['sub' => '{{%sub_service}}'], 'sub.id = spd.sub_service_id')
+            ->where(['spd.id' => $destinationId]);
+
+        if ($ctx !== null && !$ctx->isUnrestricted()) {
+            $query->andWhere(['spd.account_id' => $ctx->getAccountId()]);
+        }
+
+        $row = $query->one();
+        if ($row === null || $row === false) {
+            return null;
+        }
+
+        return SocialPostDestination::fromDatabaseRow($row);
+    }
+
+    public function retryDestination(int $destinationId, ?TenantContextInterface $context = null, bool $isAmbiguousOverride = false): bool
+    {
+        $existing = $this->findDestinationById($destinationId, $context);
+        if ($existing === null || !$existing->isFailed()) {
+            return false;
+        }
+
+        $now = time();
+        $nowDate = date('Y-m-d H:i:s');
+
+        if ($isAmbiguousOverride) {
+            // Ambiguous override requirements:
+            // 1. Must have ambiguous delivery prefix
+            // 2. Cooldown: updated_at <= time() - 900
+            // 3. Reset retry_count to 0 for a new manually approved delivery cycle
+            $cooldownThreshold = $now - 900;
+            $sql = 'UPDATE {{%social_post_destination}} ' .
+                   'SET status = :queued, error_message = NULL, retry_count = 0, scheduled_at = :nowDate, locked_at = NULL, updated_at = :now ' .
+                   'WHERE id = :id AND status = :failed AND error_message LIKE :ambiguousPattern AND updated_at <= :cooldownThreshold';
+
+            $params = [
+                ':queued' => SocialPostDestination::STATUS_QUEUED,
+                ':nowDate' => $nowDate,
+                ':now' => $now,
+                ':id' => $destinationId,
+                ':failed' => SocialPostDestination::STATUS_FAILED,
+                ':ambiguousPattern' => 'Ambiguous delivery:%',
+                ':cooldownThreshold' => $cooldownThreshold,
+            ];
+
+            if ($context !== null && !$context->isUnrestricted()) {
+                $sql .= ' AND account_id = :accId';
+                $params[':accId'] = $context->getAccountId();
+            }
+
+            $affected = $this->db->createCommand($sql, $params)->execute();
+            return $affected > 0;
+        }
+
+        // Standard non-ambiguous destination retry:
+        // Must NOT be ambiguous delivery
+        $sql = 'UPDATE {{%social_post_destination}} ' .
+               'SET status = :queued, error_message = NULL, retry_count = 0, scheduled_at = :nowDate, locked_at = NULL, updated_at = :now ' .
+               'WHERE id = :id AND status = :failed AND (error_message IS NULL OR error_message NOT LIKE :ambiguousPattern)';
+
+        $params = [
+            ':queued' => SocialPostDestination::STATUS_QUEUED,
+            ':nowDate' => $nowDate,
+            ':now' => $now,
+            ':id' => $destinationId,
+            ':failed' => SocialPostDestination::STATUS_FAILED,
+            ':ambiguousPattern' => 'Ambiguous delivery:%',
+        ];
+
+        if ($context !== null && !$context->isUnrestricted()) {
+            $sql .= ' AND account_id = :accId';
+            $params[':accId'] = $context->getAccountId();
+        }
+
+        $affected = $this->db->createCommand($sql, $params)->execute();
+        return $affected > 0;
     }
 
     public function createPost(array $data, array $destinations, ?TenantContextInterface $context = null): ?int
@@ -305,13 +547,30 @@ final class SocialPostRepository implements SocialPostRepositoryInterface
             return false;
         }
 
-        try {
-            $this->db->createCommand()->update(
-                '{{%social_post_destination}}',
-                ['status' => 'queued', 'error_message' => null, 'updated_at' => time()],
-                ['social_post_id' => $id, 'status' => 'failed']
-            )->execute();
+        $now = time();
+        $nowDate = date('Y-m-d H:i:s');
 
+        try {
+            // Strictly reset only standard failed destinations; ignore ambiguous deliveries
+            $sql = 'UPDATE {{%social_post_destination}} ' .
+                   'SET status = :queued, error_message = NULL, retry_count = 0, scheduled_at = :nowDate, locked_at = NULL, updated_at = :now ' .
+                   'WHERE social_post_id = :postId AND status = :failed AND (error_message IS NULL OR error_message NOT LIKE :ambiguousPattern)';
+
+            $params = [
+                ':queued' => SocialPostDestination::STATUS_QUEUED,
+                ':nowDate' => $nowDate,
+                ':now' => $now,
+                ':postId' => $id,
+                ':failed' => SocialPostDestination::STATUS_FAILED,
+                ':ambiguousPattern' => 'Ambiguous delivery:%',
+            ];
+
+            if ($context !== null && !$context->isUnrestricted()) {
+                $sql .= ' AND account_id = :accId';
+                $params[':accId'] = $context->getAccountId();
+            }
+
+            $this->db->createCommand($sql, $params)->execute();
             return true;
         } catch (\Throwable) {
             return false;
