@@ -48,7 +48,7 @@ final class SocialPostIndexAction
         $platform = isset($queryParams['platform']) ? trim((string) $queryParams['platform']) : '';
         $dateFrom = isset($queryParams['date_from']) ? trim((string) $queryParams['date_from']) : '';
         $dateTo = isset($queryParams['date_to']) ? trim((string) $queryParams['date_to']) : '';
-        $pageSize = 15;
+        $pageSize = 20;
         $offset = ($page - 1) * $pageSize;
 
         $filters = [
@@ -79,6 +79,7 @@ final class SocialPostIndexAction
                 'platform' => $platform,
                 'dateFrom' => $dateFrom,
                 'dateTo' => $dateTo,
+                'queryParams' => $queryParams,
                 'currentUser' => $currentUser,
                 'flash' => $flash,
                 'csrfToken' => $this->csrfToken?->getValue() ?? '',

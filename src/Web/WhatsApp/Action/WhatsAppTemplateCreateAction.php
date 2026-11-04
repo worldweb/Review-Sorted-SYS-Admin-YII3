@@ -78,12 +78,9 @@ final class WhatsAppTemplateCreateAction
             }
 
             if (empty($errors)) {
-                // Ensure plain text (strip tags)
-                $cleanText = trim(strip_tags($text));
-
                 $newTemplate = WhatsAppTemplate::createCustom(
                     name: $name,
-                    text: $cleanText,
+                    text: $text,
                     accountId: $targetAccountId,
                     status: $status,
                 );
@@ -104,9 +101,12 @@ final class WhatsAppTemplateCreateAction
             $accounts = $this->accountRepo->findAllActive(200, 0, $context);
         }
 
+        $templates = $this->whatsappRepo->findAllTemplates($context);
+
         return $this->viewRenderer
             ->withViewPath('@src/Web/WhatsApp/views')
             ->render('template/create', [
+                'templates' => $templates,
                 'name' => $name,
                 'text' => $text,
                 'status' => $status,

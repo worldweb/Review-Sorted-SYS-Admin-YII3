@@ -13,6 +13,7 @@ use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Yiisoft\Csrf\CsrfTokenInterface;
 use Yiisoft\Session\Flash\Flash;
 use Yiisoft\Session\SessionInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
@@ -33,6 +34,7 @@ final class ReviewListAction
         private SessionInterface $session,
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
+        private ?CsrfTokenInterface $csrfToken = null,
     ) {
     }
 
@@ -97,6 +99,8 @@ final class ReviewListAction
                 'context' => $context,
                 'flash' => $flash,
                 'query64' => $query64,
+                'queryParams' => $queryParams,
+                'csrfToken' => $this->csrfToken?->getValue(),
             ]);
     }
 

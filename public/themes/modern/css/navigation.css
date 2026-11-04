@@ -41,6 +41,19 @@
     color: var(--rs-white);
 }
 
+.rs-nav-menu > li.active > a .rs-sidebar__icon,
+.rs-nav-menu > li.active > a:hover .rs-sidebar__icon,
+.rs-nav-menu > li.active > a:focus .rs-sidebar__icon {
+    color: #ffffff !important;
+}
+
+.rs-nav-menu > li.active > a .rs-sidebar__icon svg,
+.rs-nav-menu > li.active > a:hover .rs-sidebar__icon svg,
+.rs-nav-menu > li.active > a:focus .rs-sidebar__icon svg {
+    stroke: #ffffff !important;
+    color: #ffffff !important;
+}
+
 /* Nav Submenus (if any) */
 .rs-nav-menu .nav-second-level {
     list-style: none;
@@ -93,4 +106,10 @@
     background-color: #234137 !important;
     color: #ffffff !important;
     font-weight: 600;
+}
+
+.rs-sidebar-link.is-active svg,
+.rs-sidebar-link.is-active i {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
 }

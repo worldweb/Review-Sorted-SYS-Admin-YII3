@@ -92,8 +92,7 @@ $this->setTitle('Send E-mail Campaign');
 
                         <div class="form-group rs-mb-4">
                             <label class="rs-label" for="emailList">Select from Saved Contacts</label>
-                            <p class="rs-text-muted" style="font-size: 12px; margin-bottom: 6px;">Hold Ctrl/Cmd to select multiple contacts from your address book.</p>
-                            <select name="emailList[]" id="emailList" class="rs-select2-input rs-input" multiple style="width: 100%; min-height: 120px; height: auto;">
+                            <select name="emailList[]" id="emailList" class="rs-select2-input rs-input" multiple style="width: 100%;">
                                 <?php if (empty($toContacts)): ?>
                                     <option disabled>No saved contacts found. Import contacts via CSV or enter manually below.</option>
                                 <?php else: ?>
@@ -141,7 +140,7 @@ $this->setTitle('Send E-mail Campaign');
 
                         <div style="margin-top: var(--rs-space-4, 16px);">
                             <label class="rs-label" for="bccEmailList">Send BCC copy to</label>
-                            <select name="bccEmailList[]" id="bccEmailList" class="rs-select2-input rs-input" multiple style="width: 100%; min-height: 80px; height: auto;">
+                            <select name="bccEmailList[]" id="bccEmailList" class="rs-select2-input rs-input" multiple style="width: 100%;">
                                 <?php foreach ($bccContacts as $contact): ?>
                                     <?php $isSelected = in_array($contact->getId(), (array) ($formData['bccEmailList'] ?? []), true); ?>
                                     <option value="<?= $contact->getId() ?>" <?= $isSelected ? 'selected' : '' ?>>
@@ -292,17 +291,106 @@ $this->setTitle('Send E-mail Campaign');
     </form>
 </div>
 
+<script src="<?= \App\Environment::url('/themes/modern/js/vendor/tinymce/tinymce.min.js') ?>"></script>
 <script>
+(function() {
+    function initSendPage() {
+        // Initialize Select2 on recipients
+        if (window.jQuery && jQuery.fn.select2) {
+            jQuery('#emailList').select2({
+                placeholder: 'Search and select contacts...',
+                allowClear: true,
+                width: '100%'
+            });
+            jQuery('#bccEmailList').select2({
+                placeholder: 'Search and select BCC contacts...',
+                allowClear: true,
+                width: '100%'
+            });
+        }
+
+        // Initialize TinyMCE on message content
+        if (typeof tinymce !== 'undefined') {
+            if (tinymce.get('campaign-message')) {
+                tinymce.get('campaign-message').remove();
+            }
+
+            tinymce.init({
+                selector: '#campaign-message',
+                license_key: 'gpl',
+                menubar: false,
+                plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'image'
+                ],
+                toolbar: [
+                    'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image code',
+                    'insertName insertEmail'
+                ],
+                height: 480,
+                min_height: 380,
+                resize: 'vertical',
+                elementpath: false,
+                statusbar: true,
+                relative_urls: false,
+                remove_script_host: false,
+                convert_urls: true,
+                branding: false,
+                promotion: false,
+                setup: function(editor) {
+                    editor.ui.registry.addButton('insertName', {
+                        text: 'Name',
+                        onAction: function() { editor.insertContent('##NAME##'); }
+                    });
+                    editor.ui.registry.addButton('insertEmail', {
+                        text: 'Email',
+                        onAction: function() { editor.insertContent('##EMAIL##'); }
+                    });
+                    editor.on('change keyup input', function() {
+                        editor.save();
+                    });
+                }
+            });
+        }
+
+        var form = document.querySelector('form[action*="email/send"]');
+        if (form) {
+            form.addEventListener('submit', function() {
+                if (window.tinymce) {
+                    tinymce.triggerSave();
+                }
+            });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSendPage);
+    } else {
+        initSendPage();
+    }
+})();
+
 function onTemplateChange(templateId) {
     if (!templateId) return;
     const div = document.getElementById('tpl-' + templateId);
-    const textarea = document.getElementById('campaign-message');
-    if (div && textarea) {
-        textarea.value = div.innerHTML;
+    if (!div) return;
+    const content = div.innerHTML;
+    if (window.tinymce && tinymce.get('campaign-message')) {
+        tinymce.get('campaign-message').setContent(content);
+        tinymce.get('campaign-message').save();
+    } else {
+        const textarea = document.getElementById('campaign-message');
+        if (textarea) textarea.value = content;
     }
 }
 
 function insertCampaignTag(tag) {
+    if (window.tinymce && tinymce.get('campaign-message')) {
+        tinymce.get('campaign-message').insertContent(tag);
+        tinymce.get('campaign-message').save();
+        return;
+    }
     const textarea = document.getElementById('campaign-message');
     if (!textarea) return;
     const start = textarea.selectionStart || 0;

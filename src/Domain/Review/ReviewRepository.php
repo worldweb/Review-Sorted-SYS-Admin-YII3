@@ -38,8 +38,8 @@ final class ReviewRepository implements ReviewRepositoryInterface
                 'reply_count' => new Expression('(SELECT COUNT(*) FROM {{%review_reply}} rr WHERE rr.review_id = r.id)'),
             ])
             ->from(['r' => '{{%review}}'])
-            ->innerJoin(['sc' => '{{%service_config}}'], 'sc.id = r.service_config_id')
-            ->innerJoin(['s' => '{{%service}}'], 's.id = sc.service_id')
+            ->leftJoin(['sc' => '{{%service_config}}'], 'sc.id = r.service_config_id')
+            ->leftJoin(['s' => '{{%service}}'], 's.id = sc.service_id')
             ->leftJoin(['sub' => '{{%sub_service}}'], 'sub.id = r.sub_service_id')
             ->where(['r.id' => $id]);
 
@@ -71,8 +71,8 @@ final class ReviewRepository implements ReviewRepositoryInterface
 
         $query = (new Query($this->db))
             ->from(['r' => '{{%review}}'])
-            ->innerJoin(['sc' => '{{%service_config}}'], 'sc.id = r.service_config_id')
-            ->innerJoin(['s' => '{{%service}}'], 's.id = sc.service_id')
+            ->leftJoin(['sc' => '{{%service_config}}'], 'sc.id = r.service_config_id')
+            ->leftJoin(['s' => '{{%service}}'], 's.id = sc.service_id')
             ->leftJoin(['sub' => '{{%sub_service}}'], 'sub.id = r.sub_service_id')
             ->leftJoin(['rr' => '{{%review_reply}}'], 'rr.review_id = r.id');
 
@@ -382,8 +382,21 @@ final class ReviewRepository implements ReviewRepositoryInterface
     {
         $ctx = $context ?? $this->tenantContextProvider?->get();
 
-        $review = $this->findById($reviewId, $ctx);
-        if ($review === null) {
+        // Direct tenant isolation check matching legacy ReviewsController::findModel
+        $checkQuery = (new Query($this->db))
+            ->from('{{%review}}')
+            ->where(['id' => $reviewId]);
+
+        if ($ctx !== null && !$ctx->isUnrestricted()) {
+            $accountId = $ctx->getAccountId();
+            if ($accountId === null) {
+                return false;
+            }
+            $checkQuery->andWhere(['account_id' => $accountId]);
+        }
+
+        $row = $checkQuery->one();
+        if ($row === false || $row === null) {
             return false;
         }
 
@@ -516,8 +529,8 @@ final class ReviewRepository implements ReviewRepositoryInterface
                 'reply_count' => new Expression('(SELECT COUNT(*) FROM {{%review_reply}} rr WHERE rr.review_id = r.id)'),
             ])
             ->from(['r' => '{{%review}}'])
-            ->innerJoin(['sc' => '{{%service_config}}'], 'sc.id = r.service_config_id')
-            ->innerJoin(['s' => '{{%service}}'], 's.id = sc.service_id')
+            ->leftJoin(['sc' => '{{%service_config}}'], 'sc.id = r.service_config_id')
+            ->leftJoin(['s' => '{{%service}}'], 's.id = sc.service_id')
             ->leftJoin(['sub' => '{{%sub_service}}'], 'sub.id = r.sub_service_id')
             ->where(['r.id' => $sanitizedIds])
             ->andWhere(['r.type' => Review::TYPE_REVIEW]);

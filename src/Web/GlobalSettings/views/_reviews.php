@@ -7,27 +7,30 @@ use Yiisoft\Html\Html;
 /**
  * @var array<string, ?string> $settings
  */
+$refreshInterval = (int) ($settings['review_auto_refresh_interval'] ?? '10');
+$defaultPageSize = (int) ($settings['review_default_page_size'] ?? '20');
+$chatPollInterval = (int) ($settings['chat_live_poll_interval'] ?? '5');
 ?>
 
 <div class="rs-form-group rs-mb-4">
-    <label for="negative_threshold" class="rs-label">Negative Review Alert Rating Threshold</label>
-    <select class="rs-input" id="negative_threshold" name="settings[reviews.negative_threshold]">
-        <option value="1" <?= ($settings['reviews.negative_threshold'] ?? '3') === '1' ? 'selected' : '' ?>>1 Star Only</option>
-        <option value="2" <?= ($settings['reviews.negative_threshold'] ?? '3') === '2' ? 'selected' : '' ?>>2 Stars &amp; Below</option>
-        <option value="3" <?= ($settings['reviews.negative_threshold'] ?? '3') === '3' ? 'selected' : '' ?>>3 Stars &amp; Below (Default)</option>
-        <option value="4" <?= ($settings['reviews.negative_threshold'] ?? '3') === '4' ? 'selected' : '' ?>>4 Stars &amp; Below</option>
+    <label for="review_auto_refresh_interval" class="rs-label">Reviews Auto-Refresh Interval (seconds)</label>
+    <input type="number" min="5" max="120" class="rs-input" id="review_auto_refresh_interval" name="settings[review_auto_refresh_interval]" value="<?= $refreshInterval ?>" required>
+    <div class="rs-text-sm rs-text-muted rs-mt-1">Frequency in seconds to poll for incoming reviews on the active reviews dashboard (between 5 and 120).</div>
+</div>
+
+<div class="rs-form-group rs-mb-4">
+    <label for="review_default_page_size" class="rs-label">Default Reviews Per Page</label>
+    <select class="rs-input rs-select" id="review_default_page_size" name="settings[review_default_page_size]">
+        <option value="10" <?= $defaultPageSize === 10 ? 'selected' : '' ?>>10 Rows</option>
+        <option value="20" <?= $defaultPageSize === 20 ? 'selected' : '' ?>>20 Rows (Default)</option>
+        <option value="50" <?= $defaultPageSize === 50 ? 'selected' : '' ?>>50 Rows</option>
+        <option value="100" <?= $defaultPageSize === 100 ? 'selected' : '' ?>>100 Rows</option>
     </select>
-    <div class="rs-text-sm rs-text-muted rs-mt-1">Reviews at or below this rating trigger instant email alerts to the location's designated manager.</div>
+    <div class="rs-text-sm rs-text-muted rs-mt-1">Default number of review items displayed per page on the main reviews listing.</div>
 </div>
 
 <div class="rs-form-group rs-mb-4">
-    <label class="rs-checkbox-wrap rs-d-flex rs-align-items-center rs-gap-2">
-        <input class="rs-checkbox" type="checkbox" id="auto_sync_reviews" name="settings[reviews.auto_sync]" value="1" <?= ($settings['reviews.auto_sync'] ?? '1') === '1' ? 'checked' : '' ?>>
-        <span class="rs-checkbox-label rs-font-semibold">Enable Periodic Review Sync Background Worker</span>
-    </label>
-</div>
-
-<div class="rs-form-group rs-mb-4">
-    <label for="sync_interval" class="rs-label">Review Sync Interval (Minutes)</label>
-    <input type="number" class="rs-input" id="sync_interval" name="settings[reviews.sync_interval]" value="<?= Html::encode($settings['reviews.sync_interval'] ?? '60') ?>">
+    <label for="chat_live_poll_interval" class="rs-label">Live Chat Poll Interval (seconds)</label>
+    <input type="number" min="3" max="60" class="rs-input" id="chat_live_poll_interval" name="settings[chat_live_poll_interval]" value="<?= $chatPollInterval ?>" required>
+    <div class="rs-text-sm rs-text-muted rs-mt-1">Interval in seconds for live chat and mention stream polling (between 3 and 60).</div>
 </div>

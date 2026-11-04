@@ -64,12 +64,10 @@ final class SocialPostRepository implements SocialPostRepositoryInterface
                 'author_email' => 'u.email',
                 'account_business_name' => 'a.business_name',
             ])
+            ->distinct()
             ->from(['sp' => '{{%social_post}}'])
             ->leftJoin(['u' => '{{%user}}'], 'u.id = sp.user_id')
-            ->leftJoin(['a' => '{{%account}}'], 'a.id = sp.account_id')
-            ->orderBy(['sp.id' => SORT_DESC])
-            ->limit($limit)
-            ->offset($offset);
+            ->leftJoin(['a' => '{{%account}}'], 'a.id = sp.account_id');
 
         if ($ctx !== null && !$ctx->isUnrestricted()) {
             $accessible = $ctx->getAccessibleAccountIds();
@@ -99,43 +97,32 @@ final class SocialPostRepository implements SocialPostRepositoryInterface
             $query->andWhere(['<=', 'sp.scheduled_at', $filters['date_to'] . ' 23:59:59']);
         }
 
+        // Database-level filtering for destination platform and status
+        if (!empty($filters['platform']) || !empty($filters['status'])) {
+            $query->innerJoin(['d' => '{{%social_post_destination}}'], 'd.social_post_id = sp.id');
+            if (!empty($filters['platform'])) {
+                $query->andWhere(['d.platform' => (string) $filters['platform']]);
+            }
+            if (!empty($filters['status'])) {
+                $st = (string) $filters['status'];
+                if ($st === 'cancelled') {
+                    $query->andWhere(['d.error_message' => 'Cancelled by user']);
+                } else {
+                    $query->andWhere(['d.status' => $st]);
+                    $query->andWhere(['or', ['d.error_message' => null], ['!=', 'd.error_message', 'Cancelled by user']]);
+                }
+            }
+        }
+
+        $query->orderBy(['sp.id' => SORT_DESC])
+            ->limit($limit)
+            ->offset($offset);
+
         $rows = $query->all();
         $posts = [];
         foreach ($rows as $row) {
             $p = SocialPost::fromDatabaseRow($row);
             $destinations = $this->findDestinationsForPost($p->getId());
-
-            if (!empty($filters['platform'])) {
-                $plat = (string) $filters['platform'];
-                $hasPlat = false;
-                foreach ($destinations as $dest) {
-                    if ($dest->getPlatform() === $plat) {
-                        $hasPlat = true;
-                        break;
-                    }
-                }
-                if (!$hasPlat) {
-                    continue;
-                }
-            }
-
-            if (!empty($filters['status'])) {
-                $st = (string) $filters['status'];
-                $hasSt = false;
-                foreach ($destinations as $dest) {
-                    if ($st === 'cancelled' && $dest->getErrorMessage() === 'Cancelled by user') {
-                        $hasSt = true;
-                        break;
-                    } elseif ($dest->getStatus() === $st && $dest->getErrorMessage() !== 'Cancelled by user') {
-                        $hasSt = true;
-                        break;
-                    }
-                }
-                if (!$hasSt) {
-                    continue;
-                }
-            }
-
             $posts[] = $p->withDestinations($destinations);
         }
 
@@ -146,6 +133,7 @@ final class SocialPostRepository implements SocialPostRepositoryInterface
     {
         $ctx = $context ?? $this->tenantContextProvider?->get();
         $query = (new Query($this->db))
+            ->select(['total' => new Expression('COUNT(DISTINCT sp.id)')])
             ->from(['sp' => '{{%social_post}}'])
             ->leftJoin(['a' => '{{%account}}'], 'a.id = sp.account_id');
 
@@ -177,7 +165,24 @@ final class SocialPostRepository implements SocialPostRepositoryInterface
             $query->andWhere(['<=', 'sp.scheduled_at', $filters['date_to'] . ' 23:59:59']);
         }
 
-        return (int) $query->count();
+        // Database-level filtering for destination platform and status
+        if (!empty($filters['platform']) || !empty($filters['status'])) {
+            $query->innerJoin(['d' => '{{%social_post_destination}}'], 'd.social_post_id = sp.id');
+            if (!empty($filters['platform'])) {
+                $query->andWhere(['d.platform' => (string) $filters['platform']]);
+            }
+            if (!empty($filters['status'])) {
+                $st = (string) $filters['status'];
+                if ($st === 'cancelled') {
+                    $query->andWhere(['d.error_message' => 'Cancelled by user']);
+                } else {
+                    $query->andWhere(['d.status' => $st]);
+                    $query->andWhere(['or', ['d.error_message' => null], ['!=', 'd.error_message', 'Cancelled by user']]);
+                }
+            }
+        }
+
+        return (int) ($query->scalar() ?? 0);
     }
 
     public function findPendingDestinations(int $limit = 20): array

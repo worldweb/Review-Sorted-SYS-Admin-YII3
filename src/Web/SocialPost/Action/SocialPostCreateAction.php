@@ -136,12 +136,50 @@ final class SocialPostCreateAction
             $selectedGroupIds = (array) ($parsedBody['group_ids'] ?? []);
             $selectedPlatforms = (array) ($parsedBody['platforms'] ?? []);
 
-            // Handle file upload
+            $validationErrors = [];
+
+            // 1. Content validation
+            if (empty($content)) {
+                $validationErrors[] = 'Post content cannot be empty.';
+            }
+
+            // 2. Destinations and groups validation
+            if (empty($selectedDestinations) && empty($selectedGroupIds)) {
+                $validationErrors[] = 'Please select at least one target location, destination, or location group.';
+            }
+
+            // 3. Scheduling validation matching Yii2 SocialPostForm
+            if ($postType === 'scheduled') {
+                if (empty($scheduledAt)) {
+                    $validationErrors[] = 'Please select a scheduled date and time.';
+                } else {
+                    $timestamp = strtotime($scheduledAt);
+                    if ($timestamp === false) {
+                        $validationErrors[] = 'Invalid date/time format. Please select a valid date and time.';
+                    } else {
+                        // 60-second clock skew tolerance
+                        if ($timestamp < time() - 60) {
+                            $validationErrors[] = 'Scheduled date and time must be in the future.';
+                        }
+                        // 30-day maximum scheduling window
+                        if ($timestamp > strtotime('+30 days 23:59:59')) {
+                            $validationErrors[] = 'Scheduled date cannot be beyond the allowed 30-day scheduling window.';
+                        }
+                    }
+                }
+            }
+
+            // 4. Handle file upload and media validation
             $mediaType = 'none';
             $mediaUrl = null;
             $uploadedFiles = $request->getUploadedFiles();
             $mediaFile = $uploadedFiles['media'] ?? $uploadedFiles['media_file'] ?? null;
             if ($mediaFile instanceof UploadedFileInterface && $mediaFile->getError() === UPLOAD_ERR_OK) {
+                // File size limit: 50MB
+                if ($mediaFile->getSize() > 50 * 1024 * 1024) {
+                    $validationErrors[] = 'Uploaded media file exceeds the 50 MB limit.';
+                }
+
                 $origName = $mediaFile->getClientFilename() ?? 'media';
                 $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
                 $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
@@ -151,9 +189,11 @@ final class SocialPostCreateAction
                     $mediaType = 'image';
                 } elseif (in_array($ext, $videoExts, true)) {
                     $mediaType = 'video';
+                } else {
+                    $validationErrors[] = 'Invalid file extension. Allowed media extensions are: ' . implode(', ', array_merge($imageExts, $videoExts));
                 }
 
-                if ($mediaType !== 'none') {
+                if ($mediaType !== 'none' && empty($validationErrors)) {
                     $uploadDir = dirname(__DIR__, 4) . '/public/uploads/social-post';
                     if (!is_dir($uploadDir)) {
                         @mkdir($uploadDir, 0775, true);
@@ -165,10 +205,40 @@ final class SocialPostCreateAction
                 }
             }
 
-            if (empty($content)) {
-                $flash->set('error', 'Post content cannot be empty.');
-            } elseif (empty($selectedDestinations) && empty($selectedGroupIds)) {
-                $flash->set('error', 'Please select at least one social destination or location group.');
+            // 5. Platform-specific character limits matching Yii2 SocialPostForm
+            $platformLimits = [
+                'facebook'  => 63206,
+                'instagram' => 2200,
+                'google'    => 1500,
+            ];
+            if (!empty($selectedPlatforms)) {
+                $effectiveLimit = 63206;
+                foreach ($selectedPlatforms as $plat) {
+                    if (isset($platformLimits[$plat]) && $platformLimits[$plat] < $effectiveLimit) {
+                        $effectiveLimit = $platformLimits[$plat];
+                    }
+                }
+                $contentLen = mb_strlen($content);
+                if ($contentLen > $effectiveLimit) {
+                    $validationErrors[] = sprintf(
+                        'Post content (%s characters) exceeds the %s character limit for the selected platforms.',
+                        number_format($contentLen),
+                        number_format($effectiveLimit)
+                    );
+                }
+            }
+
+            // 6. Platform-specific media restrictions matching Yii2 SocialPostForm
+            if (in_array('instagram', $selectedPlatforms, true) && $mediaType === 'none') {
+                $validationErrors[] = 'Instagram Business API requires an image or video media attachment.';
+            }
+
+            if (in_array('google', $selectedPlatforms, true) && $mediaType === 'video') {
+                $validationErrors[] = 'Google Business Profile Local Posts only support static image attachments (JPG/PNG). Video uploads are not supported for Google Local Posts.';
+            }
+
+            if (!empty($validationErrors)) {
+                $flash->set('error', implode(' ', $validationErrors));
             } else {
                 $destinationsToInsert = [];
                 $processedDests = [];

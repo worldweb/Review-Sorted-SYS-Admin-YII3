@@ -277,27 +277,80 @@ $this->setTitle('Social Publishing History');
             </div>
 
             <!-- Table Footer / Pagination -->
-            <div class="rs-table-footer rs-d-flex rs-align-items-center rs-justify-content-between rs-p-4">
+            <div class="rs-table-footer rs-d-flex rs-align-items-center rs-justify-content-between rs-p-4 rs-flex-wrap rs-gap-3">
                 <div class="rs-text-sm rs-text-muted">
-                    Showing <strong><?= count($posts) ?></strong> of <strong><?= $totalCount ?></strong> posts
+                    Showing <strong><?= count($posts) ?></strong> of <strong><?= number_format($totalCount) ?></strong> posts
+                    <?php if ($pageCount > 1): ?>
+                        (Page <?= $page ?> of <?= $pageCount ?>)
+                    <?php endif; ?>
                 </div>
                 <?php if ($pageCount > 1): ?>
-                    <div class="rs-d-flex rs-gap-1 rs-align-items-center">
-                        <?php for ($pg = 1; $pg <= $pageCount; $pg++): ?>
-                            <?php
-                            $pageQuery = http_build_query(array_filter([
-                                'page' => $pg,
-                                'q' => $q ?: null,
-                                'status' => $status ?: null,
-                                'platform' => $platform ?: null,
-                                'date_from' => $dateFrom ?: null,
-                                'date_to' => $dateTo ?: null,
-                            ]));
-                            ?>
-                            <a href="<?= \App\Environment::url('/social-post?' . $pageQuery) ?>" class="rs-btn rs-btn--sm <?= $pg === $page ? 'rs-btn--primary' : 'rs-btn--secondary' ?>" style="min-width: 32px; text-align: center;">
+                    <div class="rs-pagination rs-d-flex rs-gap-1 rs-align-items-center">
+                        <?php
+                        $activeQuery = $queryParams ?? $_GET ?? [];
+                        $cleanParams = [];
+                        foreach ($activeQuery as $k => $v) {
+                            if ($v !== null && $v !== '' && $k !== 'page') {
+                                $cleanParams[$k] = $v;
+                            }
+                        }
+                        if (!empty($typeFilter)) {
+                            $cleanParams['type'] = $typeFilter;
+                        }
+                        if (!empty($q)) {
+                            $cleanParams['q'] = $q;
+                        }
+                        if (!empty($status)) {
+                            $cleanParams['status'] = $status;
+                        }
+                        if (!empty($platform)) {
+                            $cleanParams['platform'] = $platform;
+                        }
+                        if (!empty($dateFrom)) {
+                            $cleanParams['date_from'] = $dateFrom;
+                        }
+                        if (!empty($dateTo)) {
+                            $cleanParams['date_to'] = $dateTo;
+                        }
+
+                        $buildPostPageUrl = static function (int $pg) use ($cleanParams): string {
+                            $params = array_merge($cleanParams, ['page' => $pg]);
+                            return \App\Environment::url('/social-post') . '?' . http_build_query($params);
+                        };
+
+                        $startPg = max(1, $page - 2);
+                        $endPg = min($pageCount, $page + 2);
+                        ?>
+
+                        <?php if ($page > 1): ?>
+                            <a href="<?= $buildPostPageUrl(1) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="First Page">&laquo; First</a>
+                            <a href="<?= $buildPostPageUrl($page - 1) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Previous Page">&lsaquo; Prev</a>
+                        <?php endif; ?>
+
+                        <?php if ($startPg > 1): ?>
+                            <a href="<?= $buildPostPageUrl(1) ?>" class="rs-btn rs-btn--sm rs-btn--outline">1</a>
+                            <?php if ($startPg > 2): ?>
+                                <span class="rs-text-muted" style="padding: 0 4px;">...</span>
+                            <?php endif; ?>
+                        <?php endif; ?>
+
+                        <?php for ($pg = $startPg; $pg <= $endPg; $pg++): ?>
+                            <a href="<?= $buildPostPageUrl($pg) ?>" class="rs-btn rs-btn--sm <?= $pg === $page ? 'rs-btn--primary' : 'rs-btn--outline' ?>" style="min-width: 32px; text-align: center;">
                                 <?= $pg ?>
                             </a>
                         <?php endfor; ?>
+
+                        <?php if ($endPg < $pageCount): ?>
+                            <?php if ($endPg < $pageCount - 1): ?>
+                                <span class="rs-text-muted" style="padding: 0 4px;">...</span>
+                            <?php endif; ?>
+                            <a href="<?= $buildPostPageUrl($pageCount) ?>" class="rs-btn rs-btn--sm rs-btn--outline"><?= $pageCount ?></a>
+                        <?php endif; ?>
+
+                        <?php if ($page < $pageCount): ?>
+                            <a href="<?= $buildPostPageUrl($page + 1) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Next Page">Next &rsaquo;</a>
+                            <a href="<?= $buildPostPageUrl($pageCount) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Last Page">Last &raquo;</a>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
             </div>

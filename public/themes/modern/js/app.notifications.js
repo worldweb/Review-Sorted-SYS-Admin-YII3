@@ -366,9 +366,17 @@
         }
     };
 
-    // Initialize on DOM ready
-    $(document).ready(function() {
+    // Initialize on DOM ready safely
+    if (typeof $ === 'function') {
+        $(document).ready(function() {
+            NotificationManager.init();
+        });
+    } else if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            NotificationManager.init();
+        });
+    } else {
         NotificationManager.init();
-    });
+    }
 
 })(typeof jQuery !== 'undefined' ? jQuery : (window.$ || {}));

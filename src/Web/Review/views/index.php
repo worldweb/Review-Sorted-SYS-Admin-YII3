@@ -19,10 +19,14 @@ use Yiisoft\Html\Html;
  * @var \App\Security\TenantContextInterface $context
  * @var \Yiisoft\Session\Flash\FlashInterface|null $flash
  * @var string|null $query64
+ * @var array<string, mixed>|null $queryParams
+ * @var string|null $csrfToken
+ * @var string|null $csrf
  */
 
 $this->setTitle('Reviews & Mentions');
 
+$effectiveCsrf = (string) ($csrfToken ?? (isset($csrf) ? (string) $csrf : ''));
 $currentPage = $filter->getPage();
 $pageSize = $filter->getPageSize();
 $totalPages = max(1, (int) ceil($total / $pageSize));
@@ -277,12 +281,9 @@ $renderStars = static function (?float $rawRate): string {
                                         <a href="<?= Html::encode($viewUrl) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Inspect Review" style="padding: 4px 8px; font-size: 12px;">
                                             View
                                         </a>
-                                        <form method="POST" action="<?= \App\Environment::url('/reviews/delete') ?>" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this review?');">
-                                            <input type="hidden" name="id" value="<?= $item->getId() ?>">
-                                            <button type="submit" class="rs-btn rs-btn--sm rs-btn--outline rs-btn--danger-outline" title="Delete Review" style="padding: 4px 8px; font-size: 12px;">
-                                                Delete
-                                            </button>
-                                        </form>
+                                        <button type="button" class="rs-btn rs-btn--sm rs-btn--outline rs-btn--danger-outline js-delete-review-btn" data-id="<?= $item->getId() ?>" title="Delete Review" style="padding: 4px 8px; font-size: 12px;">
+                                            Delete
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -293,11 +294,22 @@ $renderStars = static function (?float $rawRate): string {
         </div>
         </form>
 
+        <!-- Dedicated Delete Review Form (Standalone to ensure standard HTML5 compatibility without nested forms) -->
+        <form id="review-delete-form" method="POST" action="<?= \App\Environment::url('/reviews/delete') ?>" style="display: none;">
+            <?php if ($effectiveCsrf !== ''): ?>
+                <input type="hidden" name="_csrf" value="<?= Html::encode($effectiveCsrf) ?>">
+            <?php endif; ?>
+            <input type="hidden" name="id" id="review-delete-id" value="">
+        </form>
+
         <!-- Table Footer / Action Bar -->
         <div class="rs-table-footer rs-d-flex rs-align-items-center rs-justify-content-between rs-p-4 rs-flex-wrap rs-gap-3">
             <div class="rs-d-flex rs-align-items-center rs-gap-3">
                 <span class="rs-text-sm rs-text-muted">
                     Showing <strong><?= count($reviews) ?></strong> of <strong><?= number_format($total) ?></strong> reviews
+                    <?php if ($totalPages > 1): ?>
+                        (Page <?= $currentPage ?> of <?= $totalPages ?>)
+                    <?php endif; ?>
                 </span>
                 <?php if ($isGoogleOrFacebookChannel): ?>
                     <button type="button" class="rs-btn rs-btn--info rs-btn--sm btn-reply-all" onclick="submitBulkReply();">
@@ -309,9 +321,15 @@ $renderStars = static function (?float $rawRate): string {
             <?php if ($totalPages > 1): ?>
                 <div class="rs-pagination rs-d-flex rs-align-items-center rs-gap-1">
                     <?php
-                    $queryParams = $_GET;
-                    $buildPageUrl = static function (int $p) use ($queryParams): string {
-                        $params = array_merge($queryParams, ['page' => $p]);
+                    $activeQuery = $queryParams ?? $_GET ?? [];
+                    $cleanParams = [];
+                    foreach ($activeQuery as $k => $v) {
+                        if ($v !== null && $v !== '' && $k !== 'page') {
+                            $cleanParams[$k] = $v;
+                        }
+                    }
+                    $buildPageUrl = static function (int $p) use ($cleanParams): string {
+                        $params = array_merge($cleanParams, ['page' => $p]);
                         return \App\Environment::url('/reviews') . '?' . http_build_query($params);
                     };
 
@@ -320,19 +338,33 @@ $renderStars = static function (?float $rawRate): string {
                     ?>
 
                     <?php if ($currentPage > 1): ?>
-                        <a href="<?= $buildPageUrl(1) ?>" class="rs-btn rs-btn--sm rs-btn--outline">« First</a>
-                        <a href="<?= $buildPageUrl($currentPage - 1) ?>" class="rs-btn rs-btn--sm rs-btn--outline">‹ Prev</a>
+                        <a href="<?= $buildPageUrl(1) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="First Page">&laquo; First</a>
+                        <a href="<?= $buildPageUrl($currentPage - 1) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Previous Page">&lsaquo; Prev</a>
+                    <?php endif; ?>
+
+                    <?php if ($startPage > 1): ?>
+                        <a href="<?= $buildPageUrl(1) ?>" class="rs-btn rs-btn--sm rs-btn--outline">1</a>
+                        <?php if ($startPage > 2): ?>
+                            <span class="rs-text-muted" style="padding: 0 4px;">...</span>
+                        <?php endif; ?>
                     <?php endif; ?>
 
                     <?php for ($p = $startPage; $p <= $endPage; $p++): ?>
-                        <a href="<?= $buildPageUrl($p) ?>" class="rs-btn rs-btn--sm <?= $p === $currentPage ? 'rs-btn--primary' : 'rs-btn--outline' ?>">
+                        <a href="<?= $buildPageUrl($p) ?>" class="rs-btn rs-btn--sm <?= $p === $currentPage ? 'rs-btn--primary' : 'rs-btn--outline' ?>" style="min-width: 32px; text-align: center;">
                             <?= $p ?>
                         </a>
                     <?php endfor; ?>
 
+                    <?php if ($endPage < $totalPages): ?>
+                        <?php if ($endPage < $totalPages - 1): ?>
+                            <span class="rs-text-muted" style="padding: 0 4px;">...</span>
+                        <?php endif; ?>
+                        <a href="<?= $buildPageUrl($totalPages) ?>" class="rs-btn rs-btn--sm rs-btn--outline"><?= $totalPages ?></a>
+                    <?php endif; ?>
+
                     <?php if ($currentPage < $totalPages): ?>
-                        <a href="<?= $buildPageUrl($currentPage + 1) ?>" class="rs-btn rs-btn--sm rs-btn--outline">Next ›</a>
-                        <a href="<?= $buildPageUrl($totalPages) ?>" class="rs-btn rs-btn--sm rs-btn--outline">Last »</a>
+                        <a href="<?= $buildPageUrl($currentPage + 1) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Next Page">Next &rsaquo;</a>
+                        <a href="<?= $buildPageUrl($totalPages) ?>" class="rs-btn rs-btn--sm rs-btn--outline" title="Last Page">Last &raquo;</a>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
@@ -369,5 +401,20 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
+
+    // Review delete confirmation and submission
+    document.querySelectorAll('.js-delete-review-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to delete this review?')) {
+                var form = document.getElementById('review-delete-form');
+                var idInput = document.getElementById('review-delete-id');
+                if (form && idInput) {
+                    idInput.value = this.getAttribute('data-id');
+                    form.submit();
+                }
+            }
+        });
+    });
 });
 </script>

@@ -33,7 +33,12 @@ if ($user === null && isset($tenantContextProvider, $userRepo)) {
     }
 }
 
-// 2. Resolve Navigation and Workspaces
+// 2. Resolve Environment URLs
+$baseUrl = isset($aliases) ? (string) $aliases->get('@baseUrl') : '/';
+$base = ($baseUrl !== '' && $baseUrl !== '/') ? rtrim($baseUrl, '/') : '';
+$themeUrl = $base . '/themes/modern';
+
+// 3. Resolve Navigation and Workspaces
 $menuItems = [];
 $switchableAccounts = [];
 if ($user !== null && isset($navigationMenuProvider)) {
@@ -44,11 +49,6 @@ if ($user !== null && isset($navigationMenuProvider)) {
     $menuItems = $navigationMenuProvider->getMenuItems($user, $currentPath);
     $switchableAccounts = $navigationMenuProvider->getSwitchableAccounts($user->getId());
 }
-
-// 3. Resolve Environment URLs
-$baseUrl = isset($aliases) ? (string) $aliases->get('@baseUrl') : '/';
-$base = ($baseUrl !== '' && $baseUrl !== '/') ? rtrim($baseUrl, '/') : '';
-$themeUrl = $base . '/themes/modern';
 
 $pageTitle = $this->getTitle();
 $fullTitle = !empty($pageTitle)

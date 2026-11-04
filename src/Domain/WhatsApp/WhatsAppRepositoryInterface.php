@@ -29,6 +29,13 @@ interface WhatsAppRepositoryInterface
     public function findTemplatesByAccount(?TenantContextInterface $context = null, ?int $accountId = null): array;
 
     /**
+     * List all WhatsApp templates accessible under the given context.
+     *
+     * @return array<int, WhatsAppTemplate>
+     */
+    public function findAllTemplates(?TenantContextInterface $context = null): array;
+
+    /**
      * Find an individual WhatsApp contact by ID.
      */
     public function findContactById(int $id, ?TenantContextInterface $context = null): ?WhatsAppAddress;

@@ -52,13 +52,7 @@ if (!empty($qrImagePath)) {
     if (str_starts_with($qrImagePath, 'http://') || str_starts_with($qrImagePath, 'https://')) {
         $qrImageWebUrl = $qrImagePath;
     } else {
-        $baseUrl = \App\Environment::appBasePath();
-        $localDiskPath = rtrim(\App\Environment::publicDir(), '/\\') . '/' . ltrim($qrImagePath, '/\\');
-        if (file_exists($localDiskPath)) {
-            $qrImageWebUrl = $baseUrl . '/' . ltrim($qrImagePath, '/');
-        } else {
-            $qrImageWebUrl = $baseUrl . '/' . ltrim($qrImagePath, '/');
-        }
+        $qrImageWebUrl = \App\Environment::url('/' . ltrim($qrImagePath, '/'));
     }
 }
 

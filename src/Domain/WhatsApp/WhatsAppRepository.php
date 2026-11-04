@@ -103,6 +103,11 @@ final class WhatsAppRepository implements WhatsAppRepositoryInterface
         return $templates;
     }
 
+    public function findAllTemplates(?TenantContextInterface $context = null): array
+    {
+        return $this->findTemplatesByAccount($context);
+    }
+
     public function findContactById(int $id, ?TenantContextInterface $context = null): ?WhatsAppAddress
     {
         $ctx = $context ?? $this->tenantContextProvider?->get();

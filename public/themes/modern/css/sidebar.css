@@ -130,8 +130,8 @@
 }
 
 .rs-sidebar__item--active {
-    background-color: rgba(35, 65, 55, 0.05); /* Subtle tint instead of solid color */
-    color: var(--rs-primary);
+    background-color: var(--rs-primary-dark, #234137) !important;
+    color: #ffffff !important;
     position: relative;
 }
 
@@ -143,13 +143,13 @@
     transform: translateY(-50%);
     height: 60%;
     width: 4px;
-    background-color: var(--rs-primary);
+    background-color: #ffffff;
     border-radius: 0 4px 4px 0;
 }
 
 .rs-sidebar__item--active:hover {
-    background-color: rgba(35, 65, 55, 0.08);
-    color: var(--rs-primary);
+    background-color: var(--rs-primary-dark, #234137) !important;
+    color: #ffffff !important;
 }
 
 .rs-sidebar__icon {
@@ -167,9 +167,18 @@
     opacity: 0.8;
 }
 
-.rs-sidebar__item--active .rs-sidebar__icon {
+.rs-sidebar__item--active .rs-sidebar__icon,
+.rs-sidebar__item--active:hover .rs-sidebar__icon,
+.rs-sidebar__item--active:focus .rs-sidebar__icon {
     opacity: 1;
-    color: var(--rs-primary);
+    color: #ffffff !important;
+}
+
+.rs-sidebar__item--active .rs-sidebar__icon svg,
+.rs-sidebar__item--active:hover .rs-sidebar__icon svg,
+.rs-sidebar__item--active:focus .rs-sidebar__icon svg {
+    stroke: #ffffff !important;
+    color: #ffffff !important;
 }
 
 /* Mobile Drawer State */

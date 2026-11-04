@@ -38,7 +38,7 @@ use Yiisoft\Html\Html;
             <label style="font-size: 12px; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">
                 Configuring Role:
             </label>
-            <select class="rs-input rs-select" style="font-weight: 600; color: #0f172a; width: 100%;" onchange="location.href = <?= json_encode(\App\Environment::url('/global-settings?section=roles&target_role=')) ?> + encodeURIComponent(this.value);">
+            <select id="roles-target-role-select" class="rs-input rs-select" style="font-weight: 600; color: #0f172a; width: 100%;" data-url-base="<?= Html::encode(\App\Environment::url('/global-settings?section=roles&target_role=')) ?>">
                 <?php foreach ($roleOptions as $roleKey => $roleLabel): ?>
                     <option value="<?= Html::encode($roleKey) ?>" <?= $targetRole === $roleKey ? 'selected' : '' ?>>
                         <?= Html::encode($roleLabel) ?> (<?= Html::encode($roleKey) ?>)
@@ -128,3 +128,23 @@ use Yiisoft\Html\Html;
         </div>
     </form>
 </div>
+
+<script>
+(function() {
+    function initRolesTab() {
+        var sel = document.getElementById('roles-target-role-select');
+        if (!sel) return;
+        sel.addEventListener('change', function() {
+            var base = this.getAttribute('data-url-base') || '';
+            if (this.value) {
+                window.location.href = base + encodeURIComponent(this.value);
+            }
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initRolesTab);
+    } else {
+        initRolesTab();
+    }
+})();
+</script>

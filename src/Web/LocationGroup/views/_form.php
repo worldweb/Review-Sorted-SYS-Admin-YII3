@@ -194,7 +194,7 @@ $hasSelectedAccount = !empty($formData['account_id']);
                         </div>
 
                         <!-- Platform Groups Container -->
-                        <div id="dest-platform-groups" style="display: flex; flex-direction: column; gap: 16px; max-height: 480px; overflow-y: auto; padding-right: 4px;">
+                        <div id="dest-platform-groups" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 8px;">
                             
                             <!-- Google Platform Group -->
                             <div class="dest-group-block" id="block-google" style="<?= !empty($googleItems) ? '' : 'display:none;' ?> border: 1px solid #E2E8F0; border-radius: 6px; overflow: hidden;">
@@ -205,7 +205,7 @@ $hasSelectedAccount = !empty($formData['account_id']);
                                     </div>
                                     <button type="button" class="rs-btn rs-btn--xs rs-btn--ghost" onclick="togglePlatformGroup('google')" style="color: #2563EB;">Toggle All</button>
                                 </div>
-                                <div class="dest-items-list" id="list-google" style="padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; background: #FFFFFF;">
+                                <div class="dest-items-list" id="list-google" style="padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; background: #FFFFFF; max-height: 280px; overflow-y: auto; overscroll-behavior: contain;">
                                     <?php foreach ($googleItems as $item): ?>
                                         <?php $isChecked = isset($selectedKeySet[$item->getKey()]); ?>
                                         <label class="dest-item-row" data-search="<?= Html::encode(strtolower($item->getLabel() . ' google ' . ($item->getAccountName() ?? ''))) ?>" style="display: flex; align-items: center; gap: 10px; margin: 0; padding: 6px 8px; border-radius: 4px; cursor: pointer; transition: background 0.15s ease;">
@@ -236,7 +236,7 @@ $hasSelectedAccount = !empty($formData['account_id']);
                                     </div>
                                     <button type="button" class="rs-btn rs-btn--xs rs-btn--ghost" onclick="togglePlatformGroup('facebook')" style="color: #2563EB;">Toggle All</button>
                                 </div>
-                                <div class="dest-items-list" id="list-facebook" style="padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; background: #FFFFFF;">
+                                <div class="dest-items-list" id="list-facebook" style="padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; background: #FFFFFF; max-height: 280px; overflow-y: auto; overscroll-behavior: contain;">
                                     <?php foreach ($facebookItems as $item): ?>
                                         <?php $isChecked = isset($selectedKeySet[$item->getKey()]); ?>
                                         <label class="dest-item-row" data-search="<?= Html::encode(strtolower($item->getLabel() . ' facebook ' . ($item->getAccountName() ?? ''))) ?>" style="display: flex; align-items: center; gap: 10px; margin: 0; padding: 6px 8px; border-radius: 4px; cursor: pointer; transition: background 0.15s ease;">
@@ -267,7 +267,7 @@ $hasSelectedAccount = !empty($formData['account_id']);
                                     </div>
                                     <button type="button" class="rs-btn rs-btn--xs rs-btn--ghost" onclick="togglePlatformGroup('instagram')" style="color: #DB2777;">Toggle All</button>
                                 </div>
-                                <div class="dest-items-list" id="list-instagram" style="padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; background: #FFFFFF;">
+                                <div class="dest-items-list" id="list-instagram" style="padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; background: #FFFFFF; max-height: 280px; overflow-y: auto; overscroll-behavior: contain;">
                                     <?php foreach ($instagramItems as $item): ?>
                                         <?php $isChecked = isset($selectedKeySet[$item->getKey()]); ?>
                                         <label class="dest-item-row" data-search="<?= Html::encode(strtolower($item->getLabel() . ' instagram ' . ($item->getAccountName() ?? ''))) ?>" style="display: flex; align-items: center; gap: 10px; margin: 0; padding: 6px 8px; border-radius: 4px; cursor: pointer; transition: background 0.15s ease;">
@@ -299,13 +299,12 @@ $hasSelectedAccount = !empty($formData['account_id']);
 
                 </div>
             </div>
-        </div>
 
     <!-- Form Actions Footer -->
-    <div class="rs-card rs-mt-4" style="padding: 16px 20px; background: #F8FAFC; border-top: 1px solid var(--rs-border, #E2E8F0);">
-        <div class="rs-d-flex rs-justify-content-end rs-gap-3" style="display: flex; justify-content: flex-end; gap: 12px;">
-            <a href="<?= \App\Environment::url('/location-group/index') ?>" class="rs-btn rs-btn--secondary">Cancel</a>
-            <button type="submit" class="rs-btn rs-btn--primary">
+    <div class="rs-card rs-mt-5 rs-mb-6" style="padding: 16px 20px; background: #F8FAFC; border: 1px solid var(--rs-border, #E2E8F0); border-radius: 8px; margin-bottom: 40px; box-shadow: var(--rs-shadow-sm, 0 1px 3px rgba(0,0,0,0.05));">
+        <div class="rs-d-flex rs-justify-content-end rs-gap-3" style="display: flex; justify-content: flex-end; align-items: center; gap: 12px;">
+            <a href="<?= \App\Environment::url('/location-group/index') ?>" class="rs-btn rs-btn--secondary" style="min-width: 100px; text-align: center;">Cancel</a>
+            <button type="submit" class="rs-btn rs-btn--primary" style="padding: 9px 20px; font-weight: 600; min-width: 180px;">
                 <?= $isEdit ? 'Update Location Group' : 'Create Location Group' ?>
             </button>
         </div>

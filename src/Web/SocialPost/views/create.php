@@ -297,21 +297,21 @@ $totalDestinations = count($googleItems) + count($facebookItems) + count($instag
                 <div class="rs-platform-checkbox-group">
                     <div class="rs-checkbox-wrap rs-mb-3 rs-p-2" style="margin-bottom: 0.75rem; padding: 0.5rem; border-radius: 6px; transition: background 0.15s ease;">
                         <label class="rs-checkbox-wrap" style="font-weight: 600; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center;">
-                            <input type="checkbox" name="platforms[]" value="facebook" class="rs-checkbox platform-filter-chk" checked style="margin-right: 8px; transform: scale(1.15);">
+                            <input type="checkbox" name="platforms[]" value="facebook" class="rs-checkbox platform-checkbox platform-filter-chk" checked style="margin-right: 8px; transform: scale(1.15);">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2" style="margin-right:8px;"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                             Facebook Page
                         </label>
                     </div>
                     <div class="rs-checkbox-wrap rs-mb-3 rs-p-2" style="margin-bottom: 0.75rem; padding: 0.5rem; border-radius: 6px; transition: background 0.15s ease;">
                         <label class="rs-checkbox-wrap" style="font-weight: 600; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center;">
-                            <input type="checkbox" name="platforms[]" value="instagram" class="rs-checkbox platform-filter-chk" checked style="margin-right: 8px; transform: scale(1.15);">
+                            <input type="checkbox" name="platforms[]" value="instagram" class="rs-checkbox platform-checkbox platform-filter-chk" checked style="margin-right: 8px; transform: scale(1.15);">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="margin-right:8px;"><defs><linearGradient id="ig-grad-create" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></linearGradient></defs><rect width="24" height="24" rx="6.5" fill="url(#ig-grad-create)"/><rect x="4.75" y="4.75" width="14.5" height="14.5" rx="3.75" stroke="#ffffff" stroke-width="1.6"/><circle cx="12" cy="12" r="3.25" stroke="#ffffff" stroke-width="1.6"/><circle cx="16.25" cy="7.75" r="1" fill="#ffffff"/></svg>
                             Instagram Business
                         </label>
                     </div>
                     <div class="rs-checkbox-wrap rs-mb-3 rs-p-2" style="margin-bottom: 0.75rem; padding: 0.5rem; border-radius: 6px; transition: background 0.15s ease;">
                         <label class="rs-checkbox-wrap" style="font-weight: 600; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center;">
-                            <input type="checkbox" name="platforms[]" value="google" class="rs-checkbox platform-filter-chk" checked style="margin-right: 8px; transform: scale(1.15);">
+                            <input type="checkbox" name="platforms[]" value="google" class="rs-checkbox platform-checkbox platform-filter-chk" checked style="margin-right: 8px; transform: scale(1.15);">
                             <svg width="20" height="20" viewBox="0 0 24 24" style="margin-right:8px;"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/></svg>
                             Google Business Profile
                         </label>
@@ -352,7 +352,7 @@ $totalDestinations = count($googleItems) + count($facebookItems) + count($instag
 
                     <input type="hidden" name="scheduled_at" id="socialpostform-scheduled_at" value="">
 
-                    <div id="schedule-summary-card" class="rs-p-3" style="background-color: var(--rs-bg-app, #f8fafc); border: 1px solid var(--rs-border, #e2e8f0); border-radius: 6px; padding: 12px;">
+                    <div id="schedule-summary-card" class="rs-p-3" style="background-color: var(--rs-bg-app, #f8fafc); border: 1px solid var(--rs-border, #e2e8f0); border-radius: 6px; padding: 12px; cursor: pointer;" title="Click to change scheduled date &amp; time">
                         <div class="rs-d-flex rs-align-items-center rs-gap-3" style="display: flex; align-items: center; gap: 12px;">
                             <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #eff6ff; color: #1d4ed8; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -385,7 +385,7 @@ $totalDestinations = count($googleItems) + count($facebookItems) + count($instag
 </div>
 
 <!-- Modern Date & Time Picker Modal -->
-<div id="rs-schedule-modal" class="rs-modal-backdrop" aria-hidden="true" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1060; align-items: center; justify-content: center;">
+<div id="rs-schedule-modal" class="rs-modal-backdrop" aria-hidden="true" style="display: none;">
     <div class="rs-modal" style="max-width: 520px; width: 100%; background: #fff; border-radius: 8px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden;" role="dialog" aria-modal="true">
         <div class="rs-modal__header" style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
             <h3 id="schedule-modal-title" class="rs-modal__title" style="margin: 0; font-size: 16px; font-weight: 600;">Select Publishing Date &amp; Time</h3>
@@ -432,7 +432,7 @@ $totalDestinations = count($googleItems) + count($facebookItems) + count($instag
 </div>
 
 <!-- Social Post Preview Modal -->
-<div id="rs-social-preview-modal" class="rs-modal-backdrop" aria-hidden="true" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1060; align-items: center; justify-content: center;">
+<div id="rs-social-preview-modal" class="rs-modal-backdrop" aria-hidden="true" style="display: none;">
     <div class="rs-modal rs-modal--lg" style="max-width: 620px; width: 100%; background: #fff; border-radius: 8px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15); overflow: hidden;" role="dialog" aria-modal="true">
         <div class="rs-modal__header" style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
             <h3 id="preview-modal-title" class="rs-modal__title" style="margin: 0; font-size: 16px; font-weight: 700; color: #0f172a;">Social Post Preview</h3>
@@ -549,8 +549,9 @@ $totalDestinations = count($googleItems) + count($facebookItems) + count($instag
 <script>
 window.GROUP_MAP = <?= json_encode($groupData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
 
-(function($) {
-    if (!$) return;
+(function() {
+    function initSocialPostCreate($) {
+        if (!$) return;
 
     const MAX_DISPLAY_CHIPS = 8;
     const PLATFORM_LIMITS = {
@@ -905,9 +906,20 @@ window.GROUP_MAP = <?= json_encode($groupData, JSON_HEX_TAG | JSON_HEX_APOS | JS
     // 4. Character Counter & Platform Limit Updates
     function getCheckedPlatforms() {
         const plats = [];
-        $('.platform-filter-chk:checked').each(function() {
-            plats.push($(this).val());
+        $('.platform-filter-chk:checked, .platform-checkbox:checked').each(function() {
+            const val = $(this).val();
+            if (val && !plats.includes(val)) {
+                plats.push(val);
+            }
         });
+        if (plats.length === 0) {
+            $('.dest-checkbox:checked').each(function() {
+                const p = $(this).data('platform');
+                if (p && !plats.includes(p)) {
+                    plats.push(p);
+                }
+            });
+        }
         return plats;
     }
 
@@ -1013,7 +1025,7 @@ window.GROUP_MAP = <?= json_encode($groupData, JSON_HEX_TAG | JSON_HEX_APOS | JS
         $('#time-hour-select').html(hourOptions);
 
         let minOptions = '';
-        for (let m = 0; m < 60; m += 5) {
+        for (let m = 0; m < 60; m++) {
             const val = m < 10 ? '0' + m : '' + m;
             minOptions += '<option value="' + m + '">' + val + '</option>';
         }
@@ -1127,19 +1139,29 @@ window.GROUP_MAP = <?= json_encode($groupData, JSON_HEX_TAG | JSON_HEX_APOS | JS
     $('#time-hour-select, #time-minute-select, #time-ampm-select').on('change', validateTimeSelection);
 
     function openScheduleModal() {
+        currentCalYear = selectedDate.getFullYear();
+        currentCalMonth = selectedDate.getMonth();
         renderCalendar();
         $('#time-hour-select').val(selectedHour);
         $('#time-minute-select').val(selectedMinute);
         $('#time-ampm-select').val(selectedAmPm);
         validateTimeSelection();
-        $('#rs-schedule-modal').css('display', 'flex');
+        $('#rs-schedule-modal').css({
+            'display': 'flex',
+            'visibility': 'visible',
+            'opacity': '1'
+        }).addClass('rs-modal-backdrop--open').attr('aria-hidden', 'false');
     }
 
     function closeScheduleModal() {
-        $('#rs-schedule-modal').hide();
+        $('#rs-schedule-modal').removeClass('rs-modal-backdrop--open').css({
+            'display': 'none',
+            'visibility': 'hidden',
+            'opacity': '0'
+        }).attr('aria-hidden', 'true');
     }
 
-    $('#btn-open-schedule-picker').on('click', openScheduleModal);
+    $('#btn-open-schedule-picker, #schedule-summary-card').on('click', openScheduleModal);
     $('#btn-close-schedule-modal, #btn-cancel-schedule').on('click', closeScheduleModal);
 
     $('#btn-confirm-schedule').on('click', function() {
@@ -1188,7 +1210,14 @@ window.GROUP_MAP = <?= json_encode($groupData, JSON_HEX_TAG | JSON_HEX_APOS | JS
     updateScheduleSummaryCard(defaultTimestamp);
 
     // 8. Social Post Preview Modal
-    function getSelectedDestinationName() {
+    function getSelectedDestinationName(platform) {
+        if (platform) {
+            const matchChecked = $('.dest-checkbox[data-platform="' + platform + '"]:checked').first();
+            if (matchChecked.length > 0) {
+                const label = matchChecked.data('label') || matchChecked.closest('.rs-dest-item').data('label');
+                if (label) return label.trim();
+            }
+        }
         const firstChecked = $('.dest-checkbox:checked').first();
         if (firstChecked.length > 0) {
             const label = firstChecked.data('label') || firstChecked.closest('.rs-dest-item').data('label');
@@ -1246,7 +1275,7 @@ window.GROUP_MAP = <?= json_encode($groupData, JSON_HEX_TAG | JSON_HEX_APOS | JS
 
         let cardHtml = '';
         const safeContent = $('<div>').text(content).html().replace(/\r?\n/g, '<br>');
-        const targetName = getSelectedDestinationName();
+        const targetName = getSelectedDestinationName(currentPreviewTab);
 
         if (currentPreviewTab === 'facebook') {
             const pageName = targetName || 'Your Facebook Page';
@@ -1357,15 +1386,31 @@ window.GROUP_MAP = <?= json_encode($groupData, JSON_HEX_TAG | JSON_HEX_APOS | JS
         }
         renderPreviewTabs(platforms);
         renderPreviewContent();
-        $('#rs-social-preview-modal').css('display', 'flex');
+        $('#rs-social-preview-modal').css({
+            'display': 'flex',
+            'visibility': 'visible',
+            'opacity': '1'
+        }).addClass('rs-modal-backdrop--open').attr('aria-hidden', 'false');
     }
 
     function closePreviewModal() {
-        $('#rs-social-preview-modal').hide();
+        $('#rs-social-preview-modal').removeClass('rs-modal-backdrop--open').css({
+            'display': 'none',
+            'visibility': 'hidden',
+            'opacity': '0'
+        }).attr('aria-hidden', 'true');
     }
 
     $('#btn-preview-post, .btn-preview-post-footer').on('click', openPreviewModal);
     $('#btn-close-preview-modal, #btn-close-preview-modal-footer').on('click', closePreviewModal);
+
+    // Click on modal backdrop to close
+    $(document).on('click', '#rs-schedule-modal, #rs-social-preview-modal', function(e) {
+        if ($(e.target).hasClass('rs-modal-backdrop')) {
+            closeScheduleModal();
+            closePreviewModal();
+        }
+    });
 
     // Escape Key Handler
     $(document).on('keydown', function(e) {
@@ -1380,8 +1425,71 @@ window.GROUP_MAP = <?= json_encode($groupData, JSON_HEX_TAG | JSON_HEX_APOS | JS
         }
     });
 
-    // 9. Submit Loading State & Double-submit Prevention
-    $('#social-post-create-form').on('submit', function() {
+    // 9. Client-Side Validation, Loading State & Double-submit Prevention (Matching Yii2 SocialPostForm)
+    $('#social-post-create-form').on('submit', function(e) {
+        const content = ($('#post-content-textarea').val() || '').trim();
+        if (!content) {
+            alert('Post content cannot be empty.');
+            $('#post-content-textarea').focus();
+            return false;
+        }
+
+        const plats = getCheckedPlatforms();
+        let minLimit = PLATFORM_LIMITS.facebook;
+        if (plats.length > 0) {
+            plats.forEach(p => {
+                if (PLATFORM_LIMITS[p] && PLATFORM_LIMITS[p] < minLimit) {
+                    minLimit = PLATFORM_LIMITS[p];
+                }
+            });
+        }
+        if (content.length > minLimit) {
+            alert('Post content exceeds the allowed ' + minLimit.toLocaleString() + ' character limit for the selected platform(s). Current length: ' + content.length.toLocaleString());
+            $('#post-content-textarea').focus();
+            return false;
+        }
+
+        const hasDests = selectedDestKeys.length > 0;
+        const hasGroups = ($('#target-groups-select2').val() || []).length > 0;
+        if (!hasDests && !hasGroups) {
+            alert('Please select at least one social destination, target location, or location group.');
+            return false;
+        }
+
+        if (plats.includes('instagram') && !previewMediaSrc) {
+            alert('Instagram Business API requires an image or video media attachment. Please attach a media file.');
+            return false;
+        }
+
+        if (plats.includes('google') && previewMediaType === 'video') {
+            alert('Google Business Profile Local Posts only support static images (JPG/PNG). Video uploads are not supported for Google Local Posts.');
+            return false;
+        }
+
+        const isScheduled = $('input[name="post_type"]:checked').val() === 'scheduled';
+        if (isScheduled) {
+            const schedVal = ($('#scheduled-at-input').val() || '').trim();
+            if (!schedVal) {
+                alert('Please select a scheduled publishing date and time.');
+                openScheduleModal();
+                return false;
+            }
+            const schedTime = new Date(schedVal.replace(' ', 'T')).getTime();
+            if (isNaN(schedTime) || schedTime < (Date.now() - 60000)) {
+                alert('Scheduled date and time must be in the future.');
+                openScheduleModal();
+                return false;
+            }
+        }
+
+        const fileInput = document.getElementById('social-media-file-input');
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            if (fileInput.files[0].size > 50 * 1024 * 1024) {
+                alert('Selected media file exceeds the maximum allowed size of 50 MB.');
+                return false;
+            }
+        }
+
         const btn = $('#btn-submit-social-post');
         btn.prop('disabled', true).css('opacity', '0.75').css('cursor', 'not-allowed');
         btn.html('<svg class="rs-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg> Submitting Post...');
@@ -1406,10 +1514,27 @@ window.GROUP_MAP = <?= json_encode($groupData, JSON_HEX_TAG | JSON_HEX_APOS | JS
             }
         }
 
+        if ($('input[name="post_type"]:checked').val() === 'scheduled') {
+            $('#schedule-picker-container').show();
+        }
+
         updateCharacterCounter();
         updateCounterAndChips();
         checkGoogleVideoWarning();
     });
+    }
 
-})(window.jQuery);
+    if (typeof jQuery !== 'undefined') {
+        jQuery(document).ready(function($) {
+            initSocialPostCreate($);
+        });
+    } else {
+        window.addEventListener('DOMContentLoaded', function() {
+            var $ = window.jQuery || window.$;
+            if ($) {
+                initSocialPostCreate($);
+            }
+        });
+    }
+})();
 </script>

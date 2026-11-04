@@ -91,7 +91,6 @@ $isProtected = $template?->isProtected() ?? false;
                             class="rs-input <?= isset($errors['text']) ? 'rs-input--error' : '' ?>"
                             style="font-family: monospace; font-size: 13px; line-height: 1.5;"
                             placeholder="<p>Hi ##NAME##,</p><p>Thank you for choosing our services...</p>"
-                            required
                         ><?= Html::encode($text) ?></textarea>
                         <?php if (isset($errors['text'])): ?>
                             <span class="rs-text-danger" style="font-size: 12px;"><?= Html::encode($errors['text']) ?></span>
@@ -164,8 +163,89 @@ $isProtected = $template?->isProtected() ?? false;
     </div>
 </form>
 
+<script src="<?= \App\Environment::url('/themes/modern/js/vendor/tinymce/tinymce.min.js') ?>"></script>
 <script>
+function initEmailTemplateEditor() {
+    if (typeof tinymce === 'undefined') {
+        return;
+    }
+
+    if (tinymce.get('template-text')) {
+        tinymce.get('template-text').remove();
+    }
+
+    tinymce.init({
+        selector: '#template-text',
+        license_key: 'gpl',
+        menubar: false,
+        plugins: [
+            'advlist', 'autolink', 'lists', 'link', 'charmap', 'preview',
+            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+            'insertdatetime', 'media', 'table', 'image'
+        ],
+        toolbar: [
+            'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image code',
+            'insertName insertEmail insertReview insertRate insertLoc'
+        ],
+        height: 480,
+        min_height: 400,
+        resize: 'vertical',
+        elementpath: false,
+        statusbar: true,
+        relative_urls: false,
+        remove_script_host: false,
+        convert_urls: true,
+        branding: false,
+        promotion: false,
+        setup: function(editor) {
+            editor.ui.registry.addButton('insertName', {
+                text: 'Name',
+                onAction: function() { editor.insertContent('##NAME##'); }
+            });
+            editor.ui.registry.addButton('insertEmail', {
+                text: 'Email',
+                onAction: function() { editor.insertContent('##EMAIL##'); }
+            });
+            editor.ui.registry.addButton('insertReview', {
+                text: 'Review',
+                onAction: function() { editor.insertContent('##REVIEW##'); }
+            });
+            editor.ui.registry.addButton('insertRate', {
+                text: 'Rate',
+                onAction: function() { editor.insertContent('##RATE##'); }
+            });
+            editor.ui.registry.addButton('insertLoc', {
+                text: 'Location',
+                onAction: function() { editor.insertContent('##LOCATION##'); }
+            });
+            editor.on('change keyup input', function() {
+                editor.save();
+            });
+        }
+    });
+
+    var form = document.querySelector('form[action*="email/template"]');
+    if (form) {
+        form.addEventListener('submit', function() {
+            if (window.tinymce) {
+                tinymce.triggerSave();
+            }
+        });
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEmailTemplateEditor);
+} else {
+    initEmailTemplateEditor();
+}
+
 function insertTag(tag) {
+    if (window.tinymce && tinymce.get('template-text')) {
+        tinymce.get('template-text').insertContent(tag);
+        tinymce.get('template-text').save();
+        return;
+    }
     const textarea = document.getElementById('template-text');
     if (!textarea) return;
     const start = textarea.selectionStart || 0;

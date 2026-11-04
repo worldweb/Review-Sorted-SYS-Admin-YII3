@@ -93,8 +93,7 @@ final class WhatsAppTemplateUpdateAction
             }
 
             if (empty($errors)) {
-                $cleanText = trim(strip_tags($text));
-                $updatedTemplate = $template->withUpdated($name, $cleanText, $status);
+                $updatedTemplate = $template->withUpdated($name, $text, $status);
 
                 try {
                     $this->whatsappRepo->saveTemplate($updatedTemplate);
@@ -107,9 +106,12 @@ final class WhatsAppTemplateUpdateAction
             }
         }
 
+        $templates = $this->whatsappRepo->findAllTemplates($context);
+
         return $this->viewRenderer
             ->withViewPath('@src/Web/WhatsApp/views')
             ->render('template/update', [
+                'templates' => $templates,
                 'template' => $template,
                 'name' => $name,
                 'text' => $text,
