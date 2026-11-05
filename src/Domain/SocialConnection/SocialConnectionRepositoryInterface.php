@@ -65,6 +65,11 @@ interface SocialConnectionRepositoryInterface
     public function updateConfig(int $id, array $data, ?TenantContextInterface $context = null): bool;
 
     /**
+     * Update the page_token JSON for a ServiceConfig (e.g. for OAuth token refresh persistence).
+     */
+    public function updatePageToken(int $id, string $tokenJson, ?TenantContextInterface $context = null): bool;
+
+    /**
      * Revoke or unlink a connection (sets linked = 0).
      */
     public function unlinkConfig(int $id, ?TenantContextInterface $context = null): bool;

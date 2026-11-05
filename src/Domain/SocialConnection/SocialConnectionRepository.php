@@ -237,6 +237,26 @@ final class SocialConnectionRepository implements SocialConnectionRepositoryInte
         }
     }
 
+    public function updatePageToken(int $id, string $tokenJson, ?TenantContextInterface $context = null): bool
+    {
+        $existing = $this->findById($id, $context);
+        if ($existing === null) {
+            return false;
+        }
+
+        try {
+            $this->db->createCommand()
+                ->update('{{%service_config}}', [
+                    'page_token' => $tokenJson,
+                    'updated_at' => time(),
+                ], ['id' => $id])
+                ->execute();
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
     public function unlinkConfig(int $id, ?TenantContextInterface $context = null): bool
     {
         $existing = $this->findById($id, $context);

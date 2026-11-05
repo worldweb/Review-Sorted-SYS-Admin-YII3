@@ -7,6 +7,7 @@ namespace App\Domain\WhatsApp\Service;
 use App\Domain\WhatsApp\Provider\MetaWhatsAppClientInterface;
 use App\Domain\WhatsApp\WhatsAppRepositoryInterface;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -30,6 +31,13 @@ final class WhatsAppQueueWorkerService
      */
     public function processBatch(int $batchSize = 100): int
     {
+        // Fail-fast guard in production: refuse to process/claim queue items if live provider is not configured
+        if (\App\Environment::isProd() && !$this->metaWhatsAppClient->isConfigured()) {
+            throw new RuntimeException(
+                '[WhatsAppQueueWorker] Cannot process WhatsApp queue: Meta WhatsApp client is not configured for live messaging in production. Ensure WHATSAPP_ENABLED=true and credentials are set in .env.'
+            );
+        }
+
         // 1. Recover stale processing jobs older than 15 minutes
         $recovered = $this->whatsappRepo->recoverStaleQueueJobs(15);
         if ($recovered > 0) {

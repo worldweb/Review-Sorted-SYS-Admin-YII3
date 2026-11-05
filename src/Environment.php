@@ -38,6 +38,7 @@ final class Environment
         self::setString('APP_URL', 'http://localhost/sys-yii3');
         self::setString('APP_BASE_PATH', '/sys-yii3');
         self::setString('APP_TIMEZONE', 'Australia/Perth');
+        date_default_timezone_set(self::appTimezone());
         self::setString('FRONTEND_URL', 'http://localhost/sys-yii3');
         self::setString('BACKEND_URL', 'http://localhost/sys-yii3');
         self::setString('API_BASE_URL', 'http://localhost/sys-yii3/accountapi');
@@ -60,7 +61,7 @@ final class Environment
         self::setString('DB_CHARSET', 'utf8mb4');
         self::setString('DB_TABLE_PREFIX', '');
 
-        // Email / SMTP
+        // Email / SMTP & Mailgun
         self::setString('MAIL_HOST', '');
         self::setInteger('MAIL_PORT', 587);
         self::setString('MAIL_USERNAME', '');
@@ -68,8 +69,16 @@ final class Environment
         self::setString('MAIL_ENCRYPTION', 'tls');
         self::setString('MAIL_FROM_ADDRESS', 'noreply@reviewssorted.com');
         self::setString('MAIL_FROM_NAME', 'Reviews Sorted');
+        self::setBoolean('MAILGUN_ENABLED', false);
         self::setString('MAILGUN_API_KEY', '');
         self::setString('MAILGUN_DOMAIN', 'reviewssorted.com');
+        self::setString('MAILGUN_ENDPOINT', 'https://api.eu.mailgun.net');
+
+        // Meta WhatsApp Cloud API
+        self::setBoolean('WHATSAPP_ENABLED', false);
+        self::setString('WHATSAPP_TOKEN', self::getRawValue('WHATSAPP_TOKEN') ?? self::getRawValue('RS_WHATSAPP_ACCESS_TOKEN') ?? '');
+        self::setString('WHATSAPP_PHONE_NUMBER_ID', self::getRawValue('WHATSAPP_PHONE_NUMBER_ID') ?? self::getRawValue('RS_WHATSAPP_PHONE_NUMBER_ID') ?? '');
+        self::setString('WHATSAPP_API_VERSION', self::getRawValue('WHATSAPP_API_VERSION') ?? self::getRawValue('RS_WHATSAPP_API_VERSION') ?? 'v17.0');
 
         // Stripe
         self::setString('STRIPE_MODE', 'test');
@@ -280,6 +289,48 @@ final class Environment
     public static function googleClientSecret(): string
     {
         return (string) self::$values['GOOGLE_CLIENT_SECRET'];
+    }
+
+    // Mailgun
+    public static function mailgunEnabled(): bool
+    {
+        return (bool) (self::$values['MAILGUN_ENABLED'] ?? false);
+    }
+
+    public static function mailgunApiKey(): string
+    {
+        return (string) (self::$values['MAILGUN_API_KEY'] ?? '');
+    }
+
+    public static function mailgunDomain(): string
+    {
+        return (string) (self::$values['MAILGUN_DOMAIN'] ?? 'reviewssorted.com');
+    }
+
+    public static function mailgunEndpoint(): string
+    {
+        return (string) (self::$values['MAILGUN_ENDPOINT'] ?? 'https://api.eu.mailgun.net');
+    }
+
+    // WhatsApp
+    public static function whatsappEnabled(): bool
+    {
+        return (bool) (self::$values['WHATSAPP_ENABLED'] ?? false);
+    }
+
+    public static function whatsappToken(): string
+    {
+        return (string) (self::$values['WHATSAPP_TOKEN'] ?? '');
+    }
+
+    public static function whatsappPhoneNumberId(): string
+    {
+        return (string) (self::$values['WHATSAPP_PHONE_NUMBER_ID'] ?? '');
+    }
+
+    public static function whatsappApiVersion(): string
+    {
+        return (string) (self::$values['WHATSAPP_API_VERSION'] ?? 'v17.0');
     }
 
     // Helper to get raw value

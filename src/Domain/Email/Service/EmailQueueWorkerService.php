@@ -7,6 +7,7 @@ namespace App\Domain\Email\Service;
 use App\Domain\Email\EmailRepositoryInterface;
 use App\Domain\Email\Provider\MailgunClientInterface;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -30,6 +31,13 @@ final class EmailQueueWorkerService
      */
     public function processBatch(int $batchSize = 100): int
     {
+        // Fail-fast guard in production: refuse to process/claim queue items if live provider is not configured
+        if (\App\Environment::isProd() && !$this->mailgunClient->isConfigured()) {
+            throw new RuntimeException(
+                '[EmailQueueWorker] Cannot process email queue: Mailgun is not configured for live sending in production. Ensure MAILGUN_ENABLED=true and credentials are set in .env.'
+            );
+        }
+
         // 1. Recover stale processing jobs older than 15 minutes
         $recovered = $this->emailRepo->recoverStaleQueueJobs(15);
         if ($recovered > 0) {

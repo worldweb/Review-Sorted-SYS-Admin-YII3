@@ -26,6 +26,17 @@ final class MetaWhatsAppClient implements MetaWhatsAppClientInterface
     public function sendTextMessage(string $phone, string $message): array
     {
         if (!$this->enabled || $this->token === '' || $this->phoneNumberId === '') {
+            if (\App\Environment::isProd()) {
+                if (!$this->enabled) {
+                    throw new RuntimeException(
+                        '[MetaWhatsAppClient] Live WhatsApp messaging is disabled in production (WHATSAPP_ENABLED is false). Simulated sending is prohibited in production.'
+                    );
+                }
+                throw new RuntimeException(
+                    '[MetaWhatsAppClient] Cannot send WhatsApp message in production: WHATSAPP_TOKEN or WHATSAPP_PHONE_NUMBER_ID is missing.'
+                );
+            }
+
             $this->logger?->info(sprintf(
                 '[MetaWhatsAppClient: Simulated Send] Phone: %s, Message length: %d chars (Network disabled)',
                 $phone,

@@ -34,6 +34,17 @@ final class MailgunClient implements MailgunClientInterface
         $sender = $from !== '' ? $from : $this->defaultFrom;
 
         if (!$this->enabled || $this->apiKey === '' || $this->apiKey === 'disabled') {
+            if (\App\Environment::isProd()) {
+                if (!$this->enabled) {
+                    throw new RuntimeException(
+                        '[MailgunClient] Live email sending is disabled in production (MAILGUN_ENABLED is false). Simulated sending is prohibited in production.'
+                    );
+                }
+                throw new RuntimeException(
+                    '[MailgunClient] Cannot send email in production: MAILGUN_API_KEY is missing or invalid.'
+                );
+            }
+
             $this->logger?->info(sprintf(
                 '[MailgunClient: Simulated Send] To: %s, From: %s, Subject: "%s" (Network disabled)',
                 $to,
