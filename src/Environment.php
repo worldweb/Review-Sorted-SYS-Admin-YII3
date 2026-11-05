@@ -202,6 +202,22 @@ final class Environment
         return (bool) (self::$values['APP_C3'] ?? false);
     }
 
+    // Session / Cookies
+    public static function sessionCookieSecure(): bool
+    {
+        return (bool) (self::$values['SESSION_COOKIE_SECURE'] ?? false);
+    }
+
+    public static function sessionCookieHttpOnly(): bool
+    {
+        return (bool) (self::$values['SESSION_COOKIE_HTTPONLY'] ?? true);
+    }
+
+    public static function sessionCookieSameSite(): string
+    {
+        return (string) (self::$values['SESSION_COOKIE_SAMESITE'] ?? 'lax');
+    }
+
     // Database
     public static function dbDriver(): string
     {
