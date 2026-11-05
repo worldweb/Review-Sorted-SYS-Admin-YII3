@@ -1,0 +1,67 @@
+
+name: Deploy Yii3 to Production via FTP
+
+on:
+  push:
+    branches:
+      - sys-development
+
+  workflow_dispatch:
+
+concurrency:
+  group: production-ftp-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare deployment files
+        run: |
+          mkdir -p deploy
+          git archive --format=tar "$GITHUB_SHA" | tar -xf - -C deploy
+
+      - name: Install FTP client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+      - name: Deploy files using FTP
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+          FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
+        run: |
+          set -e
+
+          : "${FTP_HOST:?FTP_HOST is missing}"
+          : "${FTP_USERNAME:?FTP_USERNAME is missing}"
+          : "${FTP_PASSWORD:?FTP_PASSWORD is missing}"
+          : "${FTP_PORT:=21}"
+          : "${FTP_REMOTE_DIR:=/}"
+
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" \
+            -p "$FTP_PORT" "$FTP_HOST" <<EOF
+          set ftp:passive-mode true
+          set net:timeout 30
+          set net:max-retries 2
+
+          mirror --reverse \
+            --ignore-time \
+            --no-perms \
+            --parallel=2 \
+            --exclude-glob .github \
+            --exclude-glob .env \
+            --exclude-glob vendor \
+            --exclude-glob runtime \
+            deploy "$FTP_REMOTE_DIR"
+
+          bye
+          EOF
