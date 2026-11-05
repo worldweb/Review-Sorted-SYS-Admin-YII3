@@ -49,6 +49,7 @@ jobs:
 
           lftp -u "$FTP_USERNAME","$FTP_PASSWORD" \
             -p "$FTP_PORT" "$FTP_HOST" <<EOF
+          set ftp:ssl-allow no
           set ftp:passive-mode true
           set net:timeout 30
           set net:max-retries 2
