@@ -13,7 +13,6 @@ $finder = (new Finder())
     ->in([
         $root . '/config',
         $root . '/src',
-        $root . '/tests',
     ])
     ->append([
         $root . '/public/index.php',

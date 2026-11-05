@@ -10,7 +10,6 @@ use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
 return RectorConfig::configure()
     ->withPaths([
         __DIR__ . '/src',
-        __DIR__ . '/tests',
     ])
     ->withPhpSets(php82: true)
     ->withRules([

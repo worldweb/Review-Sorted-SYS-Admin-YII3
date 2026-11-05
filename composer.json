@@ -29,12 +29,12 @@
         "serve": [
             "Composer\\Config::disableProcessTimeout",
             "@php ./yii serve"
-        ],
-        "test": "codecept run"
+        ]
     },
     "require": {
         "php": "8.2 - 8.5",
         "ext-filter": "*",
+        "guzzlehttp/guzzle": "^7.8 || ^8.0",
         "httpsoft/http-message": "^1.1.6",
         "psr/container": "^2.0.2",
         "psr/http-factory": "^1.1",
@@ -42,6 +42,7 @@
         "psr/http-server-handler": "^1.0.2",
         "psr/log": "^3.0.2",
         "symfony/console": "^7.4.7 || ^8.0.7",
+        "vlucas/phpdotenv": "^5.6",
         "yiisoft/aliases": "^3.1.1",
         "yiisoft/assets": "^5.1.2",
         "yiisoft/config": "^1.6.2",
@@ -68,14 +69,7 @@
         "yiisoft/yii-view-renderer": "^7.4.1"
     },
     "require-dev": {
-        "vlucas/phpdotenv": "^5.6",
-        "codeception/c3": "^2.9",
-        "codeception/codeception": "^5.3.5",
-        "codeception/module-asserts": "^3.3.0",
-        "codeception/module-cli": "^2.0.1",
-        "codeception/module-phpbrowser": "^4",
         "friendsofphp/php-cs-fixer": "^3.94.2",
-        "phpunit/phpunit": "^11.5.55",
         "rector/rector": "^2.3.9",
         "shipmonk/composer-dependency-analyser": "^1.8.4",
         "vimeo/psalm": "^6.16.1"
@@ -85,20 +79,13 @@
             "App\\": "src"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "App\\Tests\\": "tests"
-        }
-    },
     "extra": {
         "config-plugin-file": "config/configuration.php"
     },
     "config": {
         "sort-packages": true,
-        "bump-after-update": true,
         "allow-plugins": {
             "yiisoft/config": true,
-            "codeception/c3": true,
             "composer/installers": true
         }
     }
