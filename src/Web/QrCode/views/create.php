@@ -49,8 +49,8 @@ if ($isUpdate && !empty($model->getQrcode())) {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<link rel="stylesheet" href="<?= \App\Environment::url('/assets/qr/css/qr-code-form.css') ?>">
-<link rel="stylesheet" href="<?= \App\Environment::url('/assets/qr/css/qr-code-overrides.css') ?>">
+<link rel="stylesheet" href="<?= \App\Shared\AssetVersion::append(\App\Environment::url('/assets/qr/css/qr-code-form.css')) ?>">
+<link rel="stylesheet" href="<?= \App\Shared\AssetVersion::append(\App\Environment::url('/assets/qr/css/qr-code-overrides.css')) ?>">
 
 <!-- RS Sidebar Protection & Studio Style Neutralization -->
 <style>
@@ -458,4 +458,4 @@ if ($isUpdate && !empty($model->getQrcode())) {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-<script src="<?= \App\Environment::url('/assets/qr/js/qr-code-form.js') ?>"></script>
+<script src="<?= \App\Shared\AssetVersion::append(\App\Environment::url('/assets/qr/js/qr-code-form.js')) ?>"></script>

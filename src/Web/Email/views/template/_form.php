@@ -163,7 +163,7 @@ $isProtected = $template?->isProtected() ?? false;
     </div>
 </form>
 
-<script src="<?= \App\Environment::url('/themes/modern/js/vendor/tinymce/tinymce.min.js') ?>"></script>
+<script src="<?= \App\Shared\AssetVersion::append(\App\Environment::url('/themes/modern/js/vendor/tinymce/tinymce.min.js')) ?>"></script>
 <script>
 function initEmailTemplateEditor() {
     if (typeof tinymce === 'undefined') {

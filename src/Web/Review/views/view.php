@@ -95,7 +95,7 @@ if ($decodedQ !== '') {
 }
 ?>
 
-<link rel="stylesheet" href="<?= \App\Environment::url('/themes/modern/css/view.css') ?>">
+<link rel="stylesheet" href="<?= \App\Shared\AssetVersion::append(\App\Environment::url('/themes/modern/css/view.css')) ?>">
 
 <div class="rs-page rs-p-6">
     <?php if (isset($flash)): ?>

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Shared\AssetVersion;
 use Yiisoft\Html\Html;
 
 /**
@@ -21,6 +22,7 @@ use Yiisoft\Html\Html;
 $baseUrl = isset($aliases) ? (string) $aliases->get('@baseUrl') : '/';
 $base = ($baseUrl !== '' && $baseUrl !== '/') ? rtrim($baseUrl, '/') : '';
 $themeUrl = $base . '/themes/modern';
+$asset = static fn (string $path): string => AssetVersion::append($themeUrl . $path);
 
 $pageTitle = $this->getTitle();
 if (empty($pageTitle)) {
@@ -48,16 +50,16 @@ $this->beginPage();
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700;900&display=swap" rel="stylesheet">
 
     <!-- Modern Theme CSS Stylesheets -->
-    <link rel="stylesheet" href="<?= $themeUrl ?>/css/variables.css">
-    <link rel="stylesheet" href="<?= $themeUrl ?>/css/base.css">
-    <link rel="stylesheet" href="<?= $themeUrl ?>/css/typography.css">
-    <link rel="stylesheet" href="<?= $themeUrl ?>/css/layout.css">
-    <link rel="stylesheet" href="<?= $themeUrl ?>/css/buttons.css">
-    <link rel="stylesheet" href="<?= $themeUrl ?>/css/forms.css">
-    <link rel="stylesheet" href="<?= $themeUrl ?>/css/cards.css">
-    <link rel="stylesheet" href="<?= $themeUrl ?>/css/alerts.css">
-    <link rel="stylesheet" href="<?= $themeUrl ?>/css/utilities.css">
-    <link rel="stylesheet" href="<?= $themeUrl ?>/css/responsive.css">
+    <link rel="stylesheet" href="<?= $asset('/css/variables.css') ?>">
+    <link rel="stylesheet" href="<?= $asset('/css/base.css') ?>">
+    <link rel="stylesheet" href="<?= $asset('/css/typography.css') ?>">
+    <link rel="stylesheet" href="<?= $asset('/css/layout.css') ?>">
+    <link rel="stylesheet" href="<?= $asset('/css/buttons.css') ?>">
+    <link rel="stylesheet" href="<?= $asset('/css/forms.css') ?>">
+    <link rel="stylesheet" href="<?= $asset('/css/cards.css') ?>">
+    <link rel="stylesheet" href="<?= $asset('/css/alerts.css') ?>">
+    <link rel="stylesheet" href="<?= $asset('/css/utilities.css') ?>">
+    <link rel="stylesheet" href="<?= $asset('/css/responsive.css') ?>">
 
     <style>
         .rs-auth-layout {

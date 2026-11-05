@@ -25,28 +25,31 @@ $this->setTitle('Send E-mail Campaign');
 ?>
 
 <style>
-/* ── Divider between multi-select and single recipient ── */
-.mod-divider {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin: var(--rs-space-4, 16px) 0;
-    color: var(--rs-text-muted, #94a3b8);
-    font-size: 13px;
-    text-transform: lowercase;
-}
-.mod-divider::before,
-.mod-divider::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid var(--rs-border, #e2e8f0);
-}
-.mod-divider:not(:empty)::before {
-    margin-right: .75em;
-}
-.mod-divider:not(:empty)::after {
-    margin-left: .75em;
-}
+    /* ── Divider between multi-select and single recipient ── */
+    .mod-divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: var(--rs-space-4, 16px) 0;
+        color: var(--rs-text-muted, #94a3b8);
+        font-size: 13px;
+        text-transform: lowercase;
+    }
+
+    .mod-divider::before,
+    .mod-divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid var(--rs-border, #e2e8f0);
+    }
+
+    .mod-divider:not(:empty)::before {
+        margin-right: .75em;
+    }
+
+    .mod-divider:not(:empty)::after {
+        margin-left: .75em;
+    }
 </style>
 
 <!-- Hidden template bodies for JS template content populator -->
@@ -118,8 +121,7 @@ $this->setTitle('Send E-mail Campaign');
                                     value="<?= Html::encode($formData['name'] ?? '') ?>"
                                     class="rs-input"
                                     maxlength="255"
-                                    placeholder="Full Name"
-                                />
+                                    placeholder="Full Name" />
                             </div>
                             <div class="form-group">
                                 <label class="rs-label" for="manual-email">Recipient Email</label>
@@ -130,8 +132,7 @@ $this->setTitle('Send E-mail Campaign');
                                     value="<?= Html::encode($formData['email'] ?? '') ?>"
                                     class="rs-input <?= isset($errors['email']) ? 'rs-input--error' : '' ?>"
                                     maxlength="255"
-                                    placeholder="email@example.com"
-                                />
+                                    placeholder="email@example.com" />
                                 <?php if (isset($errors['email'])): ?>
                                     <span class="rs-text-danger" style="font-size: 12px; display: block; margin-top: 4px;"><?= Html::encode($errors['email']) ?></span>
                                 <?php endif; ?>
@@ -181,8 +182,7 @@ $this->setTitle('Send E-mail Campaign');
                                     value="<?= Html::encode($formData['subject'] ?? '') ?>"
                                     class="rs-input <?= isset($errors['subject']) ? 'rs-input--error' : '' ?>"
                                     maxlength="255"
-                                    placeholder="Email subject line"
-                                />
+                                    placeholder="Email subject line" />
                                 <?php if (isset($errors['subject'])): ?>
                                     <span class="rs-text-danger" style="font-size: 12px; display: block; margin-top: 4px;"><?= Html::encode($errors['subject']) ?></span>
                                 <?php endif; ?>
@@ -194,8 +194,7 @@ $this->setTitle('Send E-mail Campaign');
                                     name="template"
                                     id="campaign-template"
                                     class="rs-select rs-input <?= isset($errors['template']) ? 'rs-input--error' : '' ?>"
-                                    onchange="onTemplateChange(this.value)"
-                                >
+                                    onchange="onTemplateChange(this.value)">
                                     <option value="">Select a template...</option>
                                     <?php foreach ($templates as $tpl): ?>
                                         <option value="<?= $tpl->getId() ?>" <?= ((string) $tpl->getId() === ($formData['template_id'] ?? '')) ? 'selected' : '' ?>>
@@ -217,8 +216,7 @@ $this->setTitle('Send E-mail Campaign');
                                     id="campaign-message"
                                     rows="22"
                                     class="rs-input <?= isset($errors['message']) ? 'rs-input--error' : '' ?>"
-                                    style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6;"
-                                ><?= Html::encode($formData['message'] ?? '') ?></textarea>
+                                    style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6;"><?= Html::encode($formData['message'] ?? '') ?></textarea>
                             </div>
                             <?php if (isset($errors['message'])): ?>
                                 <span class="rs-text-danger" style="font-size: 12px; display: block; margin-top: 4px;"><?= Html::encode($errors['message']) ?></span>
@@ -277,8 +275,7 @@ $this->setTitle('Send E-mail Campaign');
                                     type="button"
                                     class="rs-btn rs-btn--sm rs-btn--outline rs-d-flex rs-align-items-center rs-justify-content-between"
                                     onclick="insertCampaignTag('<?= Html::encode($tag) ?>')"
-                                    style="text-align: left; width: 100%; display: flex; justify-content: space-between; align-items: center;"
-                                >
+                                    style="text-align: left; width: 100%; display: flex; justify-content: space-between; align-items: center;">
                                     <code><?= Html::encode($tag) ?></code>
                                     <span class="rs-text-muted" style="font-size: 11px;"><?= Html::encode($info['label']) ?></span>
                                 </button>
@@ -291,114 +288,118 @@ $this->setTitle('Send E-mail Campaign');
     </form>
 </div>
 
-<script src="<?= \App\Environment::url('/themes/modern/js/vendor/tinymce/tinymce.min.js') ?>"></script>
+<script src="<?= \App\Shared\AssetVersion::append(\App\Environment::url('/themes/modern/js/vendor/tinymce/tinymce.min.js')) ?>"></script>
 <script>
-(function() {
-    function initSendPage() {
-        // Initialize Select2 on recipients
-        if (window.jQuery && jQuery.fn.select2) {
-            jQuery('#emailList').select2({
-                placeholder: 'Search and select contacts...',
-                allowClear: true,
-                width: '100%'
-            });
-            jQuery('#bccEmailList').select2({
-                placeholder: 'Search and select BCC contacts...',
-                allowClear: true,
-                width: '100%'
-            });
-        }
-
-        // Initialize TinyMCE on message content
-        if (typeof tinymce !== 'undefined') {
-            if (tinymce.get('campaign-message')) {
-                tinymce.get('campaign-message').remove();
+    (function() {
+        function initSendPage() {
+            // Initialize Select2 on recipients
+            if (window.jQuery && jQuery.fn.select2) {
+                jQuery('#emailList').select2({
+                    placeholder: 'Search and select contacts...',
+                    allowClear: true,
+                    width: '100%'
+                });
+                jQuery('#bccEmailList').select2({
+                    placeholder: 'Search and select BCC contacts...',
+                    allowClear: true,
+                    width: '100%'
+                });
             }
 
-            tinymce.init({
-                selector: '#campaign-message',
-                license_key: 'gpl',
-                menubar: false,
-                plugins: [
-                    'advlist', 'autolink', 'lists', 'link', 'charmap', 'preview',
-                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                    'insertdatetime', 'media', 'table', 'image'
-                ],
-                toolbar: [
-                    'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image code',
-                    'insertName insertEmail'
-                ],
-                height: 480,
-                min_height: 380,
-                resize: 'vertical',
-                elementpath: false,
-                statusbar: true,
-                relative_urls: false,
-                remove_script_host: false,
-                convert_urls: true,
-                branding: false,
-                promotion: false,
-                setup: function(editor) {
-                    editor.ui.registry.addButton('insertName', {
-                        text: 'Name',
-                        onAction: function() { editor.insertContent('##NAME##'); }
-                    });
-                    editor.ui.registry.addButton('insertEmail', {
-                        text: 'Email',
-                        onAction: function() { editor.insertContent('##EMAIL##'); }
-                    });
-                    editor.on('change keyup input', function() {
-                        editor.save();
-                    });
+            // Initialize TinyMCE on message content
+            if (typeof tinymce !== 'undefined') {
+                if (tinymce.get('campaign-message')) {
+                    tinymce.get('campaign-message').remove();
                 }
-            });
+
+                tinymce.init({
+                    selector: '#campaign-message',
+                    license_key: 'gpl',
+                    menubar: false,
+                    plugins: [
+                        'advlist', 'autolink', 'lists', 'link', 'charmap', 'preview',
+                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                        'insertdatetime', 'media', 'table', 'image'
+                    ],
+                    toolbar: [
+                        'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image code',
+                        'insertName insertEmail'
+                    ],
+                    height: 480,
+                    min_height: 380,
+                    resize: 'vertical',
+                    elementpath: false,
+                    statusbar: true,
+                    relative_urls: false,
+                    remove_script_host: false,
+                    convert_urls: true,
+                    branding: false,
+                    promotion: false,
+                    setup: function(editor) {
+                        editor.ui.registry.addButton('insertName', {
+                            text: 'Name',
+                            onAction: function() {
+                                editor.insertContent('##NAME##');
+                            }
+                        });
+                        editor.ui.registry.addButton('insertEmail', {
+                            text: 'Email',
+                            onAction: function() {
+                                editor.insertContent('##EMAIL##');
+                            }
+                        });
+                        editor.on('change keyup input', function() {
+                            editor.save();
+                        });
+                    }
+                });
+            }
+
+            var form = document.querySelector('form[action*="email/send"]');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    if (window.tinymce) {
+                        tinymce.triggerSave();
+                    }
+                });
+            }
         }
 
-        var form = document.querySelector('form[action*="email/send"]');
-        if (form) {
-            form.addEventListener('submit', function() {
-                if (window.tinymce) {
-                    tinymce.triggerSave();
-                }
-            });
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSendPage);
+        } else {
+            initSendPage();
+        }
+    })();
+
+    function onTemplateChange(templateId) {
+        if (!templateId) return;
+        const div = document.getElementById('tpl-' + templateId);
+        if (!div) return;
+        const content = div.innerHTML;
+        if (window.tinymce && tinymce.get('campaign-message')) {
+            tinymce.get('campaign-message').setContent(content);
+            tinymce.get('campaign-message').save();
+        } else {
+            const textarea = document.getElementById('campaign-message');
+            if (textarea) textarea.value = content;
         }
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initSendPage);
-    } else {
-        initSendPage();
-    }
-})();
-
-function onTemplateChange(templateId) {
-    if (!templateId) return;
-    const div = document.getElementById('tpl-' + templateId);
-    if (!div) return;
-    const content = div.innerHTML;
-    if (window.tinymce && tinymce.get('campaign-message')) {
-        tinymce.get('campaign-message').setContent(content);
-        tinymce.get('campaign-message').save();
-    } else {
+    function insertCampaignTag(tag) {
+        if (window.tinymce && tinymce.get('campaign-message')) {
+            tinymce.get('campaign-message').insertContent(tag);
+            tinymce.get('campaign-message').save();
+            return;
+        }
         const textarea = document.getElementById('campaign-message');
-        if (textarea) textarea.value = content;
+        if (!textarea) return;
+        const start = textarea.selectionStart || 0;
+        const end = textarea.selectionEnd || 0;
+        const val = textarea.value;
+        textarea.value = val.substring(0, start) + tag + val.substring(end);
+        textarea.focus();
+        const newPos = start + tag.length;
+        textarea.setSelectionRange(newPos, newPos);
     }
-}
-
-function insertCampaignTag(tag) {
-    if (window.tinymce && tinymce.get('campaign-message')) {
-        tinymce.get('campaign-message').insertContent(tag);
-        tinymce.get('campaign-message').save();
-        return;
-    }
-    const textarea = document.getElementById('campaign-message');
-    if (!textarea) return;
-    const start = textarea.selectionStart || 0;
-    const end = textarea.selectionEnd || 0;
-    const val = textarea.value;
-    textarea.value = val.substring(0, start) + tag + val.substring(end);
-    textarea.focus();
-    const newPos = start + tag.length;
-    textarea.setSelectionRange(newPos, newPos);
-}
 </script>
