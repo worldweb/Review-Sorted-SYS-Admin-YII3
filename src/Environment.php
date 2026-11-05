@@ -36,7 +36,7 @@ final class Environment
         self::setBoolean('APP_DEBUG', false);
         self::setString('APP_NAME', 'Reviews Sorted');
         self::setString('APP_URL', 'http://localhost/sys-yii3');
-        self::setString('APP_BASE_PATH', '/sys-yii3');
+        self::setStringAllowEmpty('APP_BASE_PATH', '/sys-yii3');
         self::setString('APP_TIMEZONE', 'Australia/Perth');
         date_default_timezone_set(self::appTimezone());
         self::setString('FRONTEND_URL', 'http://localhost/sys-yii3');
@@ -376,6 +376,12 @@ final class Environment
     {
         $value = self::getRawValue($key);
         self::$values[$key] = $value !== null && $value !== '' ? $value : $default;
+    }
+
+    private static function setStringAllowEmpty(string $key, string $default): void
+    {
+        $value = self::getRawValue($key);
+        self::$values[$key] = $value !== null ? $value : $default;
     }
 
     private static function setNonEmptyStringOrNull(string $key, ?string $default): void
