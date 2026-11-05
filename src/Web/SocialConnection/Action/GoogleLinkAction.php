@@ -30,7 +30,20 @@ final class GoogleLinkAction
         }
 
         $flash = new Flash($this->session);
-        $flash->set('info', 'Google location linking completed.');
+        $body = (array) ($request->getParsedBody() ?? []);
+        $query = $request->getQueryParams();
+
+        $selection = $body['selection'] ?? $query['selection'] ?? null;
+        if (is_array($selection) && !empty($selection)) {
+            $ids = array_map('intval', $selection);
+            if ($this->connectionRepo->linkGoogleLocations($ids, $context)) {
+                $flash->set('success', sprintf('Successfully linked %d Google location(s).', count($ids)));
+            } else {
+                $flash->set('error', 'Error linking selected Google locations. Please try again.');
+            }
+        } else {
+            $flash->set('info', 'Google location linking completed.');
+        }
 
         return $this->redirect(\App\Environment::url('/settings/google'));
     }

@@ -276,6 +276,9 @@ return [
             Route::get('/settings/facebook/setup')
                 ->action(Web\SocialConnection\Action\FacebookSetupAction::class)
                 ->name('settings_facebook_setup'),
+            Route::get('/settings/facebook/callback')
+                ->action(Web\SocialConnection\Action\FacebookCallbackAction::class)
+                ->name('settings_facebook_callback'),
             Route::get('/settings/google')
                 ->action(Web\SocialConnection\Action\GoogleIndexAction::class)
                 ->name('settings_google'),
@@ -294,6 +297,9 @@ return [
             Route::get('/settings/google/setup')
                 ->action(Web\SocialConnection\Action\GoogleSetupAction::class)
                 ->name('settings_google_setup'),
+            Route::get('/settings/google/callback')
+                ->action(Web\SocialConnection\Action\GoogleCallbackAction::class)
+                ->name('settings_google_callback'),
             Route::get('/settings/google/link')
                 ->action(Web\SocialConnection\Action\GoogleLinkAction::class)
                 ->name('settings_google_link'),

@@ -94,4 +94,47 @@ interface SocialConnectionRepositoryInterface
     public function deleteApi(int $id): bool;
 
     public function countAssignedPages(int $apiId): int;
+
+    /**
+     * Finds a ServiceConfig by service ID and platform page/location ID, scoped to tenant context if provided.
+     */
+    public function findConfigByPlatformPageId(int $serviceId, string $pageId, ?TenantContextInterface $context = null): ?ServiceConfig;
+
+    /**
+     * Upsert a Facebook Page connection in service_config.
+     * Prevents duplicate rows by matching (account_id, service_id = 2, page_id).
+     *
+     * @param array{id: string, name: string, access_token: string, location?: array} $pageData
+     */
+    public function upsertFacebookPage(int $accountId, ?int $apiId, array $pageData, ?string $userToken = null): ?ServiceConfig;
+
+    /**
+     * Upsert an Instagram SubService linked to a Facebook Page ServiceConfig.
+     *
+     * @param array{id: string, username: string} $instaData
+     */
+    public function upsertInstagramSubService(int $accountId, int $serviceConfigId, array $instaData): ?SubService;
+
+    /**
+     * Upsert a Google Business Profile location connection in service_config.
+     * Prevents duplicate rows by matching (account_id, service_id = 1, page_id).
+     *
+     * @param array{name: string, title?: string, storeCode?: string, account_name?: string} $locationData
+     * @param array<string, mixed> $tokenPayload
+     */
+    public function upsertGoogleLocation(int $accountId, ?int $apiId, array $locationData, array $tokenPayload, bool $linked = true): ?ServiceConfig;
+
+    /**
+     * Link selected Google location service configurations (set linked = 1).
+     *
+     * @param array<int> $serviceConfigIds
+     */
+    public function linkGoogleLocations(array $serviceConfigIds, ?TenantContextInterface $context = null): bool;
+
+    /**
+     * Find unlinked Google locations (linked = 0) for the current tenant.
+     *
+     * @return array<int, ServiceConfig>
+     */
+    public function findNotLinkedGoogleConfigs(?TenantContextInterface $context = null): array;
 }

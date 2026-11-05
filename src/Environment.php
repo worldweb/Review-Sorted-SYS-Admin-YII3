@@ -305,6 +305,12 @@ final class Environment
         return (string) self::$values['FACEBOOK_APP_SECRET'];
     }
 
+    public static function facebookRedirectUri(): string
+    {
+        $uri = trim((string) (self::$values['FACEBOOK_REDIRECT_URI'] ?? ''));
+        return $uri !== '' ? $uri : self::url('/settings/facebook/callback');
+    }
+
     public static function googleClientId(): string
     {
         return (string) self::$values['GOOGLE_CLIENT_ID'];
@@ -313,6 +319,12 @@ final class Environment
     public static function googleClientSecret(): string
     {
         return (string) self::$values['GOOGLE_CLIENT_SECRET'];
+    }
+
+    public static function googleRedirectUri(): string
+    {
+        $uri = trim((string) (self::$values['GOOGLE_REDIRECT_URI'] ?? ''));
+        return $uri !== '' ? $uri : self::url('/settings/google/callback');
     }
 
     // Mailgun
