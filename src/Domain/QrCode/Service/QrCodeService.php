@@ -129,9 +129,9 @@ final class QrCodeService implements QrCodeServiceInterface
         }
 
         // Check if explicit QR generation base URL override is configured in environment
-        $qrGenBaseUrl = getenv('RS_QR_CODE_GENERATION_BASE_URL') ?: null;
+        $qrGenBaseUrl = \App\Environment::qrCodeGenerationBaseUrl();
         if (!empty($qrGenBaseUrl)) {
-            $appBaseUrl = rtrim((string) (getenv('APP_BASE_URL') ?: ''), '/');
+            $appBaseUrl = rtrim(\App\Environment::appUrl(), '/');
             if (!empty($appBaseUrl) && str_starts_with($trimmed, $appBaseUrl)) {
                 return rtrim($qrGenBaseUrl, '/') . substr($trimmed, strlen($appBaseUrl));
             }
@@ -144,7 +144,7 @@ final class QrCodeService implements QrCodeServiceInterface
 
         $host = strtolower($parsed['host']);
         if ($host === 'localhost' || $host === '127.0.0.1') {
-            $safeHost = getenv('RS_LOCAL_QR_SAFE_HOST') ?: 'sys.test';
+            $safeHost = \App\Environment::localQrSafeHost();
             $scheme = $parsed['scheme'] ?? 'http';
             $port = isset($parsed['port']) ? ':' . $parsed['port'] : '';
             $pathAndQuery = ($parsed['path'] ?? '')

@@ -78,7 +78,7 @@ final class Environment
         self::setBoolean('WHATSAPP_ENABLED', false);
         self::setString('WHATSAPP_TOKEN', self::getRawValue('WHATSAPP_TOKEN') ?? self::getRawValue('RS_WHATSAPP_ACCESS_TOKEN') ?? '');
         self::setString('WHATSAPP_PHONE_NUMBER_ID', self::getRawValue('WHATSAPP_PHONE_NUMBER_ID') ?? self::getRawValue('RS_WHATSAPP_PHONE_NUMBER_ID') ?? '');
-        self::setString('WHATSAPP_API_VERSION', self::getRawValue('WHATSAPP_API_VERSION') ?? self::getRawValue('RS_WHATSAPP_API_VERSION') ?? 'v17.0');
+        self::setString('WHATSAPP_API_VERSION', self::getRawValue('WHATSAPP_API_VERSION') ?? self::getRawValue('RS_WHATSAPP_API_VERSION') ?? 'v18.0');
 
         // Stripe
         self::setString('STRIPE_MODE', 'test');
@@ -89,13 +89,21 @@ final class Environment
         self::setString('STRIPE_LIVE_SECRET_KEY', '');
         self::setString('STRIPE_LIVE_WEBHOOK_SECRET', '');
 
-        // Social Platforms
+        // Social Platforms & Webhooks
         self::setString('FACEBOOK_APP_ID', '');
         self::setString('FACEBOOK_APP_SECRET', '');
         self::setString('FACEBOOK_REDIRECT_URI', 'http://localhost/sys-yii3/settings/facebook/callback');
+        self::setString('FACEBOOK_VERIFY_TOKEN', self::getRawValue('FACEBOOK_VERIFY_TOKEN') ?? self::getRawValue('RS_FACEBOOK_VERIFY_TOKEN') ?? '');
         self::setString('GOOGLE_CLIENT_ID', '');
         self::setString('GOOGLE_CLIENT_SECRET', '');
         self::setString('GOOGLE_REDIRECT_URI', 'http://localhost/sys-yii3/settings/google/callback');
+
+        // QR Code Custom Landing & Development Safe Host
+        self::setString('QR_CODE_GENERATION_BASE_URL', self::getRawValue('QR_CODE_GENERATION_BASE_URL') ?? self::getRawValue('RS_QR_CODE_GENERATION_BASE_URL') ?? '');
+        self::setString('LOCAL_QR_SAFE_HOST', self::getRawValue('LOCAL_QR_SAFE_HOST') ?? self::getRawValue('RS_LOCAL_QR_SAFE_HOST') ?? 'sys.test');
+
+        // WYSIWYG / TinyMCE
+        self::setString('TINYMCE_LICENSE_KEY', self::getRawValue('TINYMCE_LICENSE_KEY') ?? 'gpl');
 
         // Security / Cookies
         self::setBoolean('SESSION_COOKIE_SECURE', false);
@@ -346,7 +354,32 @@ final class Environment
 
     public static function whatsappApiVersion(): string
     {
-        return (string) (self::$values['WHATSAPP_API_VERSION'] ?? 'v17.0');
+        return (string) (self::$values['WHATSAPP_API_VERSION'] ?? 'v18.0');
+    }
+
+    // Facebook / Social Webhooks
+    public static function facebookVerifyToken(): string
+    {
+        return (string) (self::$values['FACEBOOK_VERIFY_TOKEN'] ?? '');
+    }
+
+    // QR Code
+    public static function qrCodeGenerationBaseUrl(): ?string
+    {
+        $val = trim((string) (self::$values['QR_CODE_GENERATION_BASE_URL'] ?? ''));
+        return $val !== '' ? $val : null;
+    }
+
+    public static function localQrSafeHost(): string
+    {
+        $val = trim((string) (self::$values['LOCAL_QR_SAFE_HOST'] ?? ''));
+        return $val !== '' ? $val : 'sys.test';
+    }
+
+    // WYSIWYG Editor
+    public static function tinymceLicenseKey(): string
+    {
+        return (string) (self::$values['TINYMCE_LICENSE_KEY'] ?? 'gpl');
     }
 
     // Helper to get raw value

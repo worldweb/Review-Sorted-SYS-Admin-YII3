@@ -17,7 +17,7 @@ final class MetaWhatsAppClient implements MetaWhatsAppClientInterface
     public function __construct(
         private string $token = '',
         private string $phoneNumberId = '',
-        private string $apiVersion = 'v17.0',
+        private string $apiVersion = 'v18.0',
         private bool $enabled = false,
         private ?LoggerInterface $logger = null,
     ) {
