@@ -60,4 +60,62 @@ interface SubscriptionRepositoryInterface
      * @return array<int, AccountInvoice>
      */
     public function findInvoicesForAccount(int $accountId, int $limit = 20): array;
+
+    /**
+     * Find active paid subscription for a user.
+     */
+    public function findActiveSubscriptionByUserId(int $userId): ?Subscription;
+
+    /**
+     * Find subscription by Stripe subscription ID.
+     */
+    public function findSubscriptionByStripeId(string $stripeSubscriptionId): ?Subscription;
+
+    /**
+     * Find latest subscription for a user regardless of status.
+     */
+    public function findLatestSubscriptionByUserId(int $userId): ?Subscription;
+
+    /**
+     * Insert a new subscription record.
+     *
+     * @param array<string, mixed> $data
+     */
+    public function insertSubscription(array $data): int;
+
+    /**
+     * Update an existing subscription record.
+     *
+     * @param array<string, mixed> $data
+     */
+    public function updateSubscription(int $id, array $data): bool;
+
+    /**
+     * Mark subscription canceled or set expire_at.
+     */
+    public function cancelSubscription(int $id, ?string $expireAt = null): bool;
+
+    /**
+     * Idempotently sync a Stripe invoice into account_invoice table.
+     *
+     * @param array<string, mixed> $data
+     */
+    public function syncAccountInvoice(array $data, ?int $accountId = null, ?int $userId = null): bool;
+
+    /**
+     * Find invoice by Stripe invoice ID.
+     */
+    public function findInvoiceByStripeInvoiceId(string $stripeInvoiceId): ?AccountInvoice;
+
+    /**
+     * Find plan by exact price amount.
+     */
+    public function findPlanByPrice(float $price): ?Plan;
+
+    /**
+     * Find all distinct user IDs that have subscriptions.
+     *
+     * @return array<int>
+     */
+    public function findDistinctSubscribedUserIds(): array;
 }

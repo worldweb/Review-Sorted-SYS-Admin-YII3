@@ -30,6 +30,7 @@ $eyeOffIcon = '<svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 
         justify-content: center;
         padding: 60px 20px;
         font-family: var(--rs-font-family, inherit);
+        overflow-y: visible;
     }
     .new-client-container {
         max-width: 768px;

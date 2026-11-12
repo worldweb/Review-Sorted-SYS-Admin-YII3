@@ -80,8 +80,9 @@ final class ClientRegistrationAction
                 }
             }
 
-            if ($password === '' || strlen($password) < 6) {
-                $errors['password'] = 'Password must be at least 6 characters.';
+            $minPasswordLen = $this->settingRepo->getInt('security_password_min_length', 6);
+            if ($password === '' || strlen($password) < $minPasswordLen) {
+                $errors['password'] = sprintf('Password must be at least %d characters.', $minPasswordLen);
             }
             if ($password !== $passwordConf) {
                 $errors['password_conf'] = 'Passwords don\'t match.';

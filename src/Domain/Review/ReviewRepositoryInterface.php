@@ -96,4 +96,44 @@ interface ReviewRepositoryInterface
      * @return Review[]
      */
     public function findReviewsByIds(array $ids, ?TenantContextInterface $context = null): array;
+
+    /**
+     * Finds a review by its external platform object ID (Google reviewId or Facebook open_graph_story.id).
+     */
+    public function findReviewByObjectId(string $objId): ?Review;
+
+    /**
+     * Finds a review by customer details for Google duplicate fallback.
+     */
+    public function findReviewByCustomerDetails(string $customerName, string $reviewDate, string $reviewText, ?int $serviceConfigId = null): ?Review;
+
+    /**
+     * Safely upserts a review record with deduplication and change detection.
+     *
+     * @param array<string, mixed> $data
+     * @return array{review_id: int, action: string, changed: bool}
+     */
+    public function upsertReview(array $data): array;
+
+    /**
+     * Idempotently imports or updates an external review reply comment (e.g. from Google or Facebook).
+     */
+    public function insertOrUpdateReviewReplyComment(
+        int $reviewId,
+        int $accountId,
+        int $serviceConfigId,
+        string $objId,
+        ?string $customerId,
+        ?string $customerName,
+        string $replyText,
+        string $replyDate,
+        ?string $replyExtra = null
+    ): ?int;
+
+    /**
+     * Retrieves all existing review object IDs for a given service config ID.
+     *
+     * @return string[]
+     */
+    public function findExistingObjectIdsForConfig(int $serviceConfigId): array;
 }

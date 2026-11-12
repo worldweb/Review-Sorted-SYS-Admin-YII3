@@ -22,6 +22,22 @@ return [
             Route::methods(['GET', 'POST'], '/new-client')
                 ->action(Web\Registration\ClientRegistrationAction::class)
                 ->name('new_client'),
+            Route::methods(['GET', 'POST'], '/forgot-password')
+                ->action(Web\Auth\ForgotPasswordAction::class)
+                ->name('forgot_password'),
+            Route::methods(['GET', 'POST'], '/reset-password')
+                ->action(Web\Auth\ResetPasswordAction::class)
+                ->name('reset_password'),
+            // Legacy Yii2 route aliases
+            Route::methods(['GET', 'POST'], '/site/forgot-password')
+                ->action(Web\Auth\ForgotPasswordAction::class)
+                ->name('site_forgot_password'),
+            Route::methods(['GET', 'POST'], '/site/request-password-reset')
+                ->action(Web\Auth\ForgotPasswordAction::class)
+                ->name('site_request_password_reset'),
+            Route::methods(['GET', 'POST'], '/site/reset-password')
+                ->action(Web\Auth\ResetPasswordAction::class)
+                ->name('site_reset_password'),
 
             // User Management Routes
             Route::get('/users')
@@ -97,6 +113,9 @@ return [
             Route::methods(['GET', 'POST'], '/reviews/export')
                 ->action(Web\Review\ReviewExportAction::class)
                 ->name('reviews_export'),
+            Route::methods(['GET', 'POST'], '/reviews/sync')
+                ->action(Web\Review\ReviewSyncAction::class)
+                ->name('reviews_sync'),
 
             // QR Code Studio Routes
             Route::get('/qrcode/index')
@@ -389,6 +408,12 @@ return [
             Route::methods(['GET', 'POST'], '/stripe-webhook/index')
                 ->action(Web\Subscription\Action\StripeWebhookAction::class)
                 ->name('stripe_webhook_index'),
+            Route::methods(['GET', 'POST'], '/webhook/stripe/handle-stripe-event')
+                ->action(Web\Subscription\Action\StripeWebhookAction::class)
+                ->name('legacy_stripe_webhook_handle'),
+            Route::methods(['GET', 'POST'], '/webhook/stripe')
+                ->action(Web\Subscription\Action\StripeWebhookAction::class)
+                ->name('legacy_stripe_webhook_index'),
 
             // Global Platform Settings Routes
             Route::methods(['GET', 'POST'], '/global-settings')
@@ -408,6 +433,9 @@ return [
             Route::methods(['GET', 'POST'], '/hooks/messages')
                 ->action(Web\Hooks\Action\HooksMessagesAction::class)
                 ->name('hooks_messages'),
+            Route::methods(['GET', 'POST'], '/hooks/instagram')
+                ->action(Web\Hooks\Action\HooksMessagesAction::class)
+                ->name('hooks_instagram'),
 
             // Notifications
             Route::get('/notification/latest')

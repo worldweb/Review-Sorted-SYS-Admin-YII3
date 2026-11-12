@@ -51,6 +51,11 @@ final class LoginAction
         $allowReg = $this->settingRepo->getBool('app_allow_client_self_registration', true);
         $csrfTokenValue = $this->csrfToken?->getValue();
 
+        $queryParams = $request->getQueryParams();
+        $successMessage = isset($queryParams['reset']) && $queryParams['reset'] === '1'
+            ? 'Your password has been reset successfully. Please sign in with your new password.'
+            : null;
+
         if ($request->getMethod() === 'POST') {
             $parsedBody = $request->getParsedBody();
             $data = is_array($parsedBody) ? $parsedBody : [];
@@ -90,6 +95,7 @@ final class LoginAction
                     'email' => $form->getEmail(),
                     'rememberMe' => $form->isRememberMe(),
                     'error' => $form->getFirstError() ?? 'Incorrect email or password.',
+                    'success' => null,
                     'allowRegistration' => $allowReg,
                     'csrfToken' => $csrfTokenValue,
                 ]);
@@ -104,6 +110,7 @@ final class LoginAction
                 'email' => '',
                 'rememberMe' => true,
                 'error' => null,
+                'success' => $successMessage,
                 'allowRegistration' => $allowReg,
                 'csrfToken' => $csrfTokenValue,
             ]);

@@ -554,4 +554,217 @@ final class ReviewRepository implements ReviewRepositoryInterface
 
         return $reviews;
     }
+
+    public function findReviewByObjectId(string $objId): ?Review
+    {
+        $row = (new Query($this->db))
+            ->select(['r.*'])
+            ->from(['r' => '{{%review}}'])
+            ->where(['r.obj_id' => $objId])
+            ->one();
+
+        return ($row !== false && $row !== null) ? Review::fromDatabaseRow($row) : null;
+    }
+
+    public function findReviewByCustomerDetails(string $customerName, string $reviewDate, string $reviewText, ?int $serviceConfigId = null): ?Review
+    {
+        $query = (new Query($this->db))
+            ->select(['r.*'])
+            ->from(['r' => '{{%review}}'])
+            ->where([
+                'r.customer_name' => $customerName,
+                'r.review_date' => $reviewDate,
+                'r.review_text' => $reviewText,
+            ]);
+
+        if ($serviceConfigId !== null) {
+            $query->andWhere(['r.service_config_id' => $serviceConfigId]);
+        }
+
+        $row = $query->one();
+        return ($row !== false && $row !== null) ? Review::fromDatabaseRow($row) : null;
+    }
+
+    public function upsertReview(array $data): array
+    {
+        $objId = trim((string) ($data['obj_id'] ?? ''));
+        if ($objId === '') {
+            return ['review_id' => 0, 'action' => 'failed', 'changed' => false];
+        }
+
+        $lockKey = 'sys_rev_upsert_' . md5($objId);
+        $this->db->createCommand('SELECT GET_LOCK(:name, 10)', [':name' => $lockKey])->execute();
+
+        try {
+            $existing = $this->findReviewByObjectId($objId);
+
+            // Google fallback check matching legacy Yii 2
+            $isGoogle = !empty($data['is_google']);
+            if ($existing === null && $isGoogle) {
+                $existing = $this->findReviewByCustomerDetails(
+                    (string) ($data['customer_name'] ?? ''),
+                    (string) ($data['review_date'] ?? ''),
+                    (string) ($data['review_text'] ?? ''),
+                    isset($data['service_config_id']) ? (int) $data['service_config_id'] : null
+                );
+            }
+
+            // Special case: Google User "A Google User" (GMBS)
+            if ($existing !== null && $isGoogle && ($data['customer_name'] ?? '') === 'A Google User') {
+                return ['review_id' => $existing->getId(), 'action' => 'unchanged', 'changed' => false];
+            }
+
+            $now = time();
+
+            if ($existing !== null) {
+                $rateMatches = (float) $existing->getReviewRate() === (float) ($data['review_rate'] ?? 0);
+                $textMatches = $existing->getReviewText() === (string) ($data['review_text'] ?? '');
+
+                if ($rateMatches && $textMatches) {
+                    return ['review_id' => $existing->getId(), 'action' => 'unchanged', 'changed' => false];
+                }
+
+                // Record changed: update existing review
+                $this->db->createCommand(
+                    'UPDATE {{%review}} SET `review_rate` = :rate, `review_text` = :text, `review_extra` = :extra, `review_recommend` = :recommend, `updated_at` = :upd WHERE `id` = :id'
+                )->bindValues([
+                    ':rate' => $data['review_rate'] ?? null,
+                    ':text' => $data['review_text'] ?? '',
+                    ':extra' => $data['review_extra'] ?? null,
+                    ':recommend' => $data['review_recommend'] ?? null,
+                    ':upd' => $now,
+                    ':id' => $existing->getId(),
+                ])->execute();
+
+                return ['review_id' => $existing->getId(), 'action' => 'updated', 'changed' => true];
+            }
+
+            // Insert new review record
+            $this->db->createCommand(
+                'INSERT INTO {{%review}} (' .
+                '`account_id`, `service_config_id`, `sub_service_id`, `obj_id`, `customer_id`, ' .
+                '`customer_name`, `customer_email`, `customer_phone`, `customer_state`, `customer_region`, ' .
+                '`review_rate`, `review_text`, `review_recommend`, `review_service`, `review_date`, ' .
+                '`review_extra`, `read`, `spam_score`, `spam_status`, `type`, `created_at`, `updated_at`' .
+                ') VALUES (' .
+                ':accountId, :serviceConfigId, :subServiceId, :objId, :customerId, ' .
+                ':customerName, :customerEmail, :customerPhone, :customerState, :customerRegion, ' .
+                ':reviewRate, :reviewText, :reviewRecommend, :reviewService, :reviewDate, ' .
+                ':reviewExtra, :read, :spamScore, :spamStatus, :type, :createdAt, :updatedAt' .
+                ')'
+            )->bindValues([
+                ':accountId' => isset($data['account_id']) ? (int) $data['account_id'] : null,
+                ':serviceConfigId' => (int) ($data['service_config_id'] ?? 0),
+                ':subServiceId' => isset($data['sub_service_id']) ? (int) $data['sub_service_id'] : null,
+                ':objId' => $objId,
+                ':customerId' => (string) ($data['customer_id'] ?? ''),
+                ':customerName' => (string) ($data['customer_name'] ?? 'Customer'),
+                ':customerEmail' => isset($data['customer_email']) ? (string) $data['customer_email'] : null,
+                ':customerPhone' => isset($data['customer_phone']) ? (string) $data['customer_phone'] : null,
+                ':customerState' => isset($data['customer_state']) ? (string) $data['customer_state'] : null,
+                ':customerRegion' => isset($data['customer_region']) ? (string) $data['customer_region'] : null,
+                ':reviewRate' => isset($data['review_rate']) ? (float) $data['review_rate'] : null,
+                ':reviewText' => (string) ($data['review_text'] ?? '-'),
+                ':reviewRecommend' => isset($data['review_recommend']) ? (string) $data['review_recommend'] : null,
+                ':reviewService' => isset($data['review_service']) ? (string) $data['review_service'] : 'Google',
+                ':reviewDate' => (string) ($data['review_date'] ?? date('Y-m-d H:i:s')),
+                ':reviewExtra' => isset($data['review_extra']) ? (string) $data['review_extra'] : null,
+                ':read' => isset($data['read']) ? (int) $data['read'] : Review::STATUS_NOT_READ,
+                ':spamScore' => isset($data['spam_score']) ? (int) $data['spam_score'] : 0,
+                ':spamStatus' => isset($data['spam_status']) ? (string) $data['spam_status'] : Review::SPAM_NORMAL,
+                ':type' => (string) ($data['type'] ?? Review::TYPE_REVIEW),
+                ':createdAt' => $now,
+                ':updatedAt' => $now,
+            ])->execute();
+
+            $newId = (int) $this->db->getLastInsertID();
+
+            return ['review_id' => $newId, 'action' => 'inserted', 'changed' => false];
+        } finally {
+            try {
+                $this->db->createCommand('SELECT RELEASE_LOCK(:name)', [':name' => $lockKey])->execute();
+            } catch (Throwable) {
+                // Ignore lock release error
+            }
+        }
+    }
+
+    public function insertOrUpdateReviewReplyComment(
+        int $reviewId,
+        int $accountId,
+        int $serviceConfigId,
+        string $objId,
+        ?string $customerId,
+        ?string $customerName,
+        string $replyText,
+        string $replyDate,
+        ?string $replyExtra = null
+    ): ?int {
+        $lockKey = 'sys_reply_upsert_' . md5($objId);
+        $this->db->createCommand('SELECT GET_LOCK(:name, 10)', [':name' => $lockKey])->execute();
+
+        try {
+            $now = time();
+            $row = (new Query($this->db))
+                ->select(['id'])
+                ->from('{{%review_reply}}')
+                ->where(['obj_id' => $objId])
+                ->one();
+
+            if ($row !== false && $row !== null) {
+                $replyId = (int) $row['id'];
+                $this->db->createCommand(
+                    'UPDATE {{%review_reply}} SET `reply_text` = :text, `reply_date` = :date, `reply_extra` = :extra, `updated_at` = :upd WHERE `id` = :id'
+                )->bindValues([
+                    ':text' => $replyText,
+                    ':date' => $replyDate,
+                    ':extra' => $replyExtra,
+                    ':upd' => $now,
+                    ':id' => $replyId,
+                ])->execute();
+
+                return $replyId;
+            }
+
+            $this->db->createCommand(
+                'INSERT INTO {{%review_reply}} (' .
+                '`account_id`, `review_id`, `service_config_id`, `obj_id`, `customer_id`, ' .
+                '`customer_name`, `reply_text`, `reply_date`, `reply_extra`, `created_at`, `updated_at`' .
+                ') VALUES (' .
+                ':accId, :revId, :scId, :objId, :custId, :custName, :text, :date, :extra, :created, :updated' .
+                ')'
+            )->bindValues([
+                ':accId' => $accountId,
+                ':revId' => $reviewId,
+                ':scId' => $serviceConfigId,
+                ':objId' => $objId,
+                ':custId' => $customerId,
+                ':custName' => $customerName,
+                ':text' => $replyText,
+                ':date' => $replyDate,
+                ':extra' => $replyExtra,
+                ':created' => $now,
+                ':updated' => $now,
+            ])->execute();
+
+            return (int) $this->db->getLastInsertID();
+        } finally {
+            try {
+                $this->db->createCommand('SELECT RELEASE_LOCK(:name)', [':name' => $lockKey])->execute();
+            } catch (Throwable) {
+                // Ignore lock release error
+            }
+        }
+    }
+
+    public function findExistingObjectIdsForConfig(int $serviceConfigId): array
+    {
+        $rows = (new Query($this->db))
+            ->select(['obj_id'])
+            ->from('{{%review}}')
+            ->where(['service_config_id' => $serviceConfigId])
+            ->column();
+
+        return array_map('strval', $rows);
+    }
 }

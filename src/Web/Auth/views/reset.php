@@ -13,6 +13,8 @@ use Yiisoft\Html\Html;
  * @var string|null $error
  * @var string|null $csrfToken
  * @var string|null $token
+ * @var string|null $email
+ * @var bool|null $isInvalidToken
  * @var Yiisoft\View\WebView $this
  */
 
@@ -32,31 +34,43 @@ $this->setTitle('Set New Password');
             <p class="rs-auth-subtitle">Create a new secure password for your account.</p>
         </div>
 
-        <form id="reset-password-form" method="post" action="<?= \App\Environment::url('/reset-password') ?>" class="rs-form">
-            <?php if (!empty($csrfToken)): ?>
-                <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
-            <?php endif; ?>
-            <?php if (!empty($token)): ?>
-                <input type="hidden" name="token" value="<?= Html::encode($token) ?>">
-            <?php endif; ?>
-
+        <?php if (!empty($isInvalidToken)): ?>
             <div class="rs-form-group rs-mb-4">
-                <label for="password" class="rs-label">New Password</label>
-                <input type="password" id="password" name="password" class="rs-input" required autofocus placeholder="••••••••">
+                <a href="<?= \App\Environment::url('/forgot-password') ?>" class="rs-btn rs-btn--primary rs-btn--block rs-btn--lg">Request New Reset Link</a>
             </div>
-
-            <div class="rs-form-group rs-mb-6">
-                <label for="password_conf" class="rs-label">Confirm New Password</label>
-                <input type="password" id="password_conf" name="password_conf" class="rs-input" required placeholder="••••••••">
-            </div>
-
-            <div class="rs-form-group rs-mb-4">
-                <button type="submit" class="rs-btn rs-btn--primary rs-btn--block rs-btn--lg">Update Password</button>
-            </div>
-
             <div class="rs-text-center rs-mt-4">
                 <a href="<?= \App\Environment::url('/login') ?>" class="rs-auth-link">Return to sign in</a>
             </div>
-        </form>
+        <?php else: ?>
+            <form id="reset-password-form" method="post" action="<?= \App\Environment::url('/reset-password') ?>" class="rs-form">
+                <?php if (!empty($csrfToken)): ?>
+                    <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
+                <?php endif; ?>
+                <?php if (!empty($token)): ?>
+                    <input type="hidden" name="token" value="<?= Html::encode($token) ?>">
+                <?php endif; ?>
+                <?php if (!empty($email)): ?>
+                    <input type="hidden" name="email" value="<?= Html::encode($email) ?>">
+                <?php endif; ?>
+
+                <div class="rs-form-group rs-mb-4">
+                    <label for="password" class="rs-label">New Password</label>
+                    <input type="password" id="password" name="password" class="rs-input" required autofocus placeholder="••••••••">
+                </div>
+
+                <div class="rs-form-group rs-mb-6">
+                    <label for="password_conf" class="rs-label">Confirm New Password</label>
+                    <input type="password" id="password_conf" name="password_conf" class="rs-input" required placeholder="••••••••">
+                </div>
+
+                <div class="rs-form-group rs-mb-4">
+                    <button type="submit" class="rs-btn rs-btn--primary rs-btn--block rs-btn--lg">Update Password</button>
+                </div>
+
+                <div class="rs-text-center rs-mt-4">
+                    <a href="<?= \App\Environment::url('/login') ?>" class="rs-auth-link">Return to sign in</a>
+                </div>
+            </form>
+        <?php endif; ?>
     </div>
 </div>

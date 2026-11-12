@@ -13,6 +13,7 @@ use Yiisoft\Html\Html;
  * @var string $email
  * @var bool $rememberMe
  * @var string|null $error
+ * @var string|null $success
  * @var bool $allowRegistration
  * @var string|null $csrfToken
  * @var Yiisoft\View\WebView $this
@@ -28,6 +29,12 @@ $eyeOffIcon = '<svg id="icon-eye-off" width="18" height="18" viewBox="0 0 24 24"
         <?php if (!empty($error)): ?>
             <div class="rs-alert rs-alert--danger" role="alert">
                 <?= Html::encode($error) ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($success)): ?>
+            <div class="rs-alert rs-alert--success" role="alert">
+                <?= Html::encode($success) ?>
             </div>
         <?php endif; ?>
 

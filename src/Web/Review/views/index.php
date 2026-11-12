@@ -102,6 +102,13 @@ $renderStars = static function (?float $rawRate): string {
         <div class="rs-d-flex rs-align-items-center rs-justify-content-between rs-w-100 rs-mb-2">
             <h1 class="rs-page-title rs-m-0">Reviews & Mentions</h1>
             <div class="rs-page-header__actions rs-d-flex rs-align-items-center rs-gap-3">
+                <?php if ($currentUser->isAdmin() || $currentUser->isAccountAdmin()): ?>
+                    <button type="button" id="btn-sync-reviews" class="rs-btn rs-btn--outline" onclick="triggerReviewSync();" title="Sync Reviews from Google & Facebook">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rs-mr-1" style="vertical-align: -2px;"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                        <span id="sync-btn-text">Sync Reviews</span>
+                        <span id="sync-btn-spinner" style="display:none;">Syncing...</span>
+                    </button>
+                <?php endif; ?>
                 <?php if ($isGoogleOrFacebookChannel): ?>
                     <button type="button" class="rs-btn rs-btn--primary btn-reply-all" onclick="submitBulkReply();">
                         Bulk Reply
@@ -374,7 +381,66 @@ $renderStars = static function (?float $rawRate): string {
 
 <script>
 window.reviewReplyAllUrl = <?= json_encode(\App\Environment::url('/reviews/reply-all')) ?>;
+window.reviewSyncUrl = <?= json_encode(\App\Environment::url('/reviews/sync')) ?>;
+window.reviewSyncCsrf = <?= json_encode($effectiveCsrf) ?>;
 window.rquery = '<?= Html::encode($query64 ?? '') ?>';
+
+function triggerReviewSync() {
+    const btn = document.getElementById('btn-sync-reviews');
+    const textSpan = document.getElementById('sync-btn-text');
+    const spinnerSpan = document.getElementById('sync-btn-spinner');
+
+    if (!btn || btn.disabled) {
+        return;
+    }
+
+    if (!confirm('Fetch latest reviews from connected Google and Facebook accounts now?')) {
+        return;
+    }
+
+    btn.disabled = true;
+    if (textSpan) textSpan.style.display = 'none';
+    if (spinnerSpan) spinnerSpan.style.display = 'inline';
+
+    const formData = new FormData();
+    if (window.reviewSyncCsrf) {
+        formData.append('_csrf', window.reviewSyncCsrf);
+    }
+
+    const channelSelect = document.querySelector('select[name="service_config"]');
+    if (channelSelect && channelSelect.value) {
+        formData.append('channel_id', channelSelect.value);
+    }
+
+    fetch(window.reviewSyncUrl, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(function (response) {
+        return response.json();
+    })
+    .then(function (data) {
+        if (data.success) {
+            alert(data.message || 'Reviews synced successfully.');
+            window.location.reload();
+        } else {
+            alert(data.error || data.message || 'Review synchronization failed.');
+            btn.disabled = false;
+            if (textSpan) textSpan.style.display = 'inline';
+            if (spinnerSpan) spinnerSpan.style.display = 'none';
+        }
+    })
+    .catch(function (err) {
+        console.error('Review sync request failed:', err);
+        alert('An unexpected error occurred while synchronizing reviews. Please check system logs.');
+        btn.disabled = false;
+        if (textSpan) textSpan.style.display = 'inline';
+        if (spinnerSpan) spinnerSpan.style.display = 'none';
+    });
+}
 
 function submitBulkReply() {
     const checked = Array.from(document.querySelectorAll('.review-checkbox:checked'));

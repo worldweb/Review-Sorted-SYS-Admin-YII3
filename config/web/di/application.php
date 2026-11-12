@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Security\Middleware\AppCsrfMiddleware;
 use App\Security\Middleware\AuthenticationMiddleware;
 use App\Web\NotFound\NotFoundHandler;
 use Yiisoft\Csrf\CsrfTokenMiddleware;
@@ -29,7 +30,7 @@ return [
                     [
                         ErrorCatcher::class,
                         SessionMiddleware::class,
-                        CsrfTokenMiddleware::class,
+                        AppCsrfMiddleware::class,
                         RequestCatcherMiddleware::class,
                         AuthenticationMiddleware::class,
                         Router::class,

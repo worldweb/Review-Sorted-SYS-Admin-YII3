@@ -94,4 +94,64 @@ final class UserAuthenticationRepository implements UserAuthenticationRepository
 
         return UserAuthIdentity::fromDatabaseRow($row, $row['role'] ?? null);
     }
+
+    public function findAuthIdentityByResetToken(string $token): ?UserAuthIdentity
+    {
+        $cleanToken = trim($token);
+        if ($cleanToken === '') {
+            return null;
+        }
+
+        $row = (new Query($this->db))
+            ->select(self::AUTH_COLUMNS)
+            ->from(['u' => '{{%user}}'])
+            ->leftJoin(['aa' => '{{%auth_assignment}}'], 'CAST(aa.user_id AS UNSIGNED) = u.id')
+            ->where(['u.password_reset_token' => $cleanToken, 'u.status' => UserAuthIdentity::STATUS_ACTIVE])
+            ->groupBy(['u.id', 'aa.item_name'])
+            ->one();
+
+        if ($row === null || $row === false) {
+            return null;
+        }
+
+        return UserAuthIdentity::fromDatabaseRow($row, $row['role'] ?? null);
+    }
+
+    public function setPasswordResetToken(int $userId, ?string $token): bool
+    {
+        if ($userId <= 0) {
+            return false;
+        }
+
+        $affected = $this->db->createCommand(
+            'UPDATE {{%user}} SET password_reset_token = :token, updated_at = :updated_at WHERE id = :id',
+            [
+                ':token' => $token,
+                ':updated_at' => time(),
+                ':id' => $userId,
+            ]
+        )->execute();
+
+        return $affected >= 0;
+    }
+
+    public function resetPassword(int $userId, string $newPasswordHash): bool
+    {
+        if ($userId <= 0 || $newPasswordHash === '') {
+            return false;
+        }
+
+        $newAuthKey = bin2hex(random_bytes(16));
+        $affected = $this->db->createCommand(
+            'UPDATE {{%user}} SET password_hash = :hash, password_reset_token = NULL, auth_key = :auth_key, updated_at = :updated_at WHERE id = :id',
+            [
+                ':hash' => $newPasswordHash,
+                ':auth_key' => $newAuthKey,
+                ':updated_at' => time(),
+                ':id' => $userId,
+            ]
+        )->execute();
+
+        return $affected > 0;
+    }
 }

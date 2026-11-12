@@ -3,11 +3,22 @@
    ========================================================================== */
 
 html,
-body.rs-layout-app {
-    height: 100%;
+body {
     margin: 0;
     padding: 0;
+}
+
+html:has(body.rs-layout-app),
+body.rs-layout-app {
+    height: 100%;
     overflow: hidden;
+}
+
+body.rs-layout-guest {
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .rs-layout-app {

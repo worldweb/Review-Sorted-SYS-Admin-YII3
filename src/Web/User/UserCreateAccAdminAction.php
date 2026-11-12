@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Web\User;
 
 use App\Domain\Account\AccountRepositoryInterface;
+use App\Domain\Setting\SettingRepositoryInterface;
 use App\Domain\User\User;
 use App\Domain\User\UserRepositoryInterface;
 use App\Domain\User\UserSaveData;
@@ -30,6 +31,7 @@ final class UserCreateAccAdminAction
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
         private ?CsrfTokenInterface $csrfToken = null,
+        private ?SettingRepositoryInterface $settingRepo = null,
     ) {
     }
 
@@ -76,8 +78,9 @@ final class UserCreateAccAdminAction
             if ($saveData->accountId === null || $saveData->accountId <= 0) {
                 $errors['account_id'] = 'Account cannot be blank.';
             }
-            if ($saveData->password === null || strlen($saveData->password) < 6) {
-                $errors['password'] = 'Password should contain at least 6 characters.';
+            $minPasswordLen = $this->settingRepo?->getInt('security_password_min_length', 6) ?? 6;
+            if ($saveData->password === null || strlen($saveData->password) < $minPasswordLen) {
+                $errors['password'] = sprintf('Password should contain at least %d characters.', $minPasswordLen);
             }
             if ($saveData->password !== $saveData->passwordConfirm) {
                 $errors['password_conf'] = 'Passwords don\'t match.';

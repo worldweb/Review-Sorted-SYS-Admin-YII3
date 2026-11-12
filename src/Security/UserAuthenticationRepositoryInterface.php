@@ -24,4 +24,19 @@ interface UserAuthenticationRepositoryInterface
      * Look up an authentication identity by authentication / remember-me key.
      */
     public function findAuthIdentityByAuthKey(string $authKey): ?UserAuthIdentity;
+
+    /**
+     * Look up an active authentication identity by password reset token.
+     */
+    public function findAuthIdentityByResetToken(string $token): ?UserAuthIdentity;
+
+    /**
+     * Set or clear a password reset token for a user.
+     */
+    public function setPasswordResetToken(int $userId, ?string $token): bool;
+
+    /**
+     * Securely update user password hash, invalidate reset token, and regenerate auth key.
+     */
+    public function resetPassword(int $userId, string $newPasswordHash): bool;
 }

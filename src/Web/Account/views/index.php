@@ -437,6 +437,17 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                     </select>
                 </div>
 
+                <!-- Stripe Card Element -->
+                <div class="rs-mb-3">
+                    <label class="rs-label rs-text-xs rs-font-bold rs-mb-1" for="card-element">
+                        Credit or Debit Card <span class="rs-text-danger">*</span>
+                    </label>
+                    <div id="card-element" class="rs-input rs-w-100" style="padding: 10px 12px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <!-- Stripe.js injects the Card Element here -->
+                    </div>
+                    <div id="card-errors" class="rs-text-xs rs-text-danger rs-mt-1" role="alert" style="display: none;"></div>
+                </div>
+
                 <!-- Terms and Conditions Checkbox -->
                 <div class="rs-d-flex rs-align-items-start rs-gap-2 rs-mb-2">
                     <input type="checkbox" id="rs-terms-agree" style="margin-top: 0.25rem;" checked required>
@@ -458,10 +469,56 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
     </div>
 </div>
 
+<script src="https://js.stripe.com/v3/"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const csrfToken = <?= json_encode($csrfToken ?? '') ?>;
     const subscribeUrl = <?= json_encode(\App\Environment::url('/accounts/subscribe')) ?>;
+    const stripePublicKey = <?= json_encode(\App\Environment::stripePublicKey()) ?>;
+
+    // Initialize Stripe.js and Card Element if public key is available
+    let stripe = null;
+    let cardElement = null;
+
+    if (stripePublicKey && typeof Stripe !== 'undefined') {
+        try {
+            stripe = Stripe(stripePublicKey);
+            const elements = stripe.elements();
+            cardElement = elements.create('card', {
+                hidePostalCode: true,
+                style: {
+                    base: {
+                        color: '#1e293b',
+                        fontFamily: 'Lato, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                        fontSize: '15px',
+                        '::placeholder': {
+                            color: '#94a3b8',
+                        },
+                    },
+                    invalid: {
+                        color: '#ef4444',
+                        iconColor: '#ef4444',
+                    },
+                },
+            });
+            cardElement.mount('#card-element');
+
+            cardElement.on('change', function (event) {
+                const cardErrors = document.getElementById('card-errors');
+                if (cardErrors) {
+                    if (event.error) {
+                        cardErrors.textContent = event.error.message;
+                        cardErrors.style.display = 'block';
+                    } else {
+                        cardErrors.textContent = '';
+                        cardErrors.style.display = 'none';
+                    }
+                }
+            });
+        } catch (err) {
+            console.error('Failed to initialize Stripe Elements:', err);
+        }
+    }
 
     // 1. Upgrade / Change Plan Modal Logic
     const changeModal = document.getElementById('rs-change-plan-modal');
@@ -605,6 +662,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function resetSubButton() {
+        const spinnerText = document.getElementById('rs-submit-btn-spinner');
+        const btnText = document.getElementById('rs-submit-btn-text');
+        if (subModalSubmitBtn) subModalSubmitBtn.disabled = false;
+        if (spinnerText) spinnerText.style.display = 'none';
+        if (btnText) btnText.style.display = 'inline';
+    }
+
     if (subModalCloseBtn) subModalCloseBtn.addEventListener('click', closeSubModal);
     if (subModalCancelBtn) subModalCancelBtn.addEventListener('click', closeSubModal);
 
@@ -655,6 +720,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            const lnameInput = document.getElementById('rs-cust-lname');
+            const countryInput = document.getElementById('rs-cust-country');
+
             const emailInput = document.getElementById('rs-cust-email');
             if (!emailInput || emailInput.value.trim() === '') {
                 showSubAlert('Please provide your billing email.');
@@ -667,6 +735,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            if (!stripe || !cardElement) {
+                showSubAlert('Stripe payment processor is not initialized or public key is missing. Please contact support.');
+                return;
+            }
+
             const spinnerText = document.getElementById('rs-submit-btn-spinner');
             const btnText = document.getElementById('rs-submit-btn-text');
             if (subModalSubmitBtn) subModalSubmitBtn.disabled = true;
@@ -674,11 +747,14 @@ document.addEventListener('DOMContentLoaded', function () {
             if (btnText) btnText.style.display = 'none';
 
             try {
+                // Step 1: Initialize Customer & Subscription on Backend
                 const formData = new FormData();
                 if (csrfToken) formData.append('_csrf', csrfToken);
                 formData.append('request_type', 'create_customer_subscription');
                 formData.append('plan_id', planId);
                 formData.append('customer_fname', fnameInput.value.trim());
+                if (lnameInput) formData.append('customer_lname', lnameInput.value.trim());
+                if (countryInput) formData.append('customer_country', countryInput.value.trim());
                 formData.append('customer_email', emailInput.value.trim());
 
                 const response = await fetch(subscribeUrl, {
@@ -687,22 +763,66 @@ document.addEventListener('DOMContentLoaded', function () {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
 
-                const result = await response.json();
-                if (!response.ok || result.status !== true) {
-                    showSubAlert(result.error || 'Failed to complete subscription. Please try again.');
-                    if (subModalSubmitBtn) subModalSubmitBtn.disabled = false;
-                    if (spinnerText) spinnerText.style.display = 'none';
-                    if (btnText) btnText.style.display = 'inline';
+                const initResult = await response.json();
+                if (!response.ok || !initResult.subscriptionId || !initResult.clientSecret) {
+                    showSubAlert(initResult.error || 'Failed to initialize subscription. Please verify your details.');
+                    resetSubButton();
                     return;
                 }
 
-                alert(result.success || 'Subscribed successfully!');
+                // Step 2: Confirm Card Payment with Stripe.js using clientSecret
+                const billingName = (fnameInput.value.trim() + ' ' + (lnameInput ? lnameInput.value.trim() : '')).trim();
+                const confirmResult = await stripe.confirmCardPayment(initResult.clientSecret, {
+                    payment_method: {
+                        card: cardElement,
+                        billing_details: {
+                            name: billingName,
+                            email: emailInput.value.trim(),
+                        },
+                    },
+                });
+
+                if (confirmResult.error) {
+                    showSubAlert(confirmResult.error.message || 'Payment confirmation failed.');
+                    resetSubButton();
+                    return;
+                }
+
+                const paymentIntent = confirmResult.paymentIntent;
+                if (!paymentIntent || paymentIntent.status !== 'succeeded') {
+                    showSubAlert('Payment status is not confirmed (Status: ' + (paymentIntent ? paymentIntent.status : 'unknown') + ').');
+                    resetSubButton();
+                    return;
+                }
+
+                // Step 3: Complete Subscription Recording on Backend (FLOW 3 - payment_insert)
+                // Backend will independently retrieve and verify PaymentIntent from Stripe API before granting entitlements.
+                const insertData = new FormData();
+                if (csrfToken) insertData.append('_csrf', csrfToken);
+                insertData.append('request_type', 'payment_insert');
+                insertData.append('payment_intent_id', paymentIntent.id);
+                insertData.append('subscription_id', initResult.subscriptionId);
+                insertData.append('customer_id', initResult.customerId);
+                insertData.append('plan_id', planId);
+
+                const insertResponse = await fetch(subscribeUrl, {
+                    method: 'POST',
+                    body: insertData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                const insertResult = await insertResponse.json();
+                if (!insertResponse.ok || insertResult.status !== true) {
+                    showSubAlert(insertResult.error || 'Payment was processed by Stripe, but recording failed. Please contact support.');
+                    resetSubButton();
+                    return;
+                }
+
+                alert(insertResult.success || 'Subscription created successfully!');
                 window.location.reload();
             } catch (err) {
                 showSubAlert('An unexpected network error occurred. Please try again.');
-                if (subModalSubmitBtn) subModalSubmitBtn.disabled = false;
-                if (spinnerText) spinnerText.style.display = 'none';
-                if (btnText) btnText.style.display = 'inline';
+                resetSubButton();
             }
         });
     }

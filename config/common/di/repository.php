@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Domain\Account\AccountRepository;
 use App\Domain\Account\AccountRepositoryInterface;
+use App\Domain\Chat\ChatRepository;
+use App\Domain\Chat\ChatRepositoryInterface;
 use App\Domain\Email\EmailRepository;
 use App\Domain\Email\EmailRepositoryInterface;
 use App\Domain\LocationGroup\LocationGroupRepository;
@@ -20,6 +22,8 @@ use App\Domain\SocialConnection\SocialConnectionRepository;
 use App\Domain\SocialConnection\SocialConnectionRepositoryInterface;
 use App\Domain\SocialPost\SocialPostRepository;
 use App\Domain\SocialPost\SocialPostRepositoryInterface;
+use App\Domain\Subscription\Provider\StripeClient;
+use App\Domain\Subscription\Provider\StripeClientInterface;
 use App\Domain\Subscription\SubscriptionRepository;
 use App\Domain\Subscription\SubscriptionRepositoryInterface;
 use App\Domain\User\UserRepository;
@@ -41,6 +45,7 @@ return [
 
     // Core Domain Repositories
     AccountRepositoryInterface::class => AccountRepository::class,
+    ChatRepositoryInterface::class => ChatRepository::class,
     LocationGroupRepositoryInterface::class => LocationGroupRepository::class,
     EmailRepositoryInterface::class => EmailRepository::class,
     WhatsAppRepositoryInterface::class => WhatsAppRepository::class,
@@ -52,6 +57,7 @@ return [
     SocialConnectionRepositoryInterface::class => SocialConnectionRepository::class,
     SocialPostRepositoryInterface::class => SocialPostRepository::class,
     SubscriptionRepositoryInterface::class => SubscriptionRepository::class,
+    StripeClientInterface::class => StripeClient::class,
 
     // Authentication Credential Repository (isolated from domain DTOs)
     UserAuthenticationRepositoryInterface::class => UserAuthenticationRepository::class,
@@ -73,6 +79,14 @@ return [
     \App\Domain\Review\Channel\FacebookReplyClientInterface::class => \App\Domain\Review\Channel\FacebookReplyClient::class,
     \App\Domain\Review\ChannelReplyDispatcherInterface::class => \App\Domain\Review\ChannelReplyDispatcher::class,
     \Yiisoft\Session\Flash\FlashInterface::class => \Yiisoft\Session\Flash\Flash::class,
+
+    // Review Synchronization Clients and Services
+    \App\Domain\Review\Sync\GoogleReviewSyncClientInterface::class => \App\Domain\Review\Sync\GoogleReviewSyncClient::class,
+    \App\Domain\Review\Sync\GoogleReviewSyncClient::class => \App\Domain\Review\Sync\GoogleReviewSyncClient::class,
+    \App\Domain\Review\Sync\FacebookReviewSyncClientInterface::class => \App\Domain\Review\Sync\FacebookReviewSyncClient::class,
+    \App\Domain\Review\Sync\FacebookReviewSyncClient::class => \App\Domain\Review\Sync\FacebookReviewSyncClient::class,
+    \App\Domain\Review\Sync\ReviewSyncServiceInterface::class => \App\Domain\Review\Sync\ReviewSyncService::class,
+    \App\Domain\Review\Sync\ReviewSyncService::class => \App\Domain\Review\Sync\ReviewSyncService::class,
 
     // QR Code Generation and Image Processing Services
     \App\Domain\QrCode\Service\QrImageProcessorInterface::class => \App\Domain\QrCode\Service\QrImageProcessor::class,

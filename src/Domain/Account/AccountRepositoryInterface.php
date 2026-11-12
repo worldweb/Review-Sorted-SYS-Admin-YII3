@@ -71,6 +71,11 @@ interface AccountRepositoryInterface
     public function updateAccount(int $id, AccountSaveData $data): bool;
 
     /**
+     * Update account subscription entitlements and feature toggles.
+     */
+    public function updateSubscriptionEntitlements(int $accountId, float|int|string $subscriptionAmount, bool $active = true): bool;
+
+    /**
      * Delete an existing tenant account record.
      * (Prepared for write environment; guarded in read-only environment).
      */

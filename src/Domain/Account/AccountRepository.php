@@ -332,6 +332,28 @@ final class AccountRepository implements AccountRepositoryInterface
         return $affected >= 0;
     }
 
+    public function updateSubscriptionEntitlements(int $accountId, float|int|string $subscriptionAmount, bool $active = true): bool
+    {
+        $now = time();
+        if ($active) {
+            $sql = 'UPDATE {{%account}} SET subscription = :sub, social_media = 1, email_sender = 1, qr_code = 1, updated_at = :upd WHERE id = :id';
+            $params = [
+                ':sub' => (string) $subscriptionAmount,
+                ':upd' => $now,
+                ':id' => $accountId,
+            ];
+        } else {
+            $sql = 'UPDATE {{%account}} SET subscription = 0, social_media = 0, email_sender = 0, qr_code = 0, updated_at = :upd WHERE id = :id';
+            $params = [
+                ':upd' => $now,
+                ':id' => $accountId,
+            ];
+        }
+
+        $affected = $this->db->createCommand($sql, $params)->execute();
+        return $affected >= 0;
+    }
+
     public function deleteAccount(int $id): bool
     {
         $affected = $this->db->createCommand()->delete(

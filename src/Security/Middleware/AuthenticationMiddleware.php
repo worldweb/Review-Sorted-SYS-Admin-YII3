@@ -33,8 +33,15 @@ final class AuthenticationMiddleware implements MiddlewareInterface
         '/login',
         '/forgot-password',
         '/reset-password',
+        '/site/forgot-password',
+        '/site/request-password-reset',
+        '/site/reset-password',
         '/new-client',
         '/qrcode/scan',
+        '/hooks/messages',
+        '/hooks/instagram',
+        '/stripe-webhook',
+        '/webhook/stripe',
     ];
 
     public function __construct(
@@ -159,12 +166,12 @@ final class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         foreach (self::PUBLIC_PATHS as $publicPath) {
-            if ($path === $publicPath || rtrim($path, '/') === $publicPath) {
+            if ($path === $publicPath || rtrim($path, '/') === $publicPath || str_starts_with($path, $publicPath . '/')) {
                 return true;
             }
             if ($base !== '') {
                 $basePublic = $base . '/' . ltrim($publicPath, '/');
-                if ($path === $basePublic || rtrim($path, '/') === $basePublic) {
+                if ($path === $basePublic || rtrim($path, '/') === $basePublic || str_starts_with($path, $basePublic . '/')) {
                     return true;
                 }
             }
