@@ -185,4 +185,107 @@ final class QrCodeRepository implements QrCodeRepositoryInterface
 
         return array_map(static fn (array $row) => QrCode::fromDatabaseRow($row), $rows);
     }
+
+    public function save(array $data, ?int $id = null, ?TenantContextInterface $context = null): int
+    {
+        $ctx = $context ?? $this->tenantContextProvider?->get();
+
+        if ($ctx !== null && $ctx->isGuest()) {
+            throw new \RuntimeException('Authentication required to save QR Code.');
+        }
+
+        $now = time();
+
+        if ($id !== null && $id > 0) {
+            $existing = $this->findById($id, $ctx);
+            if ($existing === null) {
+                throw new \RuntimeException('The requested QR Code does not exist or access is denied.');
+            }
+
+            $allowedFields = [
+                'name', 'upload_logo', 'logo_type', 'qrcode', 'url',
+                'template_name', 'default_logo_name', 'frame_name', 'total_scan', 'status'
+            ];
+
+            $updateSets = [];
+            $params = [':id' => $id, ':updated_at' => $now];
+
+            foreach ($allowedFields as $field) {
+                if (array_key_exists($field, $data)) {
+                    $paramKey = ':' . $field;
+                    $updateSets[] = "`$field` = $paramKey";
+                    $params[$paramKey] = $data[$field];
+                }
+            }
+
+            $updateSets[] = "`updated_at` = :updated_at";
+
+            $sql = 'UPDATE {{%qrcode}} SET ' . implode(', ', $updateSets) . ' WHERE `id` = :id';
+            $this->db->createCommand($sql)->bindValues($params)->execute();
+
+            return $id;
+        }
+
+        $userId = isset($data['user_id']) ? (string) $data['user_id'] : ($ctx ? (string) $ctx->getUserId() : '');
+        if ($userId === '') {
+            throw new \RuntimeException('User ID is required to create a QR Code.');
+        }
+
+        $insertParams = [
+            ':user_id' => $userId,
+            ':name' => isset($data['name']) ? (string) $data['name'] : null,
+            ':upload_logo' => isset($data['upload_logo']) && $data['upload_logo'] !== '' ? (string) $data['upload_logo'] : null,
+            ':logo_type' => isset($data['logo_type']) && $data['logo_type'] !== '' ? (string) $data['logo_type'] : 'default',
+            ':qrcode' => isset($data['qrcode']) && $data['qrcode'] !== '' ? (string) $data['qrcode'] : null,
+            ':url' => isset($data['url']) && $data['url'] !== '' ? (string) $data['url'] : null,
+            ':template_name' => isset($data['template_name']) && $data['template_name'] !== '' ? (string) $data['template_name'] : 'default',
+            ':default_logo_name' => isset($data['default_logo_name']) && $data['default_logo_name'] !== '' ? (string) $data['default_logo_name'] : null,
+            ':frame_name' => isset($data['frame_name']) && $data['frame_name'] !== '' ? (string) $data['frame_name'] : null,
+            ':total_scan' => isset($data['total_scan']) && $data['total_scan'] !== '' ? (string) $data['total_scan'] : '0',
+            ':status' => isset($data['status']) && $data['status'] !== '' ? (string) $data['status'] : QrCode::STATUS_ACTIVE,
+            ':created_at' => $now,
+            ':updated_at' => $now,
+        ];
+
+        $sql = 'INSERT INTO {{%qrcode}} (
+            `user_id`, `name`, `upload_logo`, `logo_type`, `qrcode`, `url`,
+            `template_name`, `default_logo_name`, `frame_name`, `total_scan`,
+            `status`, `created_at`, `updated_at`
+        ) VALUES (
+            :user_id, :name, :upload_logo, :logo_type, :qrcode, :url,
+            :template_name, :default_logo_name, :frame_name, :total_scan,
+            :status, :created_at, :updated_at
+        )';
+
+        $this->db->createCommand($sql)->bindValues($insertParams)->execute();
+
+        return (int) $this->db->getLastInsertID();
+    }
+
+    public function delete(int $id, ?TenantContextInterface $context = null): bool
+    {
+        $ctx = $context ?? $this->tenantContextProvider?->get();
+
+        if ($ctx !== null && $ctx->isGuest()) {
+            return false;
+        }
+
+        $existing = $this->findById($id, $ctx);
+        if ($existing === null) {
+            return false;
+        }
+
+        // Cascade delete related scan logs first
+        $this->db->createCommand('DELETE FROM {{%qrcode_scan}} WHERE `qrcode_id` = :id')
+            ->bindValues([':id' => $id])
+            ->execute();
+
+        // Delete QR code entity
+        $this->db->createCommand('DELETE FROM {{%qrcode}} WHERE `id` = :id')
+            ->bindValues([':id' => $id])
+            ->execute();
+
+        return true;
+    }
 }
+

@@ -33,8 +33,9 @@ $baseUrl = \App\Environment::appBasePath();
 $ajaxUrl = $baseUrl . '/qrcode/ajax' . ($isUpdate ? '?id=' . $qrcodeId : '');
 $submitUrl = $isUpdate ? ($baseUrl . '/qrcode/update?id=' . $qrcodeId) : ($baseUrl . '/qrcode/create');
 
-// Initial preview image determination
-$initialPreviewImage = $baseUrl . '/assets/qr/frames/desktop-view/default.png';
+// Initial selected template and preview image determination
+$selectedTemplate = $model?->getTemplateName() ?? 'default';
+$initialPreviewImage = $baseUrl . '/assets/qr/templates/' . $selectedTemplate . '.png';
 if ($isUpdate && !empty($model->getQrcode())) {
     $qrPath = $model->getQrcode();
     if (str_starts_with($qrPath, 'http://') || str_starts_with($qrPath, 'https://')) {
@@ -311,7 +312,7 @@ if ($isUpdate && !empty($model->getQrcode())) {
                                                 <div class="logo-gallery">
                                                     <?php
                                                     $galleryLogos = [
-                                                        'app-store', 'calender', 'email', 'facebook', 'gmail',
+                                                        'app-store', 'bitcoin', 'calender', 'email', 'facebook', 'gmail',
                                                         'google-bussiness', 'instagram', 'linkedin', 'mp3', 'pdf',
                                                         'phone-call', 'pintrest', 'play-store', 'ratings', 'youtube'
                                                     ];
@@ -372,9 +373,9 @@ if ($isUpdate && !empty($model->getQrcode())) {
                                                     'default-7', 'balloon-bottom-1', 'balloon-top-2', 'banner-bottom-3',
                                                     'banner-top-4', 'box-bottom-5', 'box-Top-6', 'focus-8'
                                                 ];
-                                                $selectedFrame = $model?->getFrameName() ?? 'default';
+                                                $selectedFrame = $model?->getFrameName() ?? ($selectedTemplate === 'classic-frame' ? 'banner-bottom' : '');
                                                 foreach ($frames as $frameKey):
-                                                    $isFrameActive = ($selectedFrame === $frameKey);
+                                                    $isFrameActive = (!empty($selectedFrame) && $selectedFrame === $frameKey);
                                                 ?>
                                                     <div class="qr-frame-item <?= $isFrameActive ? 'active' : '' ?>">
                                                         <img src="<?= $baseUrl ?>/assets/qr/frames/<?= $frameKey ?>.png" alt="<?= $frameKey ?>" title="<?= $frameKey ?>">

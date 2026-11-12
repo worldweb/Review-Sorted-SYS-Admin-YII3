@@ -99,6 +99,8 @@ final class QrTemplateDefinition
                 'gradientColor2' => '#476CB9',
                 'gradientType' => 'linear',
                 'gradientOnEyes' => false,
+                'logo' => 'facebook',
+                'logoMode' => 'default',
             ],
             'jungle' => [
                 'body' => 'rounded-pointed',
@@ -191,6 +193,8 @@ final class QrTemplateDefinition
                 'gradientColor2' => '',
                 'gradientType' => 'linear',
                 'gradientOnEyes' => false,
+                'logo' => 'youtube',
+                'logoMode' => 'default',
             ],
             'bitcoin' => [
                 'body' => 'circle',
@@ -214,6 +218,8 @@ final class QrTemplateDefinition
                 'gradientColor2' => '',
                 'gradientType' => 'linear',
                 'gradientOnEyes' => false,
+                'logo' => 'bitcoin',
+                'logoMode' => 'default',
             ],
             'default' => [
                 'body' => 'square',
@@ -260,6 +266,8 @@ final class QrTemplateDefinition
                 'gradientColor2' => '#0029b8',
                 'gradientType' => 'radial',
                 'gradientOnEyes' => false,
+                'logo' => 'instagram',
+                'logoMode' => 'default',
             ],
             'easy' => [
                 'body' => 'circular',
@@ -307,7 +315,9 @@ final class QrTemplateDefinition
                 'gradientColor2' => '',
                 'gradientType' => 'linear',
                 'gradientOnEyes' => false,
+                'logo' => 'youtube',
                 'logoMode' => 'default',
+                'frame' => 'banner-bottom',
             ],
         ];
     }

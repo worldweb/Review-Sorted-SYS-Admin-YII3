@@ -75,18 +75,36 @@ final class QrImageProcessor implements QrImageProcessorInterface
         // Copy background onto canvas
         imagecopy($merged, $background, 0, 0, 0, 0, $backgroundWidth, $backgroundHeight);
 
+        // Proportionally scale QR code if background frame is smaller than QR code
+        $renderQr = $qrCode;
+        if ($backgroundWidth < $qrCodeWidth || $backgroundHeight < $qrCodeHeight) {
+            $targetDim = (int) round(min($backgroundWidth, $backgroundHeight) * 0.72);
+            if ($targetDim > 50) {
+                $scaledQr = imagecreatetruecolor($targetDim, $targetDim);
+                imagesavealpha($scaledQr, true);
+                $transScaled = imagecolorallocatealpha($scaledQr, 0, 0, 0, 127);
+                imagefill($scaledQr, 0, 0, $transScaled);
+                imagecopyresampled($scaledQr, $qrCode, 0, 0, 0, 0, $targetDim, $targetDim, $qrCodeWidth, $qrCodeHeight);
+                $renderQr = $scaledQr;
+                $qrCodeWidth = $targetDim;
+                $qrCodeHeight = $targetDim;
+            }
+        }
+
         // Calculate center position
         $x = ($backgroundWidth - $qrCodeWidth) / 2.0;
         $y = ($backgroundHeight - $qrCodeHeight) / 2.0;
 
-        // Apply exact vertical offset defined for this frame
-        $y += QrTemplateDefinition::getFrameVerticalOffset($frameName);
+        // Apply exact vertical offset defined for this frame (scaled if non-standard frame width)
+        $rawOffset = QrTemplateDefinition::getFrameVerticalOffset($frameName);
+        $offsetScale = $backgroundWidth / 1447.0;
+        $y += $rawOffset * $offsetScale;
 
         $finalX = (int) round($x);
         $finalY = (int) round($y);
 
         // Blend QR code onto the framed canvas
-        imagecopy($merged, $qrCode, $finalX, $finalY, 0, 0, $qrCodeWidth, $qrCodeHeight);
+        imagecopy($merged, $renderQr, $finalX, $finalY, 0, 0, $qrCodeWidth, $qrCodeHeight);
 
         imagepng($merged, $outputPath);
 

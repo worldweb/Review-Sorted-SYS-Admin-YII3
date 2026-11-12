@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Web\QrCode\Action;
 
 use App\Domain\Account\AccountRepositoryInterface;
+use App\Domain\QrCode\QrCode;
+use App\Domain\QrCode\QrCodeRepositoryInterface;
 use App\Domain\QrCode\Service\QrCodeServiceInterface;
 use App\Domain\User\UserRepositoryInterface;
 use App\Security\TenantContextProviderInterface;
@@ -25,6 +27,7 @@ use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 final class QrCreateAction
 {
     public function __construct(
+        private QrCodeRepositoryInterface $qrCodeRepo,
         private AccountRepositoryInterface $accountRepo,
         private UserRepositoryInterface $userRepo,
         private QrCodeServiceInterface $qrCodeService,
@@ -84,23 +87,52 @@ final class QrCreateAction
             $logoType = trim((string) ($parsedBody['logo_type'] ?? 'default'));
             $defaultLogo = trim((string) ($parsedBody['default_logo_name'] ?? ''));
             $frameName = trim((string) ($parsedBody['frame_name'] ?? ''));
+            $status = trim((string) ($parsedBody['status'] ?? 'active'));
+            if ($status === '') {
+                $status = 'active';
+            }
 
             if ($url === '') {
                 $flash->set('error', 'Please enter a valid destination URL.');
             } else {
                 try {
+                    $cleanName = preg_replace('/[^a-z0-9]+/', '-', strtolower($name));
+                    if ($cleanName === '') {
+                        $cleanName = 'qrcode-' . time();
+                    }
+
+                    $insertData = [
+                        'user_id' => (string) $currentUserId,
+                        'name' => $cleanName,
+                        'url' => $url,
+                        'template_name' => $templateName,
+                        'default_logo_name' => ($logoType === 'default' && $defaultLogo !== '') ? $defaultLogo : null,
+                        'frame_name' => $frameName !== '' ? $frameName : null,
+                        'logo_type' => $logoType,
+                        'total_scan' => '0',
+                        'status' => $status,
+                        'qrcode' => null,
+                    ];
+                    $newId = $this->qrCodeRepo->save($insertData, null, $context);
+
+                    $baseUrl = rtrim(\App\Environment::appUrl(), '/');
+                    $encodedId = base64_encode((string) $newId);
+                    $encodedAhid = base64_encode((string) $currentUserId);
+                    $trackingScanUrl = $baseUrl . '/qrcode/scan?url=' . urlencode($url) . '&qr=' . $encodedId . '&ahid=' . $encodedAhid;
+
                     $selectedLogo = ($logoType === 'default') ? $defaultLogo : null;
-                    $this->qrCodeService->generate(
-                        url: $url,
-                        name: $name,
+                    $generationResult = $this->qrCodeService->generate(
+                        url: $trackingScanUrl,
+                        name: $cleanName,
                         logo: $selectedLogo,
                         templateName: $templateName,
                         frameName: $frameName
                     );
 
-                    // Notice of read-only database state: write operations require write-capable connection
-                    $flash->set('warning', 'QR Code preview generated. Saving new records requires write permissions, which are deferred in read-only mode.');
-                    return $this->redirect(\App\Environment::url('/qrcode/index'));
+                    $this->qrCodeRepo->save(['qrcode' => $generationResult['path']], $newId, $context);
+
+                    $flash->set('success', 'QR Code created successfully.');
+                    return $this->redirect(\App\Environment::url('/qrcode/view?id=') . $newId);
                 } catch (Throwable $e) {
                     $flash->set('error', 'Failed to generate QR code: ' . $e->getMessage());
                 }

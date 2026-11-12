@@ -42,4 +42,20 @@ interface QrCodeRepositoryInterface
      * @return QrCode[]
      */
     public function findByAccountId(int $accountId, ?TenantContextInterface $context = null): array;
+
+    /**
+     * Saves a QR code record (creates if $id is null or 0, updates if $id > 0).
+     * Strictly enforces TenantContext isolation.
+     *
+     * @param array<string, mixed> $data
+     * @return int The ID of the created or updated QR code.
+     */
+    public function save(array $data, ?int $id = null, ?TenantContextInterface $context = null): int;
+
+    /**
+     * Deletes a QR code record and associated scans.
+     * Strictly enforces TenantContext isolation.
+     */
+    public function delete(int $id, ?TenantContextInterface $context = null): bool;
 }
+

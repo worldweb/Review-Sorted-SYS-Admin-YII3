@@ -87,8 +87,12 @@ final class QrDeleteAction
             return $this->redirect(\App\Environment::url('/qrcode/index'));
         }
 
-        // Safe read-only limitation: database delete is deferred
-        $flash->set('warning', 'QR Code deletion requires write permissions. Deletion was aborted safely in read-only mode.');
+        $deleted = $this->qrCodeRepo->delete($id, $context);
+        if ($deleted) {
+            $flash->set('success', 'QR Code deleted successfully.');
+        } else {
+            $flash->set('error', 'Failed to delete the QR Code. Please try again.');
+        }
 
         return $this->redirect(\App\Environment::url('/qrcode/index'));
     }

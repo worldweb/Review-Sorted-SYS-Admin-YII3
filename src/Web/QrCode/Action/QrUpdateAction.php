@@ -96,9 +96,59 @@ final class QrUpdateAction
         }
 
         if (strtoupper($request->getMethod()) === 'POST') {
-            // Notice of read-only state: database updates require write permissions
-            $flash->set('warning', 'QR Code update processed for preview. Saving database modifications requires write permissions, which are deferred in read-only mode.');
-            return $this->redirect(\App\Environment::url('/qrcode/view?id=') . $id);
+            $parsedBody = (array) ($request->getParsedBody() ?? []);
+            $url = trim((string) ($parsedBody['url'] ?? ''));
+            $name = trim((string) ($parsedBody['name'] ?? ''));
+            $templateName = trim((string) ($parsedBody['template_name'] ?? $parsedBody['template'] ?? 'default'));
+            $logoType = trim((string) ($parsedBody['logo_type'] ?? 'default'));
+            $defaultLogo = trim((string) ($parsedBody['default_logo_name'] ?? ''));
+            $frameName = trim((string) ($parsedBody['frame_name'] ?? ''));
+            $status = trim((string) ($parsedBody['status'] ?? 'active'));
+            if ($status === '') {
+                $status = 'active';
+            }
+
+            if ($url === '') {
+                $flash->set('error', 'Please enter a valid destination URL.');
+            } else {
+                try {
+                    $cleanName = preg_replace('/[^a-z0-9]+/', '-', strtolower($name));
+                    if ($cleanName === '') {
+                        $cleanName = 'qrcode-' . time();
+                    }
+
+                    $baseUrl = rtrim(\App\Environment::appUrl(), '/');
+                    $encodedId = base64_encode((string) $id);
+                    $encodedAhid = base64_encode((string) $currentUserId);
+                    $trackingScanUrl = $baseUrl . '/qrcode/scan?url=' . urlencode($url) . '&qr=' . $encodedId . '&ahid=' . $encodedAhid;
+
+                    $selectedLogo = ($logoType === 'default') ? $defaultLogo : null;
+                    $generationResult = $this->qrCodeService->generate(
+                        url: $trackingScanUrl,
+                        name: $cleanName,
+                        logo: $selectedLogo,
+                        templateName: $templateName,
+                        frameName: $frameName
+                    );
+
+                    $updateData = [
+                        'url' => $url,
+                        'name' => $cleanName,
+                        'template_name' => $templateName,
+                        'default_logo_name' => ($logoType === 'default' && $defaultLogo !== '') ? $defaultLogo : null,
+                        'frame_name' => $frameName !== '' ? $frameName : null,
+                        'logo_type' => $logoType,
+                        'status' => $status,
+                        'qrcode' => $generationResult['path'],
+                    ];
+                    $this->qrCodeRepo->save($updateData, $id, $context);
+
+                    $flash->set('success', 'QR Code updated successfully.');
+                    return $this->redirect(\App\Environment::url('/qrcode/view?id=') . $id);
+                } catch (\Throwable $e) {
+                    $flash->set('error', 'Failed to update QR code: ' . $e->getMessage());
+                }
+            }
         }
 
         return $this->viewRenderer

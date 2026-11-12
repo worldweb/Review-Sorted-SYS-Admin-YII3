@@ -77,8 +77,15 @@ final class QrCodeService implements QrCodeServiceInterface
         $rawDiskPath = $storageDir . DIRECTORY_SEPARATOR . $rawFileName;
         $mergedDiskPath = $storageDir . DIRECTORY_SEPARATOR . $mergedFileName;
 
-        // Resolve local logo disk path
-        $resolvedLogoPath = $this->resolveLogoDiskPath($logo);
+        // Resolve local logo disk path (supports template default logo fallback)
+        if ($logo === 'none' || $logo === 'clear') {
+            $effectiveLogo = null;
+        } elseif (!empty($logo)) {
+            $effectiveLogo = $logo;
+        } else {
+            $effectiveLogo = $templateConfig['logo'] ?? null;
+        }
+        $resolvedLogoPath = $this->resolveLogoDiskPath($effectiveLogo);
 
         // Execute remote QR generation via QRCodeMonkey API
         $this->apiClient->generateCustomQr(
@@ -89,10 +96,13 @@ final class QrCodeService implements QrCodeServiceInterface
             outputPath: $rawDiskPath
         );
 
-        // Resolve frame overlay background image
-        $effectiveFrame = !empty($frameName) ? (string) $frameName : '';
-        if ($selectedTemplate === 'classic-frame' && $effectiveFrame === '') {
-            $effectiveFrame = 'banner-bottom';
+        // Resolve frame overlay background image (supports template default frame fallback)
+        if ($frameName === 'none' || $frameName === 'clear' || $frameName === 'default' || $frameName === 'default-7') {
+            $effectiveFrame = '';
+        } elseif (!empty($frameName)) {
+            $effectiveFrame = (string) $frameName;
+        } else {
+            $effectiveFrame = (string) ($templateConfig['frame'] ?? '');
         }
 
         $frameBackgroundPath = $this->resolveFrameImagePath($effectiveFrame, $selectedTemplate);
@@ -101,23 +111,31 @@ final class QrCodeService implements QrCodeServiceInterface
             throw new RuntimeException("Frame overlay template '{$effectiveFrame}' could not be located in assets.");
         }
 
-        // Blend frame overlay with generated QR PNG
-        $this->imageProcessor->mergeFrame(
-            qrCodeImagePath: $rawDiskPath,
-            frameBackgroundPath: $frameBackgroundPath,
-            outputPath: $mergedDiskPath,
-            frameName: $effectiveFrame
-        );
-
         $webRelativeRaw = 'assets/qrcode_generated/' . $rawFileName;
         $webRelativeMerged = 'assets/qrcode_generated/' . $mergedFileName;
 
+        if ($effectiveFrame !== '' && $frameBackgroundPath !== null && file_exists($frameBackgroundPath)) {
+            // Blend frame overlay with generated QR PNG
+            $this->imageProcessor->mergeFrame(
+                qrCodeImagePath: $rawDiskPath,
+                frameBackgroundPath: $frameBackgroundPath,
+                outputPath: $mergedDiskPath,
+                frameName: $effectiveFrame
+            );
+            $finalPath = $webRelativeMerged;
+            $finalDiskPath = $mergedDiskPath;
+        } else {
+            $finalPath = $webRelativeRaw;
+            $finalDiskPath = $rawDiskPath;
+        }
+
         return [
-            'path' => $webRelativeMerged,
-            'diskPath' => $mergedDiskPath,
+            'path' => $finalPath,
+            'diskPath' => $finalDiskPath,
             'fileName' => $webRelativeRaw,
             'rawDiskPath' => $rawDiskPath,
             'size' => $qrSize,
+            'effectiveFrame' => $effectiveFrame,
         ];
     }
 
@@ -220,34 +238,19 @@ final class QrCodeService implements QrCodeServiceInterface
             $publicRoot . '/assets/qr/frames',
         ];
 
-        $candidates = [];
+        $effective = $frameName;
+        if ($effective === '' && $templateName === 'classic-frame') {
+            $effective = 'banner-bottom';
+        }
 
-        if ($templateName === 'classic-frame') {
-            if ($frameName !== '') {
-                if ($frameName === 'focus' || $frameName === 'focus-8') {
-                    $candidates[] = $frameName . '.png';
-                }
-                $candidates[] = 'desktop-view/' . $frameName . '.png';
-                $candidates[] = $frameName . '.png';
-            } else {
-                $candidates[] = 'banner-bottom.png';
-                $candidates[] = 'desktop-view/banner-bottom.png';
-            }
+        $candidates = [];
+        if ($effective === '' || $effective === 'default' || $effective === 'default-8' || $effective === 'default-7') {
+            $candidates[] = 'qrcode.png';
+            $candidates[] = 'default.png';
+            $candidates[] = 'desktop-view/default.png';
         } else {
-            if ($frameName !== '') {
-                if ($frameName === 'focus' || $frameName === 'focus-8') {
-                    $candidates[] = $frameName . '.png';
-                } elseif ($frameName === 'default' || $frameName === 'default-8') {
-                    $candidates[] = 'qrcode.png';
-                    $candidates[] = 'default.png';
-                } else {
-                    $candidates[] = 'desktop-view/' . $frameName . '.png';
-                    $candidates[] = $frameName . '.png';
-                }
-            } else {
-                $candidates[] = 'qrcode.png';
-                $candidates[] = 'default.png';
-            }
+            $candidates[] = $effective . '.png';
+            $candidates[] = 'desktop-view/' . $effective . '.png';
         }
 
         foreach ($searchDirs as $dir) {
