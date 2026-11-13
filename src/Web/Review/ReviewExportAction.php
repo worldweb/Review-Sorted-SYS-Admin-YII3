@@ -48,7 +48,6 @@ final class ReviewExportAction
         // RBAC Authorization
         if (
             !$currentUser->isAdmin() &&
-            !$currentUser->isAccountAdmin() &&
             !$this->accessDecision->getRbac()->can($currentUser, '/reviews/*')
         ) {
             $response = $this->responseFactory->createResponse(403);

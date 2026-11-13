@@ -39,32 +39,72 @@ final class DatabaseRbacManager implements RbacInterface
             return false;
         }
 
-        $normalizedPerm = '/' . ltrim($permission, '/');
+        $candidates = $this->getCandidatePermissions($permission);
 
         foreach ($roles as $role) {
             $granted = $this->getPermissionsForRole($role);
 
-            // 1. Exact match on permission name or role name
-            if (in_array($permission, $granted, true) || in_array($normalizedPerm, $granted, true)) {
-                return true;
-            }
-
-            // 2. Platform super wildcard /*
-            if (in_array('/*', $granted, true)) {
-                return true;
-            }
-
-            // 3. Prefix/directory wildcard match (e.g., /user/* matches /user/index, /user/view, etc.)
-            $parts = explode('/', trim($normalizedPerm, '/'));
-            if (!empty($parts[0])) {
-                $sectionWildcard = '/' . $parts[0] . '/*';
-                if (in_array($sectionWildcard, $granted, true)) {
+            // Check if any candidate pattern is granted to this role
+            foreach ($candidates as $candidate) {
+                if (in_array($candidate, $granted, true)) {
                     return true;
                 }
             }
         }
 
         return false;
+    }
+
+    /**
+     * Generates all candidate permission patterns that could authorize the target path.
+     * Ordered from most specific to least specific.
+     *
+     * @return string[]
+     */
+    public function getCandidatePermissions(string $path): array
+    {
+        $clean = '/' . trim($path, '/');
+        if ($clean === '/' || $clean === '') {
+            return ['/', '/*'];
+        }
+
+        $candidates = [$clean, '/' . ltrim($path, '/')];
+
+        // Route aliases for known plural/singular pairs
+        if ($clean === '/users' || str_starts_with($clean, '/users/')) {
+            $candidates[] = '/user/*';
+            $candidates[] = '/user';
+        } elseif ($clean === '/user' || str_starts_with($clean, '/user/')) {
+            $candidates[] = '/user/*';
+            $candidates[] = '/users';
+        }
+
+        // Route aliases for settings entry point
+        if ($clean === '/settings' || $clean === '/settings/index') {
+            $candidates[] = '/settings/facebook';
+            $candidates[] = '/settings/facebook/*';
+            $candidates[] = '/settings/google';
+            $candidates[] = '/settings/google/*';
+        }
+
+        // Direct directory wildcard candidate (e.g. /reviews -> /reviews/*)
+        $candidates[] = $clean . '/*';
+
+        // Multi-level hierarchical prefix matching
+        // e.g. for /settings/facebook/create:
+        // -> /settings/facebook/*, /settings/facebook
+        // -> /settings/*, /settings
+        $segments = explode('/', trim($clean, '/'));
+        for ($i = count($segments) - 1; $i >= 1; $i--) {
+            $prefix = '/' . implode('/', array_slice($segments, 0, $i));
+            $candidates[] = $prefix . '/*';
+            $candidates[] = $prefix;
+        }
+
+        // Platform super wildcard
+        $candidates[] = '/*';
+
+        return array_values(array_unique($candidates));
     }
 
     public function hasRole(User|UserAuthIdentity|int $user, string $role): bool

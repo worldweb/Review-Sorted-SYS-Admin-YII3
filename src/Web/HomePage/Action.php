@@ -14,6 +14,7 @@ use App\Domain\SocialPost\SocialPostRepositoryInterface;
 use App\Domain\User\User;
 use App\Domain\User\UserRepositoryInterface;
 use App\Environment;
+use App\Security\Authorization\RbacInterface;
 use App\Security\TenantContextInterface;
 use App\Security\TenantContextProviderInterface;
 use Composer\InstalledVersions;
@@ -42,6 +43,7 @@ final readonly class Action
         private AccountRepositoryInterface $accountRepo,
         private SocialPostRepositoryInterface $socialPostRepo,
         private ResponseFactoryInterface $responseFactory,
+        private RbacInterface $rbac,
     ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -262,6 +264,13 @@ final readonly class Action
             $upcomingPosts = [];
         }
 
+        $isAdmin = $currentUser !== null && ($currentUser->isSuperAdmin() || $currentUser->isAdmin());
+        $canCreatePost = $isAdmin || ($currentUser !== null && $this->rbac->can($currentUser, '/social-post/*'));
+        $canViewReviews = $isAdmin || ($currentUser !== null && $this->rbac->can($currentUser, '/reviews/*'));
+        $canManageUsers = $isAdmin || ($currentUser !== null && ($this->rbac->can($currentUser, '/user/*') || $this->rbac->can($currentUser, '/users')));
+        $canManageAccounts = $isAdmin || ($currentUser !== null && $this->rbac->can($currentUser, '/accounts/*'));
+        $canManageConnections = $isAdmin || ($currentUser !== null && ($this->rbac->can($currentUser, '/settings/facebook') || $this->rbac->can($currentUser, '/settings/facebook/*')));
+
         $frameworkVersion = 'Yii 3 (yiisoft/app 1.4.0, di: '
             . (InstalledVersions::getPrettyVersion('yiisoft/di') ?? '1.4.x')
             . ', runner: '
@@ -283,6 +292,11 @@ final readonly class Action
             'currentUser' => $currentUser,
             'tenantContext' => $context,
             'workspaceName' => $workspaceName,
+            'canCreatePost' => $canCreatePost,
+            'canViewReviews' => $canViewReviews,
+            'canManageUsers' => $canManageUsers,
+            'canManageAccounts' => $canManageAccounts,
+            'canManageConnections' => $canManageConnections,
             'kpi' => [
                 'unreadReviews' => $unreadReviews,
                 'totalReviews' => $totalReviews,

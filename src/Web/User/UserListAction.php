@@ -50,7 +50,6 @@ final class UserListAction
         // Server-side authorization check matching Yii 2 AccessControl
         if (
             !$currentUser->isAdmin() &&
-            !$currentUser->isAccountAdmin() &&
             !$this->accessDecision->getRbac()->can($currentUser, '/user/*')
         ) {
             $response = $this->responseFactory->createResponse(403);

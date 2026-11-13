@@ -68,14 +68,18 @@ $this->setTitle('Dashboard');
             </div>
         </div>
         <div class="rs-d-flex rs-align-items-center rs-gap-2">
-            <a href="<?= Environment::url('/social-post/create') ?>" class="rs-btn rs-btn--primary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Create Post
-            </a>
-            <a href="<?= Environment::url('/reviews?read=0') ?>" class="rs-btn rs-btn--secondary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                Reviews (<?= number_format($kpi['unreadReviews']) ?>)
-            </a>
+            <?php if ($canCreatePost ?? true): ?>
+                <a href="<?= Environment::url('/social-post/create') ?>" class="rs-btn rs-btn--primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Create Post
+                </a>
+            <?php endif; ?>
+            <?php if ($canViewReviews ?? true): ?>
+                <a href="<?= Environment::url('/reviews?read=0') ?>" class="rs-btn rs-btn--secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    Reviews (<?= number_format($kpi['unreadReviews']) ?>)
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -322,48 +326,58 @@ $this->setTitle('Dashboard');
                     </h2>
                 </div>
                 <div class="rs-card__body rs-d-flex rs-flex-column rs-gap-3">
-                    <!-- Action 1: Create Post (All Roles) -->
+                    <?php if ($canCreatePost ?? true): ?>
+                    <!-- Action 1: Create Post (All Roles with permission) -->
                     <a href="<?= Environment::url('/social-post/create') ?>" class="rs-btn rs-btn--primary" style="justify-content: flex-start; padding: 12px 16px;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         <span>Create New Social Post</span>
                     </a>
+                    <?php endif; ?>
 
-                    <!-- Action 2: View Unread Reviews (All Roles) -->
+                    <?php if ($canViewReviews ?? true): ?>
+                    <!-- Action 2: View Unread Reviews (All Roles with permission) -->
                     <a href="<?= Environment::url('/reviews?read=0') ?>" class="rs-btn rs-btn--secondary" style="justify-content: flex-start; padding: 12px 16px;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                         <span>View Unread Reviews (<?= number_format($kpi['unreadReviews']) ?>)</span>
                     </a>
+                    <?php endif; ?>
 
-                    <!-- Action 3: View Publishing Queue (All Roles) -->
+                    <?php if ($canCreatePost ?? true): ?>
+                    <!-- Action 3: View Publishing Queue (All Roles with permission) -->
                     <a href="<?= Environment::url('/social-post') ?>" class="rs-btn rs-btn--secondary" style="justify-content: flex-start; padding: 12px 16px;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                         <span>View Publishing Queue &amp; History</span>
                     </a>
+                    <?php endif; ?>
 
-                    <?php if ($currentUser !== null && ($currentUser->isAdmin() || $currentUser->isAccountAdmin())): ?>
+                    <?php if (($canManageConnections ?? false) || ($canManageUsers ?? false)): ?>
                         <div style="border-top: 1px solid var(--rs-border); margin: 6px 0; padding-top: 8px;">
                             <span style="font-size: var(--rs-font-size-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--rs-text-muted);">
                                 Channel &amp; Workspace Management
                             </span>
                         </div>
 
-                        <!-- Action 4: Connect Facebook / Instagram (Admin & Account Admin) -->
+                        <?php if ($canManageConnections ?? false): ?>
+                        <!-- Action 4: Connect Facebook / Instagram (Admin & Account Admin with permission) -->
                         <a href="<?= Environment::url('/settings/facebook') ?>" class="rs-btn rs-btn--secondary" style="justify-content: flex-start; padding: 12px 16px;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
                             <span>Connect Facebook &amp; Instagram</span>
                         </a>
 
-                        <!-- Action 5: Connect Google Business Profile (Admin & Account Admin) -->
+                        <!-- Action 5: Connect Google Business Profile (Admin & Account Admin with permission) -->
                         <a href="<?= Environment::url('/settings/google') ?>" class="rs-btn rs-btn--secondary" style="justify-content: flex-start; padding: 12px 16px;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"></path><path d="M12 8v8"></path><path d="M8 12h8"></path></svg>
                             <span>Connect Google Business Profile</span>
                         </a>
+                        <?php endif; ?>
 
-                        <!-- Action 6: Manage Users (Admin & Account Admin) -->
+                        <?php if ($canManageUsers ?? false): ?>
+                        <!-- Action 6: Manage Users (Admin & Account Admin with permission) -->
                         <a href="<?= Environment::url('/users') ?>" class="rs-btn rs-btn--secondary" style="justify-content: flex-start; padding: 12px 16px;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                             <span>Team &amp; User Management</span>
                         </a>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>

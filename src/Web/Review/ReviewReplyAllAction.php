@@ -57,7 +57,6 @@ final class ReviewReplyAllAction
         // Authorization check
         if (
             !$currentUser->isAdmin() &&
-            !$currentUser->isAccountAdmin() &&
             !$this->accessDecision->getRbac()->can($currentUser, '/reviews/*')
         ) {
             $flash->set('error', 'Forbidden: You do not have permission to reply to reviews.');

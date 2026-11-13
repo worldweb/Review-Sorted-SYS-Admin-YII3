@@ -53,10 +53,9 @@ final class ReviewListAction
             return $this->redirect(\App\Environment::url('/login'));
         }
 
-        // Check RBAC permission for reviews (super, admin, account_admin, worker all have access)
+        // Check RBAC permission for reviews
         if (
             !$currentUser->isAdmin() &&
-            !$currentUser->isAccountAdmin() &&
             !$this->accessDecision->getRbac()->can($currentUser, '/reviews/*')
         ) {
             $response = $this->responseFactory->createResponse(403);

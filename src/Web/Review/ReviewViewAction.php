@@ -58,7 +58,6 @@ final class ReviewViewAction
         // Authorization check
         if (
             !$currentUser->isAdmin() &&
-            !$currentUser->isAccountAdmin() &&
             !$this->accessDecision->getRbac()->can($currentUser, '/reviews/*')
         ) {
             $response = $this->responseFactory->createResponse(403);

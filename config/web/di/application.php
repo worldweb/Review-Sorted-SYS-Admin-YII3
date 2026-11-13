@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Security\Middleware\AppCsrfMiddleware;
 use App\Security\Middleware\AuthenticationMiddleware;
+use App\Security\Middleware\AuthorizationMiddleware;
 use App\Web\NotFound\NotFoundHandler;
 use Yiisoft\Csrf\CsrfTokenMiddleware;
 use Yiisoft\Definitions\DynamicReference;
@@ -33,6 +34,7 @@ return [
                         AppCsrfMiddleware::class,
                         RequestCatcherMiddleware::class,
                         AuthenticationMiddleware::class,
+                        AuthorizationMiddleware::class,
                         Router::class,
                     ],
                 ],

@@ -26,6 +26,7 @@ final class LocationGroupDeleteAction
         private TenantContextProviderInterface $tenantContextProvider,
         private SessionInterface $session,
         private ResponseFactoryInterface $responseFactory,
+        private ?\App\Security\Authorization\RbacInterface $rbac = null,
     ) {
     }
 
@@ -41,7 +42,7 @@ final class LocationGroupDeleteAction
             return $this->redirect(\App\Environment::url('/login'));
         }
 
-        if (!$currentUser->isAdmin() && !$currentUser->isAccountAdmin()) {
+        if (!$currentUser->isAdmin() && !$currentUser->isAccountAdmin() && !($this->rbac?->can($currentUser, '/location-group/*') ?? false)) {
             $response = $this->responseFactory->createResponse(403);
             $response->getBody()->write('Forbidden: You are not authorized to manage location groups.');
             return $response;

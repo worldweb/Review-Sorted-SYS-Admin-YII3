@@ -23,6 +23,7 @@ final class LocationGroupDestinationsAction
         private UserRepositoryInterface $userRepo,
         private TenantContextProviderInterface $tenantContextProvider,
         private ResponseFactoryInterface $responseFactory,
+        private ?\App\Security\Authorization\RbacInterface $rbac = null,
     ) {
     }
 
@@ -34,7 +35,7 @@ final class LocationGroupDestinationsAction
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
-        if ($currentUser === null || (!$currentUser->isAdmin() && !$currentUser->isAccountAdmin())) {
+        if ($currentUser === null || (!$currentUser->isAdmin() && !$currentUser->isAccountAdmin() && !($this->rbac?->can($currentUser, '/location-group/*') ?? false))) {
             return $this->jsonResponse(['success' => false, 'message' => 'Forbidden'], 403);
         }
 

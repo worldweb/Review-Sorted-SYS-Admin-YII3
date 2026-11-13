@@ -56,28 +56,30 @@ final class NavigationMenuProvider
         ];
 
         // 2. Reviews & Mentions with dynamic unread count
-        $unreadReviews = 0;
-        if ($this->db !== null) {
-            try {
-                $q = (new Query($this->db))
-                    ->from('{{%review}}')
-                    ->where(['!=', 'read', 1]);
-                if (!$isAdmin && $currentUser->getAccountId() !== null) {
-                    $q->andWhere(['account_id' => $currentUser->getAccountId()]);
+        if ($isAdmin || $this->rbac->can($userId, '/reviews/*')) {
+            $unreadReviews = 0;
+            if ($this->db !== null) {
+                try {
+                    $q = (new Query($this->db))
+                        ->from('{{%review}}')
+                        ->where(['!=', 'read', 1]);
+                    if (!$isAdmin && $currentUser->getAccountId() !== null) {
+                        $q->andWhere(['account_id' => $currentUser->getAccountId()]);
+                    }
+                    $unreadReviews = (int) $q->count();
+                } catch (\Throwable) {
+                    $unreadReviews = 0;
                 }
-                $unreadReviews = (int) $q->count();
-            } catch (\Throwable) {
-                $unreadReviews = 0;
             }
-        }
 
-        $items[] = [
-            'type' => 'item',
-            'label' => "Reviews & Mentions ($unreadReviews)",
-            'url' => $url('/reviews'),
-            'icon' => '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
-            'active' => str_starts_with($normPath, '/reviews'),
-        ];
+            $items[] = [
+                'type' => 'item',
+                'label' => "Reviews & Mentions ($unreadReviews)",
+                'url' => $url('/reviews'),
+                'icon' => '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
+                'active' => str_starts_with($normPath, '/reviews'),
+            ];
+        }
 
         // 3. Social Connections
         if ($isAdmin || $this->rbac->can($userId, '/settings/facebook') || $this->rbac->can($userId, '/facebook/*')) {
@@ -279,7 +281,7 @@ final class NavigationMenuProvider
         }
 
         // 8. User Management
-        if ($isAdmin || $isAccountAdmin || $this->rbac->can($userId, '/user/*')) {
+        if ($isAdmin || $this->rbac->can($userId, '/user/*') || $this->rbac->can($userId, '/users')) {
             $isUserActive = str_starts_with($normPath, '/user') || str_starts_with($normPath, '/users');
             $items[] = [
                 'type' => 'item',
@@ -291,7 +293,7 @@ final class NavigationMenuProvider
         }
 
         // 9. Accounts (Restored original label 'Accounts')
-        if ($isAdmin || $isAccountAdmin || $this->rbac->can($userId, '/accounts/*')) {
+        if ($isAdmin || $this->rbac->can($userId, '/accounts/*')) {
             $isAccountActive = str_starts_with($normPath, '/accounts');
             $items[] = [
                 'type' => 'item',
@@ -303,7 +305,7 @@ final class NavigationMenuProvider
         }
 
         // 10. Location Groups
-        if ($isAdmin || $isAccountAdmin || $this->rbac->can($userId, '/location-group/*')) {
+        if ($isAdmin || $this->rbac->can($userId, '/location-group/*')) {
             $items[] = [
                 'type' => 'item',
                 'label' => 'Location Groups',

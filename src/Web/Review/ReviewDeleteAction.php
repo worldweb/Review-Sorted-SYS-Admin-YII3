@@ -52,10 +52,9 @@ final class ReviewDeleteAction
             return $this->redirect(\App\Environment::url('/login'));
         }
 
-        // Authorization check: Admin, account admin, or review permission
+        // Authorization check: Admin or review permission
         if (
             !$currentUser->isAdmin() &&
-            !$currentUser->isAccountAdmin() &&
             !$this->accessDecision->getRbac()->can($currentUser, '/reviews/*')
         ) {
             $flash->set('error', 'Forbidden: You do not have permission to delete reviews.');
