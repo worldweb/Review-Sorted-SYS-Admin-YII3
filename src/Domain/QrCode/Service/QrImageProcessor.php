@@ -209,4 +209,84 @@ final class QrImageProcessor implements QrImageProcessorInterface
 
         return ['valid' => true, 'error' => null];
     }
+
+    public function convertToPdf(string $imagePath): string
+    {
+        if (!file_exists($imagePath) || !is_readable($imagePath)) {
+            throw new RuntimeException('Source image not found or unreadable for PDF generation: ' . $imagePath);
+        }
+
+        $image = @imagecreatefrompng($imagePath);
+        if (!$image) {
+            $image = @imagecreatefromjpeg($imagePath);
+        }
+        if (!$image) {
+            $data = @file_get_contents($imagePath);
+            if ($data !== false) {
+                $image = @imagecreatefromstring($data);
+            }
+        }
+
+        if (!$image) {
+            throw new RuntimeException('Failed to decode source image for PDF generation.');
+        }
+
+        $width = imagesx($image);
+        $height = imagesy($image);
+
+        // Flatten transparent PNG onto clean white background
+        $canvas = imagecreatetruecolor($width, $height);
+        $white = imagecolorallocate($canvas, 255, 255, 255);
+        imagefill($canvas, 0, 0, $white);
+        imagecopy($canvas, $image, 0, 0, 0, 0, $width, $height);
+
+        ob_start();
+        imagejpeg($canvas, null, 95);
+        $jpegData = (string) ob_get_clean();
+
+        // Standard ISO A4 dimensions in PostScript points (72 points / inch, 210mm x 297mm)
+        $pageWidth = 595.28;
+        $pageHeight = 841.89;
+        $margin = 36.0; // 0.5 inch margins
+        $availWidth = $pageWidth - (2 * $margin);
+        $availHeight = $pageHeight - (2 * $margin);
+
+        $scale = min($availWidth / $width, $availHeight / $height);
+        $renderWidth = round($width * $scale, 2);
+        $renderHeight = round($height * $scale, 2);
+        $posX = round(($pageWidth - $renderWidth) / 2, 2);
+        $posY = round(($pageHeight - $renderHeight) / 2, 2);
+
+        $contentStream = sprintf('q %.2f 0 0 %.2f %.2f %.2f cm /Im1 Do Q', $renderWidth, $renderHeight, $posX, $posY);
+        $contentLength = strlen($contentStream);
+        $jpegLength = strlen($jpegData);
+
+        // Build valid, standards-compliant PDF-1.4 binary structure
+        $pdf = "%PDF-1.4\n";
+        $offsets = [];
+
+        $offsets[1] = strlen($pdf);
+        $pdf .= "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n";
+
+        $offsets[2] = strlen($pdf);
+        $pdf .= "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n";
+
+        $offsets[3] = strlen($pdf);
+        $pdf .= "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " . $pageWidth . " " . $pageHeight . "] /Contents 4 0 R /Resources << /ProcSet [/PDF /ImageC] /XObject << /Im1 5 0 R >> >> >>\nendobj\n";
+
+        $offsets[4] = strlen($pdf);
+        $pdf .= "4 0 obj\n<< /Length " . $contentLength . " >>\nstream\n" . $contentStream . "\nendstream\nendobj\n";
+
+        $offsets[5] = strlen($pdf);
+        $pdf .= "5 0 obj\n<< /Type /XObject /Subtype /Image /Width " . $width . " /Height " . $height . " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " . $jpegLength . " >>\nstream\n" . $jpegData . "\nendstream\nendobj\n";
+
+        $xrefOffset = strlen($pdf);
+        $pdf .= "xref\n0 6\n0000000000 65535 f \n";
+        for ($i = 1; $i <= 5; $i++) {
+            $pdf .= sprintf("%010d 00000 n \n", $offsets[$i]);
+        }
+        $pdf .= "trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n" . $xrefOffset . "\n%%EOF\n";
+
+        return $pdf;
+    }
 }

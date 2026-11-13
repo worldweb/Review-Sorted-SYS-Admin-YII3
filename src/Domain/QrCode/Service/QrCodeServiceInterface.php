@@ -53,4 +53,12 @@ interface QrCodeServiceInterface
      * @return array{valid: bool, error: ?string}
      */
     public function validateLogo(string $filePath): array;
+
+    /**
+     * Converts a generated QR code image to a print-ready, standards-compliant PDF binary string.
+     *
+     * @param string $imagePath Absolute path to source QR image (PNG or JPEG).
+     * @return string Raw PDF document binary content.
+     */
+    public function convertToPdf(string $imagePath): string;
 }

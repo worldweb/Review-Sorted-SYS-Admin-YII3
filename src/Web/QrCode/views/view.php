@@ -78,6 +78,10 @@ $effectiveCsrf = $csrfToken ?? $csrf ?? '';
         </div>
     </div>
 
+    <?php if (isset($flash) && $flash !== null): ?>
+        <?php include __DIR__ . '/../../Shared/Components/_alerts.php'; ?>
+    <?php endif; ?>
+
     <!-- 2. Responsive Grid Layout -->
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;" class="rs-qr-view-grid">
         <!-- Left Column: Metadata & Analytics -->
@@ -199,6 +203,9 @@ $effectiveCsrf = $csrfToken ?? $csrf ?? '';
                         </a>
                         <a href="<?= \App\Environment::url('/qrcode/download?id=' . $model->getId() . '&format=jpg') ?>" class="rs-btn rs-btn--secondary rs-btn--sm" title="Download High-Resolution JPG">
                             <i class="fa-solid fa-download rs-mr-1"></i> JPG
+                        </a>
+                        <a href="<?= \App\Environment::url('/qrcode/download?id=' . $model->getId() . '&format=pdf') ?>" class="rs-btn rs-btn--secondary rs-btn--sm" title="Download Print-Ready PDF">
+                            <i class="fa-solid fa-file-pdf rs-mr-1"></i> PDF
                         </a>
                     </div>
                 </div>

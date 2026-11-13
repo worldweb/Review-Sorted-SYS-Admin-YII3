@@ -1,0 +1,1157 @@
+/* ==========================================================================
+   Reviews Sorted Design System (Enterprise v5.0)
+   QR Code Studio — Complete UI Color & Styling Overrides
+   ========================================================================== */
+
+/* 1. Root & Scoped Design Tokens */
+:root,
+.rs-qr-page {
+    /* Primary Brand Colors (Reviews Sorted) */
+    --rs-primary: #234137;
+    --rs-primary-hover: #2D5244;
+    --rs-primary-dark: #1A2F26;
+    
+    /* Accent Brand Colors */
+    --rs-accent: #F5A623;
+    --rs-accent-hover: #E0941A;
+    
+    /* Surfaces & Backgrounds */
+    --rs-surface: #FFFFFF;
+    --rs-surface-alt: #F8FAF9;
+    --rs-background: #FEFBF6;
+    --rs-card-tint: rgba(35, 65, 55, 0.04);
+    
+    /* Borders */
+    --rs-border: #E5E7EB;
+    --rs-border-strong: #CED4DA;
+    --rs-border-active: #234137;
+    
+    /* Typography Colors */
+    --rs-text-main: #1A2F26;
+    --rs-text-muted: #7B8A8B;
+    --rs-text-inverse: #FFFFFF;
+    
+    /* Semantic Colors */
+    --rs-success: #10B981;
+    --rs-warning: #F59E0B;
+    --rs-danger: #EF4444;
+    --rs-info: #3B82F6;
+    
+    /* Typography Scale */
+    --rs-font-family: 'Lato', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    
+    /* Shadows (Toned with Reviews Sorted Forest Green) */
+    --rs-shadow-sm: 0 1px 3px 0 rgba(35, 65, 55, 0.05);
+    --rs-shadow: 0 4px 6px -1px rgba(35, 65, 55, 0.07), 0 2px 4px -1px rgba(35, 65, 55, 0.04);
+    --rs-shadow-md: 0 6px 12px -2px rgba(35, 65, 55, 0.08), 0 3px 6px -2px rgba(35, 65, 55, 0.04);
+    --rs-shadow-lg: 0 10px 15px -3px rgba(35, 65, 55, 0.08), 0 4px 6px -2px rgba(35, 65, 55, 0.04);
+    --rs-shadow-xl: 0 20px 25px -5px rgba(35, 65, 55, 0.09), 0 10px 10px -5px rgba(35, 65, 55, 0.03);
+    
+    /* Border Radiuses */
+    --rs-radius-sm: 4px;
+    --rs-radius: 8px;
+    --rs-radius-lg: 12px;
+    --rs-radius-xl: 16px;
+    --rs-radius-full: 9999px;
+
+    /* Spacing Units */
+    --rs-space-4: 4px;
+    --rs-space-8: 8px;
+    --rs-space-12: 12px;
+    --rs-space-16: 16px;
+    --rs-space-20: 20px;
+    --rs-space-24: 24px;
+    --rs-space-32: 32px;
+    --rs-space-40: 40px;
+    --rs-space-48: 48px;
+    --rs-space-64: 64px;
+    
+    /* Standard Transitions & Focus */
+    --rs-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --rs-focus-ring: 0 0 0 2px var(--rs-surface), 0 0 0 4px var(--rs-primary);
+    
+    font-family: var(--rs-font-family);
+    color: var(--rs-text-main);
+    background: transparent;
+    padding: 0 0 var(--rs-space-32) 0;
+    min-height: auto;
+}
+
+.user-create {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* ==========================================================================
+   2. Workspace Layout
+   ========================================================================== */
+.rs-qr-workspace {
+    display: grid !important;
+    grid-template-columns: minmax(0, 62%) 38%;
+    gap: var(--rs-space-40);
+    align-items: start;
+    max-width: 1300px;
+    margin: 0;
+}
+
+.rs-qr-studio {
+    width: 100% !important;
+}
+
+/* ==========================================================================
+   3. Page Header
+   ========================================================================== */
+.rs-qr-header {
+    max-width: 1300px;
+    margin: 0 0 var(--rs-space-24) 0;
+}
+
+.rs-qr-header .rs-btn--ghost {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    color: var(--rs-text-muted) !important;
+    padding: 6px 12px !important;
+    border-radius: var(--rs-radius) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    transition: var(--rs-transition) !important;
+}
+
+.rs-qr-header .rs-btn--ghost:hover {
+    background: var(--rs-surface-alt) !important;
+    color: var(--rs-primary) !important;
+    border-color: var(--rs-border) !important;
+}
+
+.rs-qr-title {
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    color: var(--rs-primary) !important;
+    margin: 0 0 var(--rs-space-8) 0 !important;
+    letter-spacing: -0.01em;
+}
+
+.rs-qr-description {
+    font-size: 14px !important;
+    color: var(--rs-text-muted) !important;
+    margin: 0 !important;
+    line-height: 1.5 !important;
+}
+
+/* ==========================================================================
+   4. Stepper Indicators (Step 1 -> Step 2 -> Step 3)
+   ========================================================================== */
+.rs-qr-stepper {
+    max-width: 1300px;
+    margin: 0 0 var(--rs-space-24) 0;
+}
+
+.rs-qr-stepper .step-menu-wrap {
+    display: flex;
+    justify-content: flex-start;
+    gap: var(--rs-space-48);
+    background: transparent !important;
+    border: none !important;
+    position: relative;
+    padding: 0 !important;
+    list-style: none !important;
+}
+
+.rs-qr-stepper .nav-pills .nav-link {
+    background: transparent !important;
+    color: var(--rs-text-muted) !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    padding: var(--rs-space-8) 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--rs-space-12);
+    cursor: default;
+    transition: var(--rs-transition);
+}
+
+.rs-qr-stepper .nav-pills .nav-link:before,
+.rs-qr-stepper .nav-pills .nav-link:after {
+    display: none !important;
+}
+
+.rs-qr-stepper .nav-pills .nav-link .step-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--rs-radius-full);
+    background: var(--rs-surface);
+    border: 2px solid var(--rs-border-strong);
+    color: var(--rs-text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    transition: var(--rs-transition);
+}
+
+.rs-qr-stepper .nav-pills .nav-link.active {
+    color: var(--rs-primary) !important;
+}
+
+.rs-qr-stepper .nav-pills .nav-link.active .step-num {
+    background-color: var(--rs-primary) !important;
+    border-color: var(--rs-primary) !important;
+    color: var(--rs-text-inverse) !important;
+    box-shadow: 0 0 0 3px rgba(35, 65, 55, 0.15) !important;
+}
+
+.rs-qr-stepper .nav-pills .nav-link.completed .step-num {
+    background-color: var(--rs-primary-hover) !important;
+    border-color: var(--rs-primary-hover) !important;
+    color: var(--rs-text-inverse) !important;
+}
+
+.rs-qr-stepper .step-menu-wrap::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--rs-border);
+    z-index: -1;
+}
+
+/* ==========================================================================
+   5. Step Cards & Panels
+   ========================================================================== */
+.rs-qr-panel {
+    background: var(--rs-surface) !important;
+    border: 1px solid var(--rs-border) !important;
+    border-radius: var(--rs-radius-xl) !important;
+    padding: var(--rs-space-32) !important;
+    margin-bottom: var(--rs-space-24) !important;
+    box-shadow: var(--rs-shadow) !important;
+}
+
+.title-content-caption {
+    padding: 0 0 var(--rs-space-20) 0 !important;
+    border-bottom: 1px solid var(--rs-border) !important;
+    margin-bottom: var(--rs-space-24) !important;
+}
+
+.title-content-caption h2 {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: var(--rs-text-main) !important;
+    margin: 0 0 var(--rs-space-4) 0 !important;
+}
+
+.title-content-caption p {
+    font-size: 14px !important;
+    color: var(--rs-text-muted) !important;
+    margin: 0 !important;
+    line-height: 1.5 !important;
+}
+
+/* ==========================================================================
+   6. Form Fields & Validation
+   ========================================================================== */
+.form-group label,
+.name-qr label {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: var(--rs-text-main) !important;
+    margin-bottom: var(--rs-space-8) !important;
+    display: block !important;
+}
+
+.rs-form-control,
+#qr_gen_form_website_url,
+#qr-code-name,
+.url-input input {
+    border-radius: var(--rs-radius) !important;
+    border: 1px solid var(--rs-border-strong) !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+    transition: var(--rs-transition) !important;
+    background: var(--rs-surface) !important;
+    width: 100% !important;
+    color: var(--rs-text-main) !important;
+    box-shadow: none !important;
+}
+
+.rs-form-control::placeholder,
+#qr_gen_form_website_url::placeholder,
+#qr-code-name::placeholder {
+    color: #9CA3AF !important;
+}
+
+.rs-form-control:hover,
+#qr_gen_form_website_url:hover,
+#qr-code-name:hover {
+    border-color: #9CA3AF !important;
+    background: #FAFAFA !important;
+}
+
+.rs-form-control:focus,
+#qr_gen_form_website_url:focus,
+#qr-code-name:focus {
+    border-color: var(--rs-primary) !important;
+    box-shadow: 0 0 0 3px rgba(35, 65, 55, 0.15) !important;
+    outline: none !important;
+    background: var(--rs-surface) !important;
+}
+
+/* Status Select Dropdown */
+select.rs-form-control,
+select#qr-code-status {
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+    color: var(--rs-text-main) !important;
+    background-color: var(--rs-surface) !important;
+    border: 1px solid var(--rs-border-strong) !important;
+    border-radius: var(--rs-radius) !important;
+    appearance: auto !important;
+    -webkit-appearance: auto !important;
+    -moz-appearance: auto !important;
+}
+
+select.rs-form-control:focus,
+select#qr-code-status:focus {
+    border-color: var(--rs-primary) !important;
+    box-shadow: 0 0 0 3px rgba(35, 65, 55, 0.15) !important;
+    outline: none !important;
+}
+
+/* Error Messages */
+.rs-form-error,
+.text-error-msg,
+span#qr_gen_form_website_url_error,
+span#qr_gen_form_name_error {
+    color: var(--rs-danger) !important;
+    font-size: 13px !important;
+    margin-top: 6px !important;
+    display: block !important;
+    font-weight: 500 !important;
+}
+
+/* ==========================================================================
+   7. Step 2 Customization: Segmented Tabs (Templates / Logo / Frame)
+   ========================================================================== */
+.rs-qr-tabs-wrapper {
+    margin-bottom: var(--rs-space-24) !important;
+}
+
+.rs-qr-tabs {
+    display: inline-flex !important;
+    background: #F4F5F4 !important;
+    padding: 4px !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--rs-border) !important;
+    gap: 4px !important;
+    list-style: none !important;
+    margin: 0 !important;
+}
+
+.tab-link {
+    height: auto !important;
+    width: auto !important;
+    padding: 10px 22px !important;
+    border-radius: var(--rs-radius) !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: var(--rs-space-8) !important;
+    transition: var(--rs-transition) !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    color: var(--rs-text-muted) !important;
+}
+
+.tab-link:hover {
+    color: var(--rs-primary) !important;
+    background: rgba(35, 65, 55, 0.04) !important;
+}
+
+.tab-link.active {
+    background: var(--rs-surface) !important;
+    border: 1px solid var(--rs-border-strong) !important;
+    box-shadow: 0 2px 4px rgba(35, 65, 55, 0.06) !important;
+    color: var(--rs-primary) !important;
+}
+
+.tab-link .icon {
+    width: 18px !important;
+    height: 18px !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.tab-link .icon img {
+    width: 18px !important;
+    height: 18px !important;
+    opacity: 0.6 !important;
+    filter: none !important;
+    transition: var(--rs-transition) !important;
+}
+
+.tab-link.active .icon img {
+    opacity: 1 !important;
+    /* Primary Brand (#234137) Filter */
+    filter: invert(21%) sepia(16%) saturate(1376%) hue-rotate(113deg) brightness(94%) contrast(89%) !important;
+}
+
+.tab-link .text {
+    background: transparent !important;
+    padding: 0 !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    color: inherit !important;
+}
+
+/* ==========================================================================
+   8. Customization Galleries (Templates, Logos, Frames)
+   ========================================================================== */
+.template-headiing span,
+.sub-heading {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    color: var(--rs-text-main) !important;
+    display: block !important;
+    margin-bottom: var(--rs-space-12) !important;
+}
+
+.content-wrapper .tab-content {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+}
+
+.content-wrapper .tab-content-inner {
+    padding: var(--rs-space-16) 0 !important;
+}
+
+.templates-list-caption,
+.logo-gallery,
+.qr-frame-container {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)) !important;
+    gap: var(--rs-space-16) !important;
+    width: 100% !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    padding: 4px !important;
+}
+
+.templates-list-item,
+.logo-item,
+.qr-frame-item {
+    background: var(--rs-surface) !important;
+    border: 1px solid var(--rs-border) !important;
+    border-radius: var(--rs-radius-lg) !important;
+    padding: 16px 10px !important;
+    transition: var(--rs-transition) !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 1px 3px rgba(35, 65, 55, 0.04) !important;
+    cursor: pointer !important;
+    min-height: 120px !important;
+    float: none !important;
+    user-select: none !important;
+}
+
+.templates-list-item:hover,
+.logo-item:hover,
+.qr-frame-item:hover {
+    transform: translateY(-2px) !important;
+    border-color: var(--rs-primary) !important;
+    box-shadow: 0 6px 16px -2px rgba(35, 65, 55, 0.1) !important;
+}
+
+.templates-list-item.active,
+.logo-item.active,
+.qr-frame-item.active {
+    border: 2px solid var(--rs-primary) !important;
+    background: var(--rs-card-tint) !important;
+    box-shadow: 0 0 0 1px var(--rs-primary), 0 4px 12px rgba(35, 65, 55, 0.08) !important;
+}
+
+/* Checked Badge Indicator (Fixed UTF-8 Unicode Checkmark) */
+.templates-list-item.active::after,
+.logo-item.active::after,
+.qr-frame-item.active::after {
+    content: '\2713' !important;
+    position: absolute !important;
+    top: -7px !important;
+    right: -7px !important;
+    width: 22px !important;
+    height: 22px !important;
+    background: var(--rs-primary) !important;
+    color: var(--rs-text-inverse) !important;
+    border: 2px solid var(--rs-surface) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 4px rgba(35, 65, 55, 0.25) !important;
+    line-height: 1 !important;
+}
+
+.templates-img,
+.templates-list-item .templates-img {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+}
+
+.templates-img img,
+.logo-item img,
+.qr-frame-item img {
+    max-width: 60px !important;
+    max-height: 60px !important;
+    width: auto !important;
+    height: auto !important;
+    margin-bottom: var(--rs-space-12) !important;
+    object-fit: contain !important;
+}
+
+.templates-info {
+    background: transparent !important;
+    border: none !important;
+    margin-top: auto !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    color: var(--rs-text-main) !important;
+    text-align: center !important;
+    text-transform: capitalize !important;
+}
+
+.remove-text { display: none !important; }
+#slideprev, #slidenext { display: none !important; }
+
+/* ==========================================================================
+   9. Logo Type Segmented Radio Controls & Upload Area
+   ========================================================================== */
+.site-qr-code-logo-type-main-wrap {
+    margin-bottom: var(--rs-space-20) !important;
+}
+
+.site-qr-code-logo-type {
+    display: inline-flex !important;
+    gap: var(--rs-space-8) !important;
+    margin: var(--rs-space-8) 0 var(--rs-space-16) 0 !important;
+}
+
+.site-qr-code-logo-type input[type="radio"] {
+    display: none !important;
+}
+
+.site-qr-code-logo-type br {
+    display: none !important;
+}
+
+.site-qr-code-logo-type label {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 8px 20px !important;
+    background: var(--rs-surface) !important;
+    border: 1px solid var(--rs-border-strong) !important;
+    border-radius: var(--rs-radius) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--rs-text-main) !important;
+    cursor: pointer !important;
+    transition: var(--rs-transition) !important;
+    margin: 0 !important;
+    user-select: none !important;
+}
+
+.site-qr-code-logo-type label:hover {
+    background: var(--rs-surface-alt) !important;
+    border-color: var(--rs-primary) !important;
+    color: var(--rs-primary) !important;
+}
+
+.site-qr-code-logo-type input[type="radio"]:checked + label {
+    background: var(--rs-primary) !important;
+    border-color: var(--rs-primary) !important;
+    color: var(--rs-text-inverse) !important;
+    box-shadow: 0 1px 3px rgba(35, 65, 55, 0.15) !important;
+}
+
+/* Upload Container */
+.content-wrapper .drag-file-area {
+    border: 2px dashed #CED4DA !important;
+    border-radius: 12px !important;
+    background: #F8FAF9 !important;
+    padding: 36px 24px !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease-in-out !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.content-wrapper .drag-file-area:hover,
+.content-wrapper .drag-file-area.drag-over {
+    border-color: #234137 !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 4px 16px rgba(35, 65, 55, 0.08) !important;
+}
+
+.content-wrapper .drag-file-area .upload-icon {
+    margin: 0 0 14px 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 54px !important;
+    height: 54px !important;
+    border-radius: 50% !important;
+    background: rgba(35, 65, 55, 0.06) !important;
+    transition: all 0.2s ease !important;
+}
+
+.content-wrapper .drag-file-area:hover .upload-icon,
+.content-wrapper .drag-file-area.drag-over .upload-icon {
+    background: rgba(35, 65, 55, 0.12) !important;
+    transform: scale(1.05) !important;
+}
+
+.content-wrapper .drag-file-area .upload-icon i {
+    color: #234137 !important;
+    font-size: 24px !important;
+    line-height: 1 !important;
+}
+
+/* Neutralize global badge .label styles & establish high contrast typography */
+.content-wrapper .drag-file-area label,
+.content-wrapper .drag-file-area .label,
+.content-wrapper .drag-file-area .rs-qr-upload-label {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #1A2F26 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    line-height: 1.5 !important;
+    text-transform: none !important;
+}
+
+.content-wrapper .drag-file-area .browse-files {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    color: #1A2F26 !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+}
+
+.content-wrapper .drag-file-area .browse-files span,
+.content-wrapper .drag-file-area .upload-text-main {
+    color: #1A2F26 !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+}
+
+.content-wrapper .drag-file-area label .browse-files-text,
+.content-wrapper .drag-file-area .browse-files-text {
+    color: #234137 !important;
+    font-weight: 700 !important;
+    text-decoration: underline !important;
+    text-underline-offset: 3px !important;
+    cursor: pointer !important;
+    transition: color 0.15s ease !important;
+}
+
+.content-wrapper .drag-file-area label .browse-files-text:hover,
+.content-wrapper .drag-file-area .browse-files-text:hover {
+    color: #2D5244 !important;
+}
+
+.content-wrapper .drag-file-area .dynamic-message {
+    color: #7B8A8B !important;
+    font-size: 13px !important;
+    margin-top: 10px !important;
+    line-height: 1.5 !important;
+}
+
+.content-wrapper .drag-file-area .text-error-msg {
+    display: block !important;
+    margin-top: 6px !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    color: #DC2626 !important;
+}
+
+.content-wrapper .drag-file-area .existing-image {
+    max-width: 44px !important;
+    max-height: 44px !important;
+    border-radius: 6px !important;
+    border: 1px solid #CED4DA !important;
+    margin-left: 8px !important;
+    vertical-align: middle !important;
+}
+
+/* Image preview container & remove button */
+.fileupload-wrap #image_preview:empty,
+.fileupload-wrap #image_preview:not(.site-wrap-list) {
+    display: none !important;
+}
+
+.fileupload-wrap .site-wrap-list {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #FFFFFF !important;
+    border: 2px solid #234137 !important;
+    border-radius: 12px !important;
+    z-index: 5 !important;
+    box-shadow: 0 4px 16px rgba(35, 65, 55, 0.08) !important;
+}
+
+.fileupload-wrap .site-wrap-list .img-div {
+    position: relative !important;
+    max-width: 160px !important;
+    max-height: 160px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.fileupload-wrap .site-wrap-list .img-div img {
+    max-width: 140px !important;
+    max-height: 140px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    transition: opacity 0.2s ease !important;
+}
+
+.fileupload-wrap .site-wrap-list .img-div .middle {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    opacity: 0 !important;
+    transition: opacity 0.2s ease !important;
+}
+
+.fileupload-wrap .site-wrap-list .img-div:hover .middle {
+    opacity: 1 !important;
+}
+
+.fileupload-wrap .site-wrap-list .img-div:hover img {
+    opacity: 0.3 !important;
+}
+
+.fileupload-wrap .site-wrap-list #action-icon {
+    background-color: #DC2626 !important;
+    border-color: #DC2626 !important;
+    color: #FFFFFF !important;
+    border-radius: 50% !important;
+    width: 42px !important;
+    height: 42px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3) !important;
+    cursor: pointer !important;
+    border: none !important;
+    transition: background-color 0.2s ease, transform 0.2s ease !important;
+}
+
+.fileupload-wrap .site-wrap-list #action-icon:hover {
+    background-color: #B91C1C !important;
+    border-color: #B91C1C !important;
+    transform: scale(1.08) !important;
+}
+
+/* ==========================================================================
+   10. Action Buttons & Navigation Footer
+   ========================================================================== */
+.rs-qr-navigation {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: var(--rs-space-20) var(--rs-space-32) !important;
+    border: 1px solid var(--rs-border) !important;
+    background: var(--rs-surface) !important;
+    border-radius: var(--rs-radius-xl) !important;
+    box-shadow: var(--rs-shadow) !important;
+    margin-top: var(--rs-space-32) !important;
+}
+
+/* Base button styling */
+.rs-btn,
+.user-create .rs-qr-navigation .btn,
+.button-custom-genrate {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rs-space-8);
+    padding: 10px 24px !important;
+    font-family: var(--rs-font-family) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    border-radius: var(--rs-radius) !important;
+    cursor: pointer !important;
+    transition: var(--rs-transition) !important;
+    text-decoration: none !important;
+    user-select: none !important;
+    white-space: nowrap !important;
+    text-transform: none !important;
+}
+
+/* Wizard Button Alignment & Visibility Overrides */
+.rs-qr-navigation #prevBtn[style*="display: none"],
+.rs-qr-navigation #nextBtn[style*="display: none"],
+.rs-qr-navigation .button-custom-genrate[style*="display: none"],
+.user-create .actions button#prevBtn[style*="display: none"],
+.user-create .actions button#nextBtn[style*="display: none"],
+.user-create .actions button#submit[style*="display: none"] {
+    display: none !important;
+}
+
+.rs-qr-navigation #nextBtn,
+.rs-qr-navigation .button-custom-genrate,
+.rs-qr-navigation #submit {
+    margin-left: auto !important;
+}
+
+.rs-qr-navigation #prevBtn {
+    margin-right: auto !important;
+}
+
+.rs-btn:active,
+.user-create .rs-qr-navigation .btn:active,
+.button-custom-genrate:active {
+    transform: translateY(1px) !important;
+}
+
+/* Primary Button (Next, Finish, View) */
+.rs-btn--primary,
+#nextBtn,
+.button-custom-genrate,
+.user-create .actions button#submit,
+.rs-qr-view-btn {
+    background-color: var(--rs-primary) !important;
+    border: 1px solid var(--rs-primary) !important;
+    color: var(--rs-text-inverse) !important;
+    box-shadow: var(--rs-shadow-sm) !important;
+}
+
+.rs-btn--primary:hover,
+#nextBtn:hover,
+.button-custom-genrate:hover,
+.user-create .actions button#submit:hover,
+.rs-qr-view-btn:hover {
+    background-color: var(--rs-primary-hover) !important;
+    border-color: var(--rs-primary-hover) !important;
+    color: var(--rs-text-inverse) !important;
+    box-shadow: var(--rs-shadow-md) !important;
+}
+
+.rs-btn--primary:active,
+#nextBtn:active,
+.button-custom-genrate:active,
+.user-create .actions button#submit:active,
+.rs-qr-view-btn:active {
+    background-color: var(--rs-primary-dark) !important;
+    border-color: var(--rs-primary-dark) !important;
+}
+
+.rs-btn--primary:focus,
+#nextBtn:focus,
+.button-custom-genrate:focus,
+.user-create .actions button#submit:focus,
+.rs-qr-view-btn:focus {
+    outline: none !important;
+    box-shadow: var(--rs-focus-ring) !important;
+}
+
+/* Secondary Button (Previous, Go Back) */
+.rs-btn--secondary,
+#prevBtn,
+.rs-qr-go-back-btn {
+    background-color: var(--rs-surface) !important;
+    border: 1px solid var(--rs-border-strong) !important;
+    color: var(--rs-text-main) !important;
+    box-shadow: var(--rs-shadow-sm) !important;
+}
+
+.rs-btn--secondary:hover,
+#prevBtn:hover,
+.rs-qr-go-back-btn:hover {
+    background-color: var(--rs-surface-alt) !important;
+    border-color: var(--rs-primary) !important;
+    color: var(--rs-primary) !important;
+    box-shadow: var(--rs-shadow) !important;
+}
+
+.rs-btn--secondary:active,
+#prevBtn:active,
+.rs-qr-go-back-btn:active {
+    background-color: #F0F4F2 !important;
+    border-color: var(--rs-primary-dark) !important;
+}
+
+.rs-btn--secondary:focus,
+#prevBtn:focus,
+.rs-qr-go-back-btn:focus {
+    outline: none !important;
+    box-shadow: var(--rs-focus-ring) !important;
+}
+
+.rs-btn:disabled,
+.button-custom-genrate:disabled,
+#nextBtn:disabled {
+    opacity: 0.55 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+/* ==========================================================================
+   11. Live Preview Sidebar Card
+   ========================================================================== */
+.rs-qr-preview-sidebar {
+    position: sticky !important;
+    top: var(--rs-space-32) !important;
+    width: 100% !important;
+}
+
+.rs-qr-preview-card {
+    background: var(--rs-surface) !important;
+    border-radius: var(--rs-radius-xl) !important;
+    box-shadow: var(--rs-shadow-lg) !important;
+    border: 1px solid var(--rs-border) !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    position: relative !important;
+}
+
+.rs-qr-preview-header {
+    text-align: center !important;
+    padding: 14px 24px !important;
+    background: var(--rs-surface-alt) !important;
+    border-bottom: 1px solid var(--rs-border) !important;
+}
+
+.rs-qr-preview-header h3 {
+    margin: 0 !important;
+    font-size: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    font-weight: 700 !important;
+    color: var(--rs-text-muted) !important;
+}
+
+.rs-qr-preview-body {
+    padding: var(--rs-space-32) var(--rs-space-24) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: var(--rs-surface) !important;
+    min-height: 360px !important;
+}
+
+.rs-qr-generated-wrapper {
+    background: var(--rs-surface) !important;
+    padding: var(--rs-space-12) !important;
+    width: 100% !important;
+    max-width: 250px !important;
+    border-radius: var(--rs-radius-lg) !important;
+    box-shadow: var(--rs-shadow-sm) !important;
+    border: 1px solid var(--rs-border) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.rs-qr-generated-wrapper img {
+    width: 100% !important;
+    height: auto !important;
+    border-radius: var(--rs-radius) !important;
+}
+
+.rs-qr-preview-body h2 {
+    display: none !important;
+}
+
+/* Live Preview Design Container */
+body .site-gen-qr-code-design {
+    height: auto !important;
+    max-width: 250px !important;
+    width: 100% !important;
+    background-image: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto !important;
+    position: static !important;
+    top: 0 !important;
+}
+
+body .site-gen-qr-code-design img {
+    top: 0 !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+    display: block !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+}
+
+/* ==========================================================================
+   12. Step 3 Confirmation / Success Screen Styling
+   ========================================================================== */
+.rs-qr-success-header {
+    text-align: center !important;
+    padding: var(--rs-space-16) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    margin-bottom: var(--rs-space-16) !important;
+}
+
+.rs-qr-success-title {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: var(--rs-text-main) !important;
+    margin: var(--rs-space-12) 0 var(--rs-space-4) 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: var(--rs-space-8) !important;
+}
+
+.rs-qr-success-icon {
+    color: var(--rs-primary) !important;
+}
+
+.rs-qr-success-desc {
+    font-size: 14px !important;
+    color: var(--rs-text-muted) !important;
+    margin: 0 0 var(--rs-space-16) 0 !important;
+    line-height: 1.5 !important;
+}
+
+/* Download Panel */
+.site-donwload-button {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 250px !important;
+    margin: var(--rs-space-20) auto 0 auto !important;
+    flex-direction: column !important;
+    gap: var(--rs-space-8) !important;
+}
+
+.site-donwload-button button {
+    background: var(--rs-primary) !important;
+    color: var(--rs-text-inverse) !important;
+    border: 1px solid var(--rs-primary) !important;
+    border-radius: var(--rs-radius) !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    width: 100% !important;
+    transition: var(--rs-transition) !important;
+    box-shadow: var(--rs-shadow-sm) !important;
+    cursor: pointer !important;
+}
+
+.site-donwload-button button:hover {
+    background: var(--rs-primary-hover) !important;
+    border-color: var(--rs-primary-hover) !important;
+    color: var(--rs-text-inverse) !important;
+    box-shadow: var(--rs-shadow-md) !important;
+}
+
+.site-donwload-button button a {
+    color: inherit !important;
+    text-decoration: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: var(--rs-space-8) !important;
+}
+
+/* ==========================================================================
+   13. Spinner & Loader Consistency
+   ========================================================================== */
+#loader {
+    background-color: rgba(254, 251, 246, 0.7) !important;
+    backdrop-filter: blur(4px) !important;
+}
+
+#loader:before {
+    border: 5px solid var(--rs-border-strong) !important;
+    border-top-color: var(--rs-primary) !important;
+}
+
+/* ==========================================================================
+   14. Responsive Layout Breakpoints
+   ========================================================================== */
+@media (max-width: 1023px) {
+    .rs-qr-workspace {
+        grid-template-columns: 1fr !important;
+        display: flex !important;
+        flex-direction: column-reverse !important;
+    }
+    .rs-qr-preview-sidebar {
+        position: static !important;
+        margin-bottom: var(--rs-space-32) !important;
+    }
+    .rs-qr-navigation {
+        flex-direction: column !important;
+        gap: var(--rs-space-16) !important;
+    }
+    .rs-btn {
+        width: 100% !important;
+    }
+    .rs-qr-stepper .step-menu-wrap {
+        gap: var(--rs-space-24) !important;
+    }
+}

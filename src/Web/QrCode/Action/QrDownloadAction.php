@@ -23,7 +23,7 @@ use Yiisoft\Aliases\Aliases;
  */
 final class QrDownloadAction
 {
-    private const ALLOWED_FORMATS = ['png', 'jpg'];
+    private const ALLOWED_FORMATS = ['png', 'jpg', 'pdf'];
 
     public function __construct(
         private QrCodeRepositoryInterface $qrCodeRepo,
@@ -71,10 +71,7 @@ final class QrDownloadAction
         }
 
         if (!in_array($format, self::ALLOWED_FORMATS, true)) {
-            if ($format === 'pdf') {
-                return $this->errorResponse(400, 'Bad Request: PDF generation is currently deferred.');
-            }
-            return $this->errorResponse(400, 'Bad Request: Unsupported download format requested. Supported formats: PNG, JPG.');
+            return $this->errorResponse(400, 'Bad Request: Unsupported download format requested. Supported formats: PNG, JPG, PDF.');
         }
 
         $qrCode = $this->qrCodeRepo->findById($id, $context);
@@ -139,6 +136,24 @@ final class QrDownloadAction
                     ->withHeader('Content-Type', 'image/jpeg')
                     ->withHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
                     ->withHeader('Content-Length', (string) strlen($jpgBytes))
+                    ->withHeader('Pragma', 'no-cache')
+                    ->withHeader('Expires', '0')
+                    ->withBody($stream);
+            }
+
+            if ($format === 'pdf') {
+                $pdfBytes = $this->qrCodeService->convertToPdf($resolvedDiskPath);
+
+                $stream = new Stream(fopen('php://temp', 'r+'));
+                $stream->write($pdfBytes);
+                $stream->rewind();
+
+                $filename = $cleanName . '.pdf';
+
+                return $this->responseFactory->createResponse(200)
+                    ->withHeader('Content-Type', 'application/pdf')
+                    ->withHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                    ->withHeader('Content-Length', (string) strlen($pdfBytes))
                     ->withHeader('Pragma', 'no-cache')
                     ->withHeader('Expires', '0')
                     ->withBody($stream);

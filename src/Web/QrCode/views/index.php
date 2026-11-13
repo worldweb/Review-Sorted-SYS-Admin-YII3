@@ -39,6 +39,10 @@ $actions = [
 include __DIR__ . '/../../Shared/Components/_page_header.php';
 ?>
 
+<?php if (isset($flash) && $flash !== null): ?>
+    <?php include __DIR__ . '/../../Shared/Components/_alerts.php'; ?>
+<?php endif; ?>
+
 <div class="rs-card">
     <div class="rs-card__header rs-d-flex rs-justify-content-between rs-align-items-center rs-flex-wrap rs-gap-3" style="padding: 16px 20px; border-bottom: 1px solid var(--rs-border, #E2E8F0);">
         <form method="GET" action="<?= \App\Environment::url('/qrcode/index') ?>" class="rs-d-flex rs-align-items-center rs-gap-2" style="margin: 0;">

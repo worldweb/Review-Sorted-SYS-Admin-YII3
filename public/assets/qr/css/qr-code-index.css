@@ -1,0 +1,272 @@
+body .wrap nav#w0 .container {
+	display: block;
+}
+
+.btn-group-vertical>.btn-group:after, .btn-group-vertical>.btn-group:before, .btn-toolbar:after, .btn-toolbar:before, .clearfix:after, .clearfix:before, .container-fluid:after, .container-fluid:before, .container:after, .container:before, .dl-horizontal dd:after, .dl-horizontal dd:before, .form-horizontal .form-group:after, .form-horizontal .form-group:before, .modal-footer:after, .modal-footer:before, .nav:after, .nav:before, .navbar-collapse:after, .navbar-collapse:before, .navbar-header:after, .navbar-header:before, .navbar:after, .navbar:before, .pager:after, .pager:before, .panel-body:after, .panel-body:before, .row:after, .row:before {
+	content: inherit !important;
+}
+
+.account-index table a {
+	color: #00283A;
+	text-decoration: none !important;
+}
+
+.site-wrap-qrcode-section-lite-bit {
+	text-align: center;
+	font-weight: 600;
+}
+
+.site-qrcode-action-table-column-wrap {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 5px;
+	margin: 0 auto;
+	margin-bottom: 5px;
+	max-width: 90%;
+	width: 100%;
+	padding-top: 3px !important;
+}
+
+.site-qrcode-action-table-column-wrap a {
+	width: 100%;
+	display: inline-flex;
+	font-weight: 400;
+	text-align: center;
+	vertical-align: middle;
+	-webkit-user-select: none;
+	user-select: none;
+	background-color: transparent;
+	border: 1px solid transparent;
+	padding: .4rem .75rem;
+	font-size: .875rem;
+	line-height: 1.25;
+	border-radius: 0;
+	transition: all .15s ease-in-out;
+	color: #ED5200 !important;
+	border-color: #ED5200;
+	font-size: 14px;
+	text-decoration: none !important;
+	gap: 5px;
+	justify-content: center;
+	align-items: center;
+}
+
+.site-qrcode-action-table-column-wrap a:hover {
+	background-color: #ED5200;
+	color: #fff !important;
+}
+
+.dropdown-menu .dropdown-item {
+	width: 100%;
+	display: inline-flex;
+	font-weight: 400;
+	text-align: center;
+	vertical-align: middle;
+	-webkit-user-select: none;
+	user-select: none;
+	background-color: transparent;
+	border: 1px solid transparent;
+	padding: .4rem .75rem;
+	line-height: 1.25;
+	border-radius: 0;
+	transition: all .15s ease-in-out;
+	color: #ED5200 !important;
+	border-color: #ED5200;
+	font-size: 14px;
+	text-decoration: none !important;
+	gap: 5px;
+	justify-content: center;
+	align-items: center;
+}
+
+.dropdown-menu .dropdown-item:hover {
+	background-color: #ED5200;
+	color: #fff !important;
+}
+
+.account-index .ctm_menu.open .dropdown-menu {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 5px;
+	margin: 0 auto;
+	margin-bottom: 5px;
+	width: 100%;
+	padding-top: 3px !important;
+	padding-bottom: 4px;
+}
+
+.account-index .ctm_menu.open .dropdown-menu .dropdown-item {
+	max-width: 90%;
+}
+
+.account-index table .dropdown {
+	width: 100%;
+	max-width: 70%;
+	margin: 0 auto;
+	margin-bottom: 5px;
+}
+
+.account-index table .dropdown button {
+	width: 100%;
+	max-width: 120px;
+	border-radius: 0;
+	box-shadow: none !important;
+	outline: none !important;
+	color: #ED5200 !important;
+	border-color: #ED5200;
+	background: transparent;
+}
+
+.account-index table .dropdown button:hover, .account-index table .dropdown button:focus, .account-index table .dropdown button:focus-visible {
+	background-color: #ED5200;
+	color: #fff !important;
+	border-color: #ED5200 !important;
+}
+
+.account-index table .dropdown .btn-primary.active, .account-index table .dropdown .btn-primary.focus, .account-index table .dropdown .btn-primary:active, .account-index table .dropdown .btn-primary:focus, .account-index table .dropdown .btn-primary:hover, .account-index table .dropdown.open>.dropdown-toggle.btn-primary {
+	background-color: #ED5200;
+	color: #fff !important;
+	border-color: #ED5200 !important;
+}
+
+.account-index table .dropdown .dropdown-menu {
+	width: 100%;
+	border-radius: 0;
+	padding: 0;
+	margin: 0.125rem 0 0;
+	font-size: .875rem;
+	color: #151b1e;
+	text-align: left;
+	list-style: none;
+	background-color: #fff;
+	background-clip: padding-box;
+	border: 1px solid #c2cfd6;
+	max-width: 118px !important;
+	min-width: 118px !important;
+}
+
+.account-index table .dropdown .dropdown-menu a {
+	font-size: 14px;
+	text-align: center;
+	width: 100%;
+}
+
+.account-index table .dropdown .dropdown-menu a:hover {
+	color: #ED5200;
+}
+
+.site-main-wrap-account-index-slot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 10px;
+}
+
+.site-main-wrap-account-index-slot a.btn {
+	background: #ED5200 !important;
+	border-color: #ED5200 !important;
+	padding: 10px 18px;
+	border-radius: 4px;
+	font-size: 14px;
+	text-transform: uppercase;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	transition: all .3s ease-in-out;
+	outline: none;
+	box-shadow: none !important;
+}
+
+.site-main-wrap-account-index-slot h1, .site-main-wrap-account-index-slot p {
+	margin: 0;
+}
+
+.account-index .summary {
+	padding-bottom: 10px;
+}
+
+.account-index table .dropdown .dropdown-toggle {
+	transform: rotate(0deg);
+}
+
+.account-index table .dropdown.open .dropdown-toggle::after {
+	transform: rotate(180deg);
+}
+
+p.site-qrcode-status-section-active b {
+	color: green;
+	font-size: 14px;
+	text-transform: uppercase;
+}
+p.site-qrcode-status-section-active {
+    text-align: center;
+}
+p.site-qrcode-status-section-deactive b {
+	color: red;
+	font-size: 14px;
+	text-transform: uppercase;
+}
+p.site-qrcode-status-section-deactive {
+    text-align: center;
+}
+.site-wrap-qrcode-section-lite-bit i {
+    font-size: 18px;
+    padding: 10px;
+}
+
+.ctm_edit {
+}
+
+.ctm_open_menu {
+	width: 30px;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	border-left: 1px solid #ED5200;
+	height: 34px;
+	transition: all .2s ease-in-out;
+}
+
+.ctm_edit .dropdown-toggle::after {
+	content: inherit;
+}
+
+.ctm_edit .dropdown-toggle {
+	display: flex;
+	justify-content: space-between;
+	padding: 0 0 0 8px;
+	align-items: center;
+}
+
+.ctm_edit.open .dropdown-toggle .ctm_open_menu, .ctm_edit .dropdown-toggle:hover .ctm_open_menu {
+	border-color: #fff;
+}
+
+.ctm_update {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+.account-index th {
+    text-align: center;
+}
+.account-index tbody tr td img {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+.account-index tbody td:first-child {
+    text-align: center;
+}
+p.dropdown-item.item-download-as-jpg {
+    margin-bottom: 0px;
+    cursor: pointer;
+}
+.account-index table td {
+    vertical-align: middle !important;
+}

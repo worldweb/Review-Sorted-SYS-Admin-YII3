@@ -180,6 +180,11 @@ final class QrCodeService implements QrCodeServiceInterface
         return $this->imageProcessor->convertToJpg($pngPath, $outputPath, $quality);
     }
 
+    public function convertToPdf(string $imagePath): string
+    {
+        return $this->imageProcessor->convertToPdf($imagePath);
+    }
+
     public function validateLogo(string $filePath): array
     {
         return $this->imageProcessor->validateLogo($filePath);

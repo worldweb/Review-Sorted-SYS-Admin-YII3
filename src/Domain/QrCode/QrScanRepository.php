@@ -35,7 +35,8 @@ final class QrScanRepository implements QrScanRepositoryInterface
             ->from(['qs' => '{{%qrcode_scan}}'])
             ->innerJoin(['q' => '{{%qrcode}}'], 'q.id = qs.qrcode_id')
             ->leftJoin(['u' => '{{%user}}'], 'u.id = q.user_id')
-            ->where(['qs.qrcode_id' => $qrCodeId]);
+            ->where(['qs.qrcode_id' => $qrCodeId])
+            ->andWhere(['>=', 'qs.created_at', new Expression('q.created_at')]);
 
         if ($ctx !== null && !$ctx->isUnrestricted()) {
             $targetAccountId = $ctx->getPrimaryAccountId();
@@ -69,6 +70,7 @@ final class QrScanRepository implements QrScanRepositoryInterface
             ->innerJoin(['q' => '{{%qrcode}}'], 'q.id = qs.qrcode_id')
             ->leftJoin(['u' => '{{%user}}'], 'u.id = q.user_id')
             ->where(['qs.qrcode_id' => $qrCodeId])
+            ->andWhere(['>=', 'qs.created_at', new Expression('q.created_at')])
             ->andWhere(['>=', 'qs.created_at', $todayStart])
             ->andWhere(['<', 'qs.created_at', $tomorrowStart]);
 
@@ -98,7 +100,8 @@ final class QrScanRepository implements QrScanRepositoryInterface
             ->from(['qs' => '{{%qrcode_scan}}'])
             ->innerJoin(['q' => '{{%qrcode}}'], 'q.id = qs.qrcode_id')
             ->leftJoin(['u' => '{{%user}}'], 'u.id = q.user_id')
-            ->where(['qs.qrcode_id' => $qrCodeId]);
+            ->where(['qs.qrcode_id' => $qrCodeId])
+            ->andWhere(['>=', 'qs.created_at', new Expression('q.created_at')]);
 
         if ($ctx !== null && !$ctx->isUnrestricted()) {
             $targetAccountId = $ctx->getPrimaryAccountId();
@@ -144,7 +147,8 @@ final class QrScanRepository implements QrScanRepositoryInterface
             ->from(['qs' => '{{%qrcode_scan}}'])
             ->innerJoin(['q' => '{{%qrcode}}'], 'q.id = qs.qrcode_id')
             ->leftJoin(['u' => '{{%user}}'], 'u.id = q.user_id')
-            ->where(['qs.qrcode_id' => $qrCodeId]);
+            ->where(['qs.qrcode_id' => $qrCodeId])
+            ->andWhere(['>=', 'qs.created_at', new Expression('q.created_at')]);
 
         if ($ctx !== null && !$ctx->isUnrestricted()) {
             $targetAccountId = $ctx->getPrimaryAccountId();

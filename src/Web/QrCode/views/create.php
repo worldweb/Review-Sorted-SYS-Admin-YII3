@@ -139,6 +139,10 @@ if ($isUpdate && !empty($model->getQrcode())) {
             </div>
         </div>
 
+        <?php if (isset($flash) && $flash !== null): ?>
+            <?php include __DIR__ . '/../../Shared/Components/_alerts.php'; ?>
+        <?php endif; ?>
+
         <!-- Stepper Indicators -->
         <div class="rs-qr-stepper">
             <ul class="nav nav-pills step-menu-wrap" id="pills-tab" role="tablist">
@@ -335,10 +339,10 @@ if ($isUpdate && !empty($model->getQrcode())) {
                                                     <div class="upload-files-container">
                                                         <div class="drag-file-area">
                                                             <span class="material-icons-outlined upload-icon"> <i class="fa-solid fa-cloud-arrow-up"></i></span>
-                                                            <label class="label">
+                                                            <label class="rs-qr-upload-label label">
                                                                 <span class="browse-files">
                                                                     <input type="file" class="default-file-input" id="qr_gen_form_logo" name="upload_logo" accept="image/jpg, image/png, image/jpeg">
-                                                                    <span>Drag file here or</span>
+                                                                    <span class="upload-text-main">Drag file here or</span>
                                                                     <span class="browse-files-text">browse file</span>
                                                                 </span>
                                                                 <?php if ($model?->isUploadedLogo() && !empty($model->getUploadLogo())): ?>
