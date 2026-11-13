@@ -55,7 +55,9 @@ final class UserCreateAction
             $parsedBody = $request->getParsedBody();
             $data = is_array($parsedBody) ? $parsedBody : [];
 
-            $saveData = UserSaveData::fromArray($data, User::ROLE_ADMIN);
+            $adminPostData = $data;
+            unset($adminPostData['account_id'], $adminPostData['newRole']);
+            $saveData = UserSaveData::fromArray($adminPostData, User::ROLE_ADMIN, null);
 
             // Validation rules
             if ($saveData->name === '') {
@@ -65,6 +67,8 @@ final class UserCreateAction
                 $errors['email'] = 'Email cannot be blank.';
             } elseif (!filter_var($saveData->email, FILTER_VALIDATE_EMAIL)) {
                 $errors['email'] = 'Email is not a valid email address.';
+            } elseif ($this->userRepo->findByEmail($saveData->email, $context) !== null) {
+                $errors['email'] = 'Email already registered.';
             }
             $minPasswordLen = $this->settingRepo?->getInt('security_password_min_length', 6) ?? 6;
             if ($saveData->password === null || strlen($saveData->password) < $minPasswordLen) {
@@ -78,7 +82,7 @@ final class UserCreateAction
                 try {
                     $newUserId = $this->userRepo->createUser($saveData);
                     if ($newUserId > 0) {
-                        return $this->redirect(\App\Environment::url('/users/view?id=' . $newUserId));
+                        return $this->redirect(\App\Environment::url('/user/view?id=' . $newUserId));
                     }
                     $errors['general'] = 'Failed to create administrator.';
                 } catch (\Throwable $e) {

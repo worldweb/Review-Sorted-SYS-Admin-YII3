@@ -65,14 +65,12 @@ final class UserListAction
         $users = $searchResult['users'];
         $total = $searchResult['total'];
 
-        // Determine action buttons visibility
+        // Determine action buttons visibility (matching Yii2 role matrix)
         $canAddAdmin = $currentUser->isAdmin();
         $canAddAccountAdmin = $currentUser->isAdmin();
 
         $canAddWorker = false;
-        if ($currentUser->isAdmin()) {
-            $canAddWorker = true;
-        } elseif ($currentUser->isAccountAdmin()) {
+        if ($currentUser->isAccountAdmin()) {
             $accId = $context->getAccountId() ?? $currentUser->getAccountId();
             if ($accId !== null) {
                 $account = $this->accountRepo->findById($accId, $context);

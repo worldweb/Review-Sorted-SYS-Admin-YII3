@@ -27,14 +27,17 @@ $eyeOffIcon = '<svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 
         min-height: 100vh;
         background-color: var(--rs-bg-app, #f9fafb);
         display: flex;
-        justify-content: center;
-        padding: 60px 20px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 48px 20px 64px 20px;
         font-family: var(--rs-font-family, inherit);
-        overflow-y: visible;
+        box-sizing: border-box;
     }
     .new-client-container {
         max-width: 768px;
         width: 100%;
+        margin: 0 auto;
     }
     .new-client-brand {
         text-align: center;

@@ -88,40 +88,58 @@ final class UserUpdateAction
 
             $saveData = UserSaveData::fromArray($postData, $targetUser->getRole() ?? User::ROLE_WORKER, $targetUser->getAccountId());
 
-            // Non-admins cannot alter their tenant account association
+            // Non-admins cannot alter their tenant account association or role
             $effectiveAccountId = $currentUser->isAdmin() ? $saveData->accountId : $targetUser->getAccountId();
+            $effectiveRole = $currentUser->isAdmin() ? $saveData->role : ($targetUser->getRole() ?? User::ROLE_WORKER);
+
+            $sanitizedSaveData = new UserSaveData(
+                name: $saveData->name,
+                email: $saveData->email,
+                password: $saveData->password,
+                passwordConfirm: $saveData->passwordConfirm,
+                role: $effectiveRole,
+                status: $saveData->status,
+                accountId: $effectiveAccountId,
+                ownerId: $targetUser->getOwnerId(),
+                extraAccounts: $saveData->extraAccounts,
+            );
 
             // Validation rules
-            if ($saveData->name === '') {
+            if ($sanitizedSaveData->name === '') {
                 $errors['name'] = 'Name cannot be blank.';
             }
-            if ($saveData->email === '') {
+            if ($sanitizedSaveData->email === '') {
                 $errors['email'] = 'Email cannot be blank.';
-            } elseif (!filter_var($saveData->email, FILTER_VALIDATE_EMAIL)) {
+            } elseif (!filter_var($sanitizedSaveData->email, FILTER_VALIDATE_EMAIL)) {
                 $errors['email'] = 'Email is not a valid email address.';
+            } else {
+                $existing = $this->userRepo->findByEmail($sanitizedSaveData->email, $context);
+                if ($existing !== null && $existing->getId() !== $targetId) {
+                    $errors['email'] = 'Email already registered.';
+                }
             }
 
             // Optional password update
-            if ($saveData->password !== null && $saveData->password !== '') {
-                if (strlen($saveData->password) < 6) {
+            if ($sanitizedSaveData->password !== null && $sanitizedSaveData->password !== '') {
+                if (strlen($sanitizedSaveData->password) < 6) {
                     $errors['password'] = 'Password should contain at least 6 characters.';
                 }
-                if ($saveData->password !== $saveData->passwordConfirm) {
+                if ($sanitizedSaveData->password !== $sanitizedSaveData->passwordConfirm) {
                     $errors['password_conf'] = 'Passwords don\'t match.';
                 }
             }
 
             $data = array_merge($data, [
-                'name' => $saveData->name,
-                'email' => $saveData->email,
-                'status' => $saveData->status,
+                'name' => $sanitizedSaveData->name,
+                'email' => $sanitizedSaveData->email,
+                'status' => $sanitizedSaveData->status,
                 'account_id' => $effectiveAccountId,
             ]);
 
             if (empty($errors)) {
                 try {
-                    $this->userRepo->updateUser($targetId, $saveData);
-                    return $this->redirect(\App\Environment::url('/users/view?id=' . $targetId));
+                    $this->userRepo->updateUser($targetId, $sanitizedSaveData);
+                    return $this->redirect(\App\Environment::url('/user/view?id=' . $targetId));
                 } catch (\Throwable $e) {
                     $errors['general'] = 'Failed to update user: ' . $e->getMessage();
                 }

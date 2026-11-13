@@ -63,7 +63,25 @@ declare(strict_types=1);
                 </div>
 
                 <div class="rs-col" style="max-width: 300px; border-left: 1px solid var(--rs-border-muted, #CED4DA); padding-left: 24px;">
-                    <h3 class="rs-text-md rs-mb-4" style="font-size: 16px; font-weight: 600; margin-top: 0;">Status</h3>
+                    <h3 class="rs-text-md rs-mb-4" style="font-size: 16px; font-weight: 600; margin-top: 0;">Account Information</h3>
+                    
+                    <?php if (isset($account) && $account !== null): ?>
+                        <div class="rs-form-group rs-mb-4">
+                            <label class="rs-label">Target Account</label>
+                            <div style="padding: 10px 12px; background: #f8fafc; border: 1px solid var(--rs-border-muted, #CED4DA); border-radius: 6px;">
+                                <div style="font-weight: 600; color: #1e293b; font-size: 14px;">
+                                    <?= htmlspecialchars($account->getBusinessName() ?? ('Account #' . $account->getId())) ?>
+                                </div>
+                                <?php if (isset($remainingSeats) && isset($maxUsers)): ?>
+                                    <div class="rs-text-muted" style="font-size: 12px; margin-top: 4px;">
+                                        Available Seats: <strong><?= (int) $remainingSeats ?></strong> of <?= (int) $maxUsers ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <h3 class="rs-text-md rs-mb-4" style="font-size: 16px; font-weight: 600; margin-top: 16px;">Status</h3>
                     <div class="rs-form-group rs-mb-4">
                         <label for="user-status" class="rs-label">Status</label>
                         <select id="user-status" name="status" class="rs-input" style="height: 44px;" <?= !empty($limitReached) ? 'disabled' : '' ?>>

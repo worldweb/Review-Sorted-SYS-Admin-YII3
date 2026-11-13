@@ -10,6 +10,7 @@ use App\Domain\SocialConnection\ServiceConfig;
 use App\Domain\SocialConnection\SubService;
 use App\Domain\SocialPost\SocialPost;
 use App\Domain\SocialPost\SocialPostDestination;
+use App\Domain\SocialPost\SocialPostRepositoryInterface;
 use App\Domain\User\User;
 use App\Domain\User\UserRepositoryInterface;
 use App\Environment;
@@ -39,6 +40,7 @@ final readonly class Action
         private ReviewRepositoryInterface $reviewRepo,
         private UserRepositoryInterface $userRepo,
         private AccountRepositoryInterface $accountRepo,
+        private SocialPostRepositoryInterface $socialPostRepo,
         private ResponseFactoryInterface $responseFactory,
     ) {}
 
@@ -115,40 +117,25 @@ final readonly class Action
             $scheduledCount = 0;
         }
 
-        // 5. KPI C: Publishing Failures (failed destinations requiring attention, excluding user cancellations)
-        $totalFailed = 0;
-        $ambiguousFailed = 0;
-        $regularFailed = 0;
-        try {
-            $failureQuery = (new Query($this->db))
-                ->select([
-                    'total_failed' => new Expression('COUNT(*)'),
-                    'ambiguous_failed' => new Expression("SUM(CASE WHEN error_message LIKE 'Ambiguous delivery:%' THEN 1 ELSE 0 END)"),
-                    'regular_failed' => new Expression("SUM(CASE WHEN error_message NOT LIKE 'Ambiguous delivery:%' OR error_message IS NULL THEN 1 ELSE 0 END)"),
-                ])
-                ->from('{{%social_post_destination}}')
-                ->where(['status' => SocialPostDestination::STATUS_FAILED])
-                ->andWhere(['or', ['error_message' => null], ['!=', 'error_message', 'Cancelled by user']]);
+        // 5. KPI C: Role-Based Operational Metric (Total Workspaces for Admin, Published Posts for Tenant)
+        $totalAccounts = 0;
+        $activeAccounts = 0;
+        $publishedPostsCount = 0;
 
-            if (!$context->isUnrestricted()) {
-                $accessible = $context->getAccessibleAccountIds();
-                if (!empty($accessible)) {
-                    $failureQuery->andWhere(['in', 'account_id', $accessible]);
-                    $failedStats = $failureQuery->one() ?: [];
-                    $totalFailed = (int) ($failedStats['total_failed'] ?? 0);
-                    $ambiguousFailed = (int) ($failedStats['ambiguous_failed'] ?? 0);
-                    $regularFailed = (int) ($failedStats['regular_failed'] ?? 0);
-                }
-            } else {
-                $failedStats = $failureQuery->one() ?: [];
-                $totalFailed = (int) ($failedStats['total_failed'] ?? 0);
-                $ambiguousFailed = (int) ($failedStats['ambiguous_failed'] ?? 0);
-                $regularFailed = (int) ($failedStats['regular_failed'] ?? 0);
+        if ($context->isUnrestricted()) {
+            try {
+                $totalAccounts = $this->accountRepo->count([], $context);
+                $activeAccounts = $this->accountRepo->count(['status' => 1], $context);
+            } catch (Throwable) {
+                $totalAccounts = 0;
+                $activeAccounts = 0;
             }
+        }
+
+        try {
+            $publishedPostsCount = $this->socialPostRepo->countPosts($context, null, ['status' => 'published']);
         } catch (Throwable) {
-            $totalFailed = 0;
-            $ambiguousFailed = 0;
-            $regularFailed = 0;
+            $publishedPostsCount = 0;
         }
 
         // 6. KPI D: Active Social Channels (linked Facebook Pages, Instagram Accounts, Google Locations)
@@ -300,22 +287,15 @@ final readonly class Action
                 'unreadReviews' => $unreadReviews,
                 'totalReviews' => $totalReviews,
                 'scheduledPostsCount' => $scheduledCount,
-                'totalFailed' => $totalFailed,
-                'ambiguousFailed' => $ambiguousFailed,
-                'regularFailed' => $regularFailed,
+                'totalAccounts' => $totalAccounts,
+                'activeAccounts' => $activeAccounts,
+                'publishedPostsCount' => $publishedPostsCount,
                 'activeChannelsCount' => $activeChannelsCount,
                 'facebookChannelsCount' => $facebookCount,
                 'googleChannelsCount' => $googleCount,
                 'instagramChannelsCount' => $instagramCount,
             ],
             'upcomingPosts' => $upcomingPosts,
-            'failureAlert' => [
-                'hasFailures' => $totalFailed > 0,
-                'totalFailed' => $totalFailed,
-                'ambiguousFailed' => $ambiguousFailed,
-                'regularFailed' => $regularFailed,
-                'failedQueueUrl' => Environment::url('/social-post?status=failed'),
-            ],
         ]);
     }
 }

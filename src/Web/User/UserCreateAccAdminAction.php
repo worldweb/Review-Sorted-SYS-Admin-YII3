@@ -74,6 +74,8 @@ final class UserCreateAccAdminAction
                 $errors['email'] = 'Email cannot be blank.';
             } elseif (!filter_var($saveData->email, FILTER_VALIDATE_EMAIL)) {
                 $errors['email'] = 'Email is not a valid email address.';
+            } elseif ($this->userRepo->findByEmail($saveData->email, $context) !== null) {
+                $errors['email'] = 'Email already registered.';
             }
             if ($saveData->accountId === null || $saveData->accountId <= 0) {
                 $errors['account_id'] = 'Account cannot be blank.';
@@ -90,7 +92,7 @@ final class UserCreateAccAdminAction
                 try {
                     $newUserId = $this->userRepo->createUser($saveData);
                     if ($newUserId > 0) {
-                        return $this->redirect(\App\Environment::url('/users/view?id=' . $newUserId));
+                        return $this->redirect(\App\Environment::url('/user/view?id=' . $newUserId));
                     }
                     $errors['general'] = 'Failed to create account administrator.';
                 } catch (\Throwable $e) {

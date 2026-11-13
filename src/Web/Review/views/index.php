@@ -191,7 +191,17 @@ $renderStars = static function (?float $rawRate): string {
                                     <?php endforeach; ?>
                                 </select>
                             </td>
-                            <td></td>
+                            <td>
+                                <select name="review_rate" class="rs-select rs-input rs-w-100" style="font-size: 12px; padding: 4px 6px;" onchange="this.form.submit()">
+                                    <option value="">All</option>
+                                    <option value="5" <?= $filter->getReviewRate() !== null && $filter->getReviewRate() === 5.0 ? 'selected' : '' ?>>5 Stars</option>
+                                    <option value="4" <?= $filter->getReviewRate() !== null && $filter->getReviewRate() === 4.0 ? 'selected' : '' ?>>4 Stars</option>
+                                    <option value="3" <?= $filter->getReviewRate() !== null && $filter->getReviewRate() === 3.0 ? 'selected' : '' ?>>3 Stars</option>
+                                    <option value="2" <?= $filter->getReviewRate() !== null && $filter->getReviewRate() === 2.0 ? 'selected' : '' ?>>2 Stars</option>
+                                    <option value="1" <?= $filter->getReviewRate() !== null && $filter->getReviewRate() === 1.0 ? 'selected' : '' ?>>1 Star</option>
+                                    <option value="0" <?= $filter->getReviewRate() !== null && $filter->getReviewRate() === 0.0 ? 'selected' : '' ?>>0 Stars (No recommendation)</option>
+                                </select>
+                            </td>
                             <td>
                                 <input type="text" name="review_text" class="rs-input rs-w-100" style="font-size: 12px; padding: 4px 8px;" placeholder="Search text..." value="<?= Html::encode($filter->getReviewText() ?? '') ?>" onkeydown="if(event.key==='Enter') this.form.submit();">
                             </td>

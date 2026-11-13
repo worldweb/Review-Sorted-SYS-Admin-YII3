@@ -43,16 +43,16 @@ final class UserCreateWorkerAction
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
-        if ($currentUser === null || !$this->accessDecision->canCreateUserRole($context, User::ROLE_WORKER)) {
+        if ($currentUser === null || !$currentUser->isAccountAdmin()) {
             $response = $this->responseFactory->createResponse(403);
-            $response->getBody()->write('Forbidden: You are not authorized to create team members.');
+            $response->getBody()->write('Forbidden: Only Account Administrators can create team members.');
             return $response;
         }
 
         $accountId = $context->getScopedAccountId() ?? ($context->getAccountId() ?? ($currentUser->getAccountId() ?? $currentUser->getOwnerId()));
         if ($accountId === null || $accountId <= 0) {
-            $response = $this->responseFactory->createResponse(400);
-            $response->getBody()->write('Bad Request: User does not belong to a valid tenant account.');
+            $response = $this->responseFactory->createResponse(403);
+            $response->getBody()->write('Forbidden: Account Administrator does not belong to a valid tenant account.');
             return $response;
         }
 
@@ -74,7 +74,11 @@ final class UserCreateWorkerAction
             $parsedBody = $request->getParsedBody();
             $data = is_array($parsedBody) ? $parsedBody : [];
 
-            $saveData = UserSaveData::fromArray($data, User::ROLE_WORKER, $accountId);
+            // Discard any posted account_id/role to guarantee strict context derivation
+            $workerPostData = $data;
+            $workerPostData['account_id'] = $accountId;
+            $workerPostData['newRole'] = User::ROLE_WORKER;
+            $saveData = UserSaveData::fromArray($workerPostData, User::ROLE_WORKER, $accountId);
 
             // Validation rules
             if ($saveData->name === '') {
@@ -84,6 +88,8 @@ final class UserCreateWorkerAction
                 $errors['email'] = 'Email cannot be blank.';
             } elseif (!filter_var($saveData->email, FILTER_VALIDATE_EMAIL)) {
                 $errors['email'] = 'Email is not a valid email address.';
+            } elseif ($this->userRepo->findByEmail($saveData->email, $context) !== null) {
+                $errors['email'] = 'Email already registered.';
             }
             $minPasswordLen = $this->settingRepo?->getInt('security_password_min_length', 6) ?? 6;
             if ($saveData->password === null || strlen($saveData->password) < $minPasswordLen) {
@@ -97,7 +103,7 @@ final class UserCreateWorkerAction
                 try {
                     $newUserId = $this->userRepo->createUser($saveData);
                     if ($newUserId > 0) {
-                        return $this->redirect(\App\Environment::url('/users/view?id=' . $newUserId));
+                        return $this->redirect(\App\Environment::url('/user/view?id=' . $newUserId));
                     }
                     $errors['general'] = 'Failed to create team member.';
                 } catch (\Throwable $e) {
@@ -105,6 +111,8 @@ final class UserCreateWorkerAction
                 }
             }
         }
+
+        $remainingSeats = $account !== null ? max(0, $account->getMaxUsers() - $totalUsers) : 0;
 
         return $this->viewRenderer
             ->render(__DIR__ . '/views/create', [
@@ -116,6 +124,10 @@ final class UserCreateWorkerAction
                 'infoMessage' => $infoMessage,
                 'role' => User::ROLE_WORKER,
                 'limitReached' => $limitReached,
+                'account' => $account,
+                'totalUsers' => $totalUsers,
+                'remainingSeats' => $remainingSeats,
+                'maxUsers' => $account?->getMaxUsers() ?? 0,
                 'csrfToken' => $this->csrfToken?->getValue(),
             ]);
     }

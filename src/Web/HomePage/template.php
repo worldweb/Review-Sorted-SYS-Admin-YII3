@@ -32,22 +32,15 @@ use Yiisoft\View\WebView;
  *     unreadReviews: int,
  *     totalReviews: int,
  *     scheduledPostsCount: int,
- *     totalFailed: int,
- *     ambiguousFailed: int,
- *     regularFailed: int,
+ *     totalAccounts?: int,
+ *     activeAccounts?: int,
+ *     publishedPostsCount?: int,
  *     activeChannelsCount: int,
  *     facebookChannelsCount: int,
  *     googleChannelsCount: int,
  *     instagramChannelsCount: int,
  * } $kpi
  * @var array<int, SocialPost> $upcomingPosts
- * @var array{
- *     hasFailures: bool,
- *     totalFailed: int,
- *     ambiguousFailed: int,
- *     regularFailed: int,
- *     failedQueueUrl: string,
- * } $failureAlert
  */
 
 $this->setTitle('Dashboard');
@@ -85,33 +78,6 @@ $this->setTitle('Dashboard');
             </a>
         </div>
     </div>
-
-    <!-- Conditional Publishing Failure Alert Banner -->
-    <?php if ($failureAlert['hasFailures']): ?>
-        <div class="rs-alert rs-alert--danger rs-mb-5" role="alert" style="box-shadow: var(--rs-shadow-sm);">
-            <div class="rs-alert__icon" style="margin-top: 2px;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-            </div>
-            <div class="rs-alert__content">
-                <div style="font-weight: 700; font-size: 1rem; margin-bottom: 4px;">
-                    Publishing Attention Required: <?= number_format($failureAlert['totalFailed']) ?> Failed Destination<?= $failureAlert['totalFailed'] > 1 ? 's' : '' ?>
-                </div>
-                <div>
-                    One or more outbound social media destinations encountered errors during publishing and require operator review.
-                    <?php if ($failureAlert['ambiguousFailed'] > 0): ?>
-                        <div style="margin-top: 4px; font-weight: 600;">
-                            ⚠️ <?= number_format($failureAlert['ambiguousFailed']) ?> destination<?= $failureAlert['ambiguousFailed'] > 1 ? 's are' : ' is' ?> under <em>Ambiguous Delivery Quarantine</em> (timeout expired without remote confirmation). Please verify external channels before retrying.
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <div style="margin-left: auto; padding-left: 16px; align-self: center;">
-                <a href="<?= Html::encode($failureAlert['failedQueueUrl']) ?>" class="rs-btn rs-btn--danger rs-btn--sm" style="white-space: nowrap;">
-                    View Failed Queue &rarr;
-                </a>
-            </div>
-        </div>
-    <?php endif; ?>
 
     <!-- Four Top KPI Cards Grid -->
     <div class="rs-dashboard-grid rs-mb-5">
@@ -153,37 +119,46 @@ $this->setTitle('Dashboard');
             </div>
         </div>
 
-        <!-- KPI 3: Publishing Failures -->
-        <div class="rs-col-span-3">
-            <div class="rs-kpi-card" <?= $kpi['totalFailed'] > 0 ? 'style="border-color: var(--rs-danger);"' : '' ?>>
-                <div class="rs-kpi-card__header">
-                    <div>
-                        <span class="rs-kpi-card__title">Publishing Failures</span>
-                        <div class="rs-kpi-card__value rs-mt-2" style="<?= $kpi['totalFailed'] > 0 ? 'color: var(--rs-danger);' : '' ?>">
-                            <?= number_format($kpi['totalFailed']) ?>
+        <!-- KPI 3: Role-Based Metric (Platform Admin: Total Workspaces, Account Admin/Worker: Published Posts) -->
+        <?php if ($tenantContext->isUnrestricted()): ?>
+            <!-- Admin KPI 3: Total Workspaces -->
+            <div class="rs-col-span-3">
+                <div class="rs-kpi-card">
+                    <div class="rs-kpi-card__header">
+                        <div>
+                            <span class="rs-kpi-card__title">Total Workspaces</span>
+                            <div class="rs-kpi-card__value rs-mt-2"><?= number_format($kpi['totalAccounts'] ?? 0) ?></div>
+                        </div>
+                        <div class="rs-kpi-card__icon" style="background-color: var(--rs-primary-bg, #ECFDF5); color: var(--rs-primary, #234137);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                         </div>
                     </div>
-                    <div class="rs-kpi-card__icon" style="background-color: <?= $kpi['totalFailed'] > 0 ? 'var(--rs-danger-bg)' : 'var(--rs-success-bg)' ?>; color: <?= $kpi['totalFailed'] > 0 ? 'var(--rs-danger-text)' : 'var(--rs-success-text)' ?>;">
-                        <?php if ($kpi['totalFailed'] > 0): ?>
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                        <?php else: ?>
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                        <?php endif; ?>
+                    <div class="rs-kpi-card__footer rs-d-flex rs-justify-content-between rs-align-items-center">
+                        <span class="rs-text-muted"><?= number_format($kpi['activeAccounts'] ?? 0) ?> active workspaces</span>
+                        <a href="<?= Environment::url('/accounts') ?>" style="font-weight: 600; font-size: var(--rs-font-size-xs);">Manage &rarr;</a>
                     </div>
                 </div>
-                <div class="rs-kpi-card__footer rs-d-flex rs-justify-content-between rs-align-items-center">
-                    <?php if ($kpi['totalFailed'] > 0): ?>
-                        <span class="rs-text-danger" style="font-weight: 600;">
-                            <?= $kpi['regularFailed'] ?> standard<?= $kpi['ambiguousFailed'] > 0 ? ', ' . $kpi['ambiguousFailed'] . ' ambiguous' : '' ?>
-                        </span>
-                        <a href="<?= Environment::url('/social-post?status=failed') ?>" class="rs-text-danger" style="font-weight: 600; font-size: var(--rs-font-size-xs);">Resolve &rarr;</a>
-                    <?php else: ?>
-                        <span class="rs-text-success" style="font-weight: 600;">● All healthy</span>
-                        <a href="<?= Environment::url('/social-post') ?>" style="font-weight: 600; font-size: var(--rs-font-size-xs);">History &rarr;</a>
-                    <?php endif; ?>
+            </div>
+        <?php else: ?>
+            <!-- Account Admin / Worker KPI 3: Published Posts -->
+            <div class="rs-col-span-3">
+                <div class="rs-kpi-card">
+                    <div class="rs-kpi-card__header">
+                        <div>
+                            <span class="rs-kpi-card__title">Published Posts</span>
+                            <div class="rs-kpi-card__value rs-mt-2"><?= number_format($kpi['publishedPostsCount'] ?? 0) ?></div>
+                        </div>
+                        <div class="rs-kpi-card__icon" style="background-color: var(--rs-success-bg, #DEF7EC); color: var(--rs-success, #0E9F6E);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="rs-kpi-card__footer rs-d-flex rs-justify-content-between rs-align-items-center">
+                        <span class="rs-text-muted">Lifetime published</span>
+                        <a href="<?= Environment::url('/social-post') ?>" style="font-weight: 600; font-size: var(--rs-font-size-xs);">View Posts &rarr;</a>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
 
         <!-- KPI 4: Connected Channels -->
         <div class="rs-col-span-3">
@@ -198,10 +173,14 @@ $this->setTitle('Dashboard');
                     </div>
                 </div>
                 <div class="rs-kpi-card__footer rs-d-flex rs-justify-content-between rs-align-items-center">
-                    <span class="rs-text-muted" style="font-size: var(--rs-font-size-xs);">
+                    <span class="rs-text-muted rs-text-truncate" style="font-size: var(--rs-font-size-xs); max-width: 65%;" title="<?= $kpi['facebookChannelsCount'] ?> FB • <?= $kpi['instagramChannelsCount'] ?> IG • <?= $kpi['googleChannelsCount'] ?> GBP">
                         <?= $kpi['facebookChannelsCount'] ?> FB • <?= $kpi['instagramChannelsCount'] ?> IG • <?= $kpi['googleChannelsCount'] ?> GBP
                     </span>
-                    <a href="<?= Environment::url('/settings/facebook') ?>" style="font-weight: 600; font-size: var(--rs-font-size-xs);">Channels &rarr;</a>
+                    <?php if ($currentUser !== null && ($currentUser->isAdmin() || $currentUser->isAccountAdmin())): ?>
+                        <a href="<?= Environment::url('/settings/facebook') ?>" style="font-weight: 600; font-size: var(--rs-font-size-xs); white-space: nowrap;">Channels &rarr;</a>
+                    <?php else: ?>
+                        <span class="rs-text-muted" style="font-size: var(--rs-font-size-xs);">Active</span>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
