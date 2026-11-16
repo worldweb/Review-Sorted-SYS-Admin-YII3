@@ -30,13 +30,18 @@ final class UserSwitchAction
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
+        if ($request->getMethod() !== 'POST') {
+            return $this->responseFactory->createResponse(405)->withHeader('Allow', 'POST');
+        }
+
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
             return $this->redirect(\App\Environment::url('/login'));
         }
 
+        $body = (array) ($request->getParsedBody() ?? []);
         $queryParams = $request->getQueryParams();
-        $targetAccountId = isset($queryParams['id']) ? (int) $queryParams['id'] : 0;
+        $targetAccountId = isset($body['id']) ? (int) $body['id'] : (isset($queryParams['id']) ? (int) $queryParams['id'] : 0);
 
         if ($targetAccountId <= 0) {
             $response = $this->responseFactory->createResponse(400);

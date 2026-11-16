@@ -65,7 +65,14 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
     </div>
 
     <?php if ($section === 'database_migration'): ?>
-        <?= $this->render('_database_migration') ?>
+        <?= $this->render('_database_migration', [
+            'dbHealth' => $dbHealth ?? [],
+            'schemaReport' => $schemaReport ?? [],
+            'migrationStatus' => $migrationStatus ?? [],
+            'syncPlan' => $syncPlan ?? [],
+            'lastExecutionReport' => $lastExecutionReport ?? null,
+            'csrfToken' => $csrfToken ?? '',
+        ]) ?>
     <?php elseif ($section === 'roles'): ?>
         <?= $this->render('_roles', [
             'roleMatrix' => $roleMatrix ?? [],

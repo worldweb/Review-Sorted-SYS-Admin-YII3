@@ -153,7 +153,7 @@ final class LocationGroupUpdateAction
                     $flash->add('success', sprintf('Location group "%s" updated successfully.', $formData['name']));
                     return $this->redirect(\App\Environment::url('/location-group/view?id=') . $id);
                 } catch (\Throwable $e) {
-                    $flash->add('error', 'Database error: ' . $e->getMessage());
+                    $flash->add('error', \App\Environment::appDebug() ? ('Database error: ' . $e->getMessage()) : 'An unexpected database error occurred. Please try again later.');
                 }
             }
         }

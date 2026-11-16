@@ -138,7 +138,7 @@ final class WhatsAppImporterAction
                 $importedCount = $this->whatsappRepo->saveContactsBatch($validRows, $targetAccountId);
                 $flash->add('success', sprintf('%d phone numbers imported successfully.', $importedCount));
             } catch (\Throwable $e) {
-                $flash->add('error', 'Database error: ' . $e->getMessage());
+                $flash->add('error', \App\Environment::appDebug() ? ('Database error: ' . $e->getMessage()) : 'An unexpected database error occurred. Please try again later.');
             }
         }
 

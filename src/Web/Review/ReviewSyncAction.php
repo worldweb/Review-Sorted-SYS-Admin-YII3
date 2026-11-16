@@ -41,6 +41,10 @@ final class ReviewSyncAction
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
+        if ($request->getMethod() !== 'POST') {
+            return $this->responseFactory->createResponse(405)->withHeader('Allow', 'POST');
+        }
+
         $context = $this->tenantContextProvider->get();
         $isAjax = strtolower($request->getHeaderLine('X-Requested-With')) === 'xmlhttprequest';
 

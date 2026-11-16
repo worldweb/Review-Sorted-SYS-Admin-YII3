@@ -8,6 +8,7 @@ use App\Domain\Account\AccountRepositoryInterface;
 use App\Domain\Setting\SettingRepositoryInterface;
 use App\Domain\User\UserRepositoryInterface;
 use App\Security\Middleware\AuthenticationMiddleware;
+use App\Security\RateLimiter\FileRateLimiter;
 use App\Security\RememberMeService;
 use App\Security\TenantContext;
 use App\Security\TenantContextProviderInterface;
@@ -36,6 +37,7 @@ final class LoginAction
         private SettingRepositoryInterface $settingRepo,
         private ResponseFactoryInterface $responseFactory,
         private ?CsrfTokenInterface $csrfToken = null,
+        private ?FileRateLimiter $rateLimiter = null,
     ) {
     }
 
@@ -60,10 +62,39 @@ final class LoginAction
             $parsedBody = $request->getParsedBody();
             $data = is_array($parsedBody) ? $parsedBody : [];
 
+            $limiter = $this->rateLimiter ?? new FileRateLimiter();
+            $ip = $limiter->getClientIp($request);
+            $email = isset($data['email']) && is_string($data['email']) ? strtolower(trim($data['email'])) : '';
+            $ipKey = "login:ip:{$ip}";
+            $userKey = $email !== '' ? "login:user:{$email}" : null;
+
+            if (!$limiter->check($ipKey, 10, 900) || ($userKey !== null && !$limiter->check($userKey, 5, 900))) {
+                $retryAfter = max($limiter->getRetryAfter($ipKey, 900), $userKey !== null ? $limiter->getRetryAfter($userKey, 900) : 0);
+                $minutes = max(1, (int) ceil($retryAfter / 60));
+                return $this->viewRenderer
+                    ->withLayout('@src/Web/Shared/Layout/Guest/layout.php')
+                    ->render(__DIR__ . '/views/login', [
+                        'appName' => $appName,
+                        'title' => 'Sign in to your account',
+                        'email' => $email,
+                        'rememberMe' => false,
+                        'error' => "Too many failed login attempts. Please try again in {$minutes} minute(s).",
+                        'success' => null,
+                        'allowRegistration' => $allowReg,
+                        'csrfToken' => $csrfTokenValue,
+                    ]);
+            }
+
             $form = new LoginForm($data);
             if ($form->validate($this->authRepo, $this->accountRepo, $this->userRepo)) {
                 $identity = $form->getIdentity();
                 if ($identity !== null) {
+                    // Reset rate limiting on successful authentication
+                    $limiter->reset($ipKey);
+                    if ($userKey !== null) {
+                        $limiter->reset($userKey);
+                    }
+
                     // Prevent session fixation
                     $this->session->regenerateId();
                     $this->session->set(AuthenticationMiddleware::SESSION_AUTH_KEY, $identity->getId());

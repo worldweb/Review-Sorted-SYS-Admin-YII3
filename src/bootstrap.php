@@ -42,6 +42,13 @@ if (file_exists($envFile)) {
 
 Environment::prepare();
 
+// Production error display & logging configuration
+if (!Environment::appDebug()) {
+    ini_set('display_errors', '0');
+    ini_set('display_startup_errors', '0');
+}
+ini_set('log_errors', '1');
+
 if (!function_exists('app_url')) {
     function app_url(string $path = ''): string
     {

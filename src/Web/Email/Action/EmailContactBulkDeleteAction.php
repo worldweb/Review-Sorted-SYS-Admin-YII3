@@ -71,7 +71,7 @@ final class EmailContactBulkDeleteAction
             $deletedCount = $this->emailRepo->deleteContactsBatch($ids, $accountId);
             $flash->add('success', sprintf('%d contacts deleted successfully.', $deletedCount));
         } catch (\Throwable $e) {
-            $flash->add('error', 'Database error: ' . $e->getMessage());
+            $flash->add('error', \App\Environment::appDebug() ? ('Database error: ' . $e->getMessage()) : 'An unexpected database error occurred. Please try again later.');
         }
 
         return $this->redirect(\App\Environment::url('/email/importer'));

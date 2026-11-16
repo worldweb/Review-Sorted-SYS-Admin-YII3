@@ -196,7 +196,7 @@ final class EmailSendAction
                     $flash->add('success', sprintf('%d emails queued for delivery.', $queuedCount));
                     return $this->redirect(\App\Environment::url('/email/queue'));
                 } catch (\Throwable $e) {
-                    $flash->add('error', 'Database error: ' . $e->getMessage());
+                    $flash->add('error', \App\Environment::appDebug() ? ('Database error: ' . $e->getMessage()) : 'An unexpected database error occurred. Please try again later.');
                     return $this->redirect(\App\Environment::url('/email/send'));
                 }
             }

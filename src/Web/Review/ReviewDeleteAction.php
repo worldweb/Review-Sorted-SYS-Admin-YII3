@@ -40,10 +40,8 @@ final class ReviewDeleteAction
 
         $flash = new Flash($this->session);
 
-        $method = $request->getMethod();
-        if ($method !== 'POST' && $method !== 'GET') {
-            $flash->set('error', 'Method not allowed for review deletion.');
-            return $this->redirect(\App\Environment::url('/reviews'));
+        if ($request->getMethod() !== 'POST') {
+            return $this->responseFactory->createResponse(405)->withHeader('Allow', 'POST');
         }
 
         $currentUserId = $context->getUserId();

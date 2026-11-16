@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Environment;
+use Yiisoft\ErrorHandler\ErrorHandler;
 use Yiisoft\ErrorHandler\Renderer\HtmlRenderer;
 
 /**
@@ -10,6 +11,9 @@ use Yiisoft\ErrorHandler\Renderer\HtmlRenderer;
  */
 
 return [
+    ErrorHandler::class => [
+        'debug()' => [Environment::appDebug()],
+    ],
     HtmlRenderer::class => [
         '__construct()' => [
             'traceLink' => static function (string $file, ?int $line) use ($params): string|null {

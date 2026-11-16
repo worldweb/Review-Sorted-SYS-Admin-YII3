@@ -24,6 +24,10 @@ final class GoogleLinkAction
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
+        if ($request->getMethod() !== 'POST') {
+            return $this->responseFactory->createResponse(405)->withHeader('Allow', 'POST');
+        }
+
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
             return $this->redirect(\App\Environment::url('/login'));
@@ -31,9 +35,7 @@ final class GoogleLinkAction
 
         $flash = new Flash($this->session);
         $body = (array) ($request->getParsedBody() ?? []);
-        $query = $request->getQueryParams();
-
-        $selection = $body['selection'] ?? $query['selection'] ?? null;
+        $selection = $body['selection'] ?? null;
         if (is_array($selection) && !empty($selection)) {
             $ids = array_map('intval', $selection);
             if ($this->connectionRepo->linkGoogleLocations($ids, $context)) {

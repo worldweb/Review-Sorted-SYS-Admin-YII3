@@ -129,9 +129,15 @@ $this->setTitle('Google Accounts');
                                             <a href="<?= \App\Environment::url('/settings/google/update?id=' . $cfg->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--secondary" title="Edit Settings">
                                                 Edit
                                             </a>
-                                            <a href="<?= \App\Environment::url('/settings/google/revoke?id=' . $cfg->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-danger" onclick="return confirm('Are you sure you want to disconnect this location?');" title="Disconnect">
-                                                Disconnect
-                                            </a>
+                                            <form method="post" action="<?= \App\Environment::url('/settings/google/revoke') ?>" style="display:inline-block; margin:0;" onsubmit="return confirm('Are you sure you want to disconnect this location?');">
+                                                <?php if (!empty($csrf ?? $csrfToken ?? '')): ?>
+                                                    <input type="hidden" name="_csrf" value="<?= Html::encode($csrf ?? $csrfToken ?? '') ?>">
+                                                <?php endif; ?>
+                                                <input type="hidden" name="id" value="<?= $cfg->getId() ?>">
+                                                <button type="submit" class="rs-btn rs-btn--sm rs-btn--ghost rs-text-danger" style="background:none; border:none; cursor:pointer;" title="Disconnect">
+                                                    Disconnect
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

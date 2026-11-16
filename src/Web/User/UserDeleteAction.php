@@ -27,13 +27,18 @@ final class UserDeleteAction
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
+        if ($request->getMethod() !== 'POST') {
+            return $this->responseFactory->createResponse(405)->withHeader('Allow', 'POST');
+        }
+
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
             return $this->redirect(\App\Environment::url('/login'));
         }
 
+        $body = (array) ($request->getParsedBody() ?? []);
         $queryParams = $request->getQueryParams();
-        $targetId = isset($queryParams['id']) ? (int) $queryParams['id'] : 0;
+        $targetId = isset($body['id']) ? (int) $body['id'] : (isset($queryParams['id']) ? (int) $queryParams['id'] : 0);
 
         $targetUser = $this->userRepo->findById($targetId, $context);
         if ($targetUser === null) {
@@ -55,7 +60,7 @@ final class UserDeleteAction
         }
 
         try {
-            $this->userRepo->deleteUser($targetId);
+            $this->userRepo->deleteUser($targetId, $context);
         } catch (\Throwable $e) {
             return $this->redirect(\App\Environment::url('/users?msg=' . urlencode($e->getMessage())));
         }

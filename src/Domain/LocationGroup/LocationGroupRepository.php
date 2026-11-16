@@ -409,7 +409,7 @@ final class LocationGroupRepository implements LocationGroupRepositoryInterface
             if ($group->getId() > 0) {
                 $groupId = $group->getId();
                 $this->db->createCommand(
-                    'UPDATE {{%location_group}} SET account_id = :accountId, name = :name, description = :description, status = :status, updated_at = :updatedAt WHERE id = :id',
+                    'UPDATE {{%location_group}} SET name = :name, description = :description, status = :status, updated_at = :updatedAt WHERE id = :id AND account_id = :accountId',
                     array_merge($params, [':id' => $groupId])
                 )->execute();
             } else {

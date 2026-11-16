@@ -7,6 +7,7 @@ namespace App\Web\Auth;
 use App\Domain\Email\Provider\MailgunClientInterface;
 use App\Domain\Setting\SettingRepositoryInterface;
 use App\Security\Middleware\AuthenticationMiddleware;
+use App\Security\RateLimiter\FileRateLimiter;
 use App\Security\UserAuthenticationRepositoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -31,6 +32,7 @@ final class ForgotPasswordAction
         private ResponseFactoryInterface $responseFactory,
         private ?CsrfTokenInterface $csrfToken = null,
         private ?LoggerInterface $logger = null,
+        private ?FileRateLimiter $rateLimiter = null,
     ) {
     }
 
@@ -48,6 +50,24 @@ final class ForgotPasswordAction
         if ($request->getMethod() === 'POST') {
             $parsedBody = $request->getParsedBody();
             $data = is_array($parsedBody) ? $parsedBody : [];
+
+            $limiter = $this->rateLimiter ?? new FileRateLimiter();
+            $ip = $limiter->getClientIp($request);
+            $rateKey = "forgot:ip:{$ip}";
+            if (!$limiter->check($rateKey, 5, 900)) {
+                $retryAfter = $limiter->getRetryAfter($rateKey, 900);
+                $minutes = max(1, (int) ceil($retryAfter / 60));
+                return $this->viewRenderer
+                    ->withLayout('@src/Web/Shared/Layout/Guest/layout.php')
+                    ->render(__DIR__ . '/views/forgot', [
+                        'appName' => $appName,
+                        'title' => 'Reset Password',
+                        'error' => "Too many password reset requests from your network. Please try again in {$minutes} minute(s).",
+                        'success' => null,
+                        'csrfToken' => $csrfTokenValue,
+                    ]);
+            }
+
             $email = isset($data['email']) && is_string($data['email']) ? trim($data['email']) : '';
 
             if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {

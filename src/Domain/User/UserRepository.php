@@ -413,12 +413,21 @@ final class UserRepository implements UserRepositoryInterface
         return $affected >= 0;
     }
 
-    public function deleteUser(int $id): bool
+    public function deleteUser(int $id, ?\App\Security\TenantContextInterface $context = null): bool
     {
-        // Guard against deleting super admin
-        $user = $this->findById($id);
+        // Guard against deleting super admin or user outside tenant boundary
+        $user = $this->findById($id, $context);
+        if ($user === null && $context !== null && !$context->isUnrestricted()) {
+            throw new \RuntimeException('User not found within the authorized workspace.');
+        }
+
         if ($user !== null && $user->isSuperAdmin()) {
             throw new \RuntimeException('Cannot delete the super admin.');
+        }
+
+        $userWhere = ['id' => $id];
+        if ($context !== null && !$context->isUnrestricted()) {
+            $userWhere['account_id'] = $context->getAccountId();
         }
 
         $this->db->createCommand()->delete(
@@ -428,7 +437,7 @@ final class UserRepository implements UserRepositoryInterface
 
         $affected = $this->db->createCommand()->delete(
             '{{%user}}',
-            ['id' => $id]
+            $userWhere
         )->execute();
 
         return $affected > 0;

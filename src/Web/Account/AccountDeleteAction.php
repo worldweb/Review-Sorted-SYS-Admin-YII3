@@ -27,6 +27,10 @@ final class AccountDeleteAction
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
+        if ($request->getMethod() !== 'POST') {
+            return $this->responseFactory->createResponse(405)->withHeader('Allow', 'POST');
+        }
+
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
             return $this->redirect(\App\Environment::url('/login'));
@@ -39,12 +43,8 @@ final class AccountDeleteAction
             return $response;
         }
 
-        $queryParams = $request->getQueryParams();
-        $id = isset($queryParams['id']) ? (int) $queryParams['id'] : 0;
-        if ($id <= 0) {
-            $body = (array) ($request->getParsedBody() ?? []);
-            $id = isset($body['id']) ? (int) $body['id'] : 0;
-        }
+        $body = (array) ($request->getParsedBody() ?? []);
+        $id = isset($body['id']) ? (int) $body['id'] : ((int) ($request->getQueryParams()['id'] ?? 0));
 
         if ($id > 0) {
             $this->accountRepo->deleteAccount($id);

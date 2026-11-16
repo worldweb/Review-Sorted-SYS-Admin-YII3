@@ -215,7 +215,10 @@ $this->beginPage();
                 <!-- Workspace Selector -->
                 <?php if (!empty($switchableAccounts) && count($switchableAccounts) > 1): ?>
                     <div class="rs-sidebar__workspace">
-                        <form action="<?= $base ?>/user/switch" method="get">
+                        <form action="<?= $base ?>/user/switch" method="post">
+                            <?php if (!empty($csrf)): ?>
+                                <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>">
+                            <?php endif; ?>
                             <select name="id" onchange="this.form.submit()" class="rs-sidebar__workspace-selector" aria-label="Switch Workspace">
                                 <?php foreach ($switchableAccounts as $accountId => $accountName): ?>
                                     <option value="<?= $accountId ?>" <?= ($user->getAccountId() === $accountId) ? 'selected="selected"' : '' ?>>

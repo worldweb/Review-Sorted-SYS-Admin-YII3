@@ -41,7 +41,13 @@ $statusClass = $user->isActive() ? 'rs-badge--success' : 'rs-badge--danger';
                 <a href="<?= \App\Environment::url('/user/update?id=' . $user->getId()) ?>" class="rs-btn rs-btn--primary">Update</a>
             <?php endif; ?>
             <?php if ($canDelete): ?>
-                <a href="<?= \App\Environment::url('/user/delete?id=' . $user->getId()) ?>" class="rs-btn rs-btn--danger" onclick="return confirm('Are you sure you want to permanently delete this user?');">Delete</a>
+                <form method="post" action="<?= \App\Environment::url('/user/delete') ?>" style="display:inline-block; margin:0;" onsubmit="return confirm('Are you sure you want to permanently delete this user?');">
+                    <?php if (!empty($csrf ?? $csrfToken ?? '')): ?>
+                        <input type="hidden" name="_csrf" value="<?= Html::encode($csrf ?? $csrfToken ?? '') ?>">
+                    <?php endif; ?>
+                    <input type="hidden" name="id" value="<?= $user->getId() ?>">
+                    <button type="submit" class="rs-btn rs-btn--danger">Delete</button>
+                </form>
             <?php endif; ?>
         </div>
     </div>

@@ -82,8 +82,8 @@ interface UserRepositoryInterface
     public function updateUser(int $id, UserSaveData $data): bool;
 
     /**
-     * Delete an existing user record.
+     * Delete an existing user record with optional tenant boundary scoping.
      * (Prepared for write environment; guarded in read-only environment).
      */
-    public function deleteUser(int $id): bool;
+    public function deleteUser(int $id, ?\App\Security\TenantContextInterface $context = null): bool;
 }

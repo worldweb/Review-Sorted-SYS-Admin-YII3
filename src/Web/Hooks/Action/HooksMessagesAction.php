@@ -69,7 +69,7 @@ final class HooksMessagesAction
         ]);
 
         if ($mode === 'subscribe') {
-            if ($expectedToken === '' || hash_equals($expectedToken, $token)) {
+            if ($expectedToken !== '' && hash_equals($expectedToken, $token)) {
                 $this->logger->info('Facebook Webhook handshake verified successfully');
                 $response = $this->responseFactory->createResponse(200)
                     ->withHeader('Content-Type', 'text/plain');
@@ -77,20 +77,14 @@ final class HooksMessagesAction
                 return $response;
             }
 
-            $this->logger->warning('Facebook Webhook handshake failed: token mismatch', [
+            $this->logger->warning('Facebook Webhook handshake failed: token mismatch or verification secret not configured', [
+                'expected_token_configured' => $expectedToken !== '',
                 'received_token_length' => strlen($token),
             ]);
 
             $response = $this->responseFactory->createResponse(403)
                 ->withHeader('Content-Type', 'text/plain');
             $response->getBody()->write('Forbidden: Invalid verification token');
-            return $response;
-        }
-
-        if ($challenge !== '' && $expectedToken === '') {
-            $response = $this->responseFactory->createResponse(200)
-                ->withHeader('Content-Type', 'text/plain');
-            $response->getBody()->write($challenge);
             return $response;
         }
 
@@ -102,10 +96,44 @@ final class HooksMessagesAction
 
     /**
      * Handles incoming Meta webhook event payload (POST).
+     * Enforces strict X-Hub-Signature-256 HMAC verification to prevent spoofed webhook injections.
      */
     private function handleWebhookPayload(ServerRequestInterface $request): ResponseInterface
     {
         $body = (string) $request->getBody();
+
+        // 1. Verify Meta HMAC SHA-256 signature
+        $appSecret = Environment::facebookAppSecret();
+        if ($appSecret === '') {
+            $this->logger->error('Facebook Webhook rejected: FACEBOOK_APP_SECRET is not configured on server');
+            $response = $this->responseFactory->createResponse(403)
+                ->withHeader('Content-Type', 'text/plain');
+            $response->getBody()->write('Forbidden: Webhook signature secret not configured.');
+            return $response;
+        }
+
+        $hubSignature = $request->getHeaderLine('X-Hub-Signature-256');
+        if ($hubSignature === '' || !str_starts_with($hubSignature, 'sha256=')) {
+            $this->logger->warning('Facebook Webhook rejected: Missing or invalid X-Hub-Signature-256 header', [
+                'has_header' => $hubSignature !== '',
+            ]);
+            $response = $this->responseFactory->createResponse(403)
+                ->withHeader('Content-Type', 'text/plain');
+            $response->getBody()->write('Forbidden: Missing or invalid signature header.');
+            return $response;
+        }
+
+        $receivedHash = substr($hubSignature, 7);
+        $expectedHash = hash_hmac('sha256', $body, $appSecret);
+
+        if (!hash_equals($expectedHash, $receivedHash)) {
+            $this->logger->warning('Facebook Webhook rejected: X-Hub-Signature-256 hash mismatch');
+            $response = $this->responseFactory->createResponse(403)
+                ->withHeader('Content-Type', 'text/plain');
+            $response->getBody()->write('Forbidden: Signature verification failed.');
+            return $response;
+        }
+
         $data = json_decode($body, true);
 
         if (!is_array($data)) {

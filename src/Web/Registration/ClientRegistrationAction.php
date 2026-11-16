@@ -10,6 +10,7 @@ use App\Domain\Setting\SettingRepositoryInterface;
 use App\Domain\User\User;
 use App\Domain\User\UserRepositoryInterface;
 use App\Domain\User\UserSaveData;
+use App\Security\RateLimiter\FileRateLimiter;
 use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -31,6 +32,7 @@ final class ClientRegistrationAction
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
         private ?CsrfTokenInterface $csrfToken = null,
+        private ?FileRateLimiter $rateLimiter = null,
     ) {
     }
 
@@ -55,6 +57,22 @@ final class ClientRegistrationAction
         if ($request->getMethod() === 'POST') {
             $parsedBody = $request->getParsedBody();
             $data = is_array($parsedBody) ? $parsedBody : [];
+
+            // Honeypot bot protection
+            if (!empty($data['website_url_hp'])) {
+                // Silently redirect bot
+                return $this->redirect(\App\Environment::url('/login?registered=1'));
+            }
+
+            // IP-based registration rate limiting (max 5 per hour per IP)
+            $limiter = $this->rateLimiter ?? new FileRateLimiter();
+            $ip = $limiter->getClientIp($request);
+            $rateKey = "register:ip:{$ip}";
+            if (!$limiter->check($rateKey, 5, 3600)) {
+                $retryAfter = $limiter->getRetryAfter($rateKey, 3600);
+                $minutes = max(1, (int) ceil($retryAfter / 60));
+                $errors['general'] = "Too many registration attempts from your network. Please try again in {$minutes} minute(s).";
+            }
 
             $businessName = trim((string) ($data['business_name'] ?? ''));
             $firstName = trim((string) ($data['first_name'] ?? ''));

@@ -27,6 +27,10 @@ final class FacebookApiDeleteAction
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
+        if ($request->getMethod() !== 'POST') {
+            return $this->responseFactory->createResponse(405)->withHeader('Allow', 'POST');
+        }
+
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
             return $this->redirect(\App\Environment::url('/login'));
@@ -37,7 +41,8 @@ final class FacebookApiDeleteAction
             return $this->redirect(\App\Environment::url('/settings/facebook'));
         }
 
-        $id = (int) ($request->getQueryParams()['id'] ?? 0);
+        $body = (array) ($request->getParsedBody() ?? []);
+        $id = isset($body['id']) ? (int) $body['id'] : ((int) ($request->getQueryParams()['id'] ?? 0));
         $api = $this->connectionRepo->findApiById($id);
         if ($api === null || $api->getServiceId() !== Api::SERVICE_FACEBOOK) {
             return $this->redirect(\App\Environment::url('/settings/facebook-api'));

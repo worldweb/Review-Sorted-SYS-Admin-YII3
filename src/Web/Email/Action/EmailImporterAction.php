@@ -134,7 +134,7 @@ final class EmailImporterAction
                 $importedCount = $this->emailRepo->saveContactsBatch($validRows, $targetAccountId);
                 $flash->add('success', sprintf('%d emails imported successfully.', $importedCount));
             } catch (\Throwable $e) {
-                $flash->add('error', 'Database error: ' . $e->getMessage());
+                $flash->add('error', \App\Environment::appDebug() ? ('Database error: ' . $e->getMessage()) : 'An unexpected database error occurred. Please try again later.');
             }
         }
 

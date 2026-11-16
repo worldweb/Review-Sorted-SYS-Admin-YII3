@@ -100,7 +100,7 @@ final class WhatsAppTemplateUpdateAction
                     $flash->add('success', sprintf('WhatsApp template "%s" updated successfully.', $name));
                     return $this->redirect(\App\Environment::url('/whatsapp/template/view?id=') . $template->getId());
                 } catch (\Throwable $e) {
-                    $flash->add('error', 'Database error: ' . $e->getMessage());
+                    $flash->add('error', \App\Environment::appDebug() ? ('Database error: ' . $e->getMessage()) : 'An unexpected database error occurred. Please try again later.');
                     return $this->redirect(\App\Environment::url('/whatsapp/template/view?id=') . $template->getId());
                 }
             }

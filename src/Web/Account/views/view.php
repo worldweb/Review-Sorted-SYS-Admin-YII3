@@ -27,7 +27,13 @@ $actionButtons = [
     '<a href="' . $url('/accounts/update?id=' . $account->getId()) . '" class="rs-btn rs-btn--primary">Edit Workspace</a>',
 ];
 if ($currentUser->isAdmin()) {
-    $actionButtons[] = '<a href="' . $url('/accounts/delete?id=' . $account->getId()) . '" class="rs-btn rs-btn--danger" onclick="return confirm(\'Are you sure you want to delete this workspace?\');">Delete</a>';
+    $csrfTokenVal = $csrf ?? $csrfToken ?? '';
+    $csrfInput = !empty($csrfTokenVal) ? '<input type="hidden" name="_csrf" value="' . Html::encode($csrfTokenVal) . '">' : '';
+    $actionButtons[] = '<form method="post" action="' . $url('/accounts/delete') . '" style="display:inline-block; margin:0;" onsubmit="return confirm(\'Are you sure you want to delete this workspace?\');">'
+        . $csrfInput
+        . '<input type="hidden" name="id" value="' . $account->getId() . '">'
+        . '<button type="submit" class="rs-btn rs-btn--danger">Delete</button>'
+        . '</form>';
 }
 
 $title = $businessName;

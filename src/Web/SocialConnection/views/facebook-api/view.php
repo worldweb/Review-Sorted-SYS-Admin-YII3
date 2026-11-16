@@ -23,9 +23,13 @@ $this->setTitle($api->getLabel());
             <a href="<?= \App\Environment::url('/settings/facebook-api/update?id=' . $api->getId()) ?>" class="btn btn-primary rs-btn rs-btn--primary">
                 Update
             </a>
-            <a href="<?= \App\Environment::url('/settings/facebook-api/delete?id=' . $api->getId()) ?>" class="btn btn-danger rs-btn rs-btn--danger" onclick="return confirm('Are you sure you want to delete this item?');">
-                Delete
-            </a>
+            <form method="post" action="<?= \App\Environment::url('/settings/facebook-api/delete') ?>" style="display:inline-block; margin:0;" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                <?php if (!empty($csrf ?? $csrfToken ?? '')): ?>
+                    <input type="hidden" name="_csrf" value="<?= Html::encode($csrf ?? $csrfToken ?? '') ?>">
+                <?php endif; ?>
+                <input type="hidden" name="id" value="<?= $api->getId() ?>">
+                <button type="submit" class="btn btn-danger rs-btn rs-btn--danger">Delete</button>
+            </form>
             <a href="<?= \App\Environment::url('/settings/facebook-api') ?>" class="btn btn-default rs-btn rs-btn--secondary">
                 Back to Facebook Apps
             </a>

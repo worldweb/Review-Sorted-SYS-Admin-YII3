@@ -26,12 +26,17 @@ final class GoogleRevokeAction
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
+        if ($request->getMethod() !== 'POST') {
+            return $this->responseFactory->createResponse(405)->withHeader('Allow', 'POST');
+        }
+
         $context = $this->tenantContextProvider->get();
         if ($context->isGuest()) {
             return $this->redirect(\App\Environment::url('/login'));
         }
 
-        $id = (int) ($request->getQueryParams()['id'] ?? 0);
+        $body = (array) ($request->getParsedBody() ?? []);
+        $id = isset($body['id']) ? (int) $body['id'] : ((int) ($request->getQueryParams()['id'] ?? 0));
         $flash = new Flash($this->session);
 
         // Pre-fetch connection to determine account and location name before unlinking

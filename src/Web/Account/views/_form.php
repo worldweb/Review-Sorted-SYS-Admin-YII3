@@ -105,7 +105,11 @@ $isAdmin = isset($currentUser) && $currentUser->isAdmin();
                 <div class="rs-col rs-col-4">
                     <div class="rs-form-group">
                         <label for="acc-max-users" class="rs-label" style="font-weight: 600; display: block; margin-bottom: 6px;">Max Users</label>
-                        <input type="number" id="acc-max-users" name="max_users" class="rs-input" min="1" max="1000" value="<?= Html::encode((string) ($data['max_users'] ?? 5)) ?>" style="width: 100%;">
+                        <?php if ($isAdmin): ?>
+                            <input type="number" id="acc-max-users" name="max_users" class="rs-input" min="1" max="1000" value="<?= Html::encode((string) ($data['max_users'] ?? 5)) ?>" style="width: 100%;">
+                        <?php else: ?>
+                            <input type="text" class="rs-input" value="<?= Html::encode((string) ($data['max_users'] ?? 5)) ?> seats" disabled style="width: 100%; background: #f8fafc; cursor: not-allowed;" title="Only platform administrators can change user seat limits.">
+                        <?php endif; ?>
                     </div>
                 </div>
                 
@@ -122,10 +126,14 @@ $isAdmin = isset($currentUser) && $currentUser->isAdmin();
                 <div class="rs-col rs-col-4">
                     <div class="rs-form-group">
                         <label for="acc-status" class="rs-label" style="font-weight: 600; display: block; margin-bottom: 6px;">Status</label>
-                        <select id="acc-status" name="status" class="rs-input rs-select" style="width: 100%;">
-                            <option value="1" <?= ((int) ($data['status'] ?? 1)) === 1 ? 'selected' : '' ?>>Active</option>
-                            <option value="0" <?= ((int) ($data['status'] ?? 1)) === 0 ? 'selected' : '' ?>>Disabled</option>
-                        </select>
+                        <?php if ($isAdmin): ?>
+                            <select id="acc-status" name="status" class="rs-input rs-select" style="width: 100%;">
+                                <option value="1" <?= ((int) ($data['status'] ?? 1)) === 1 ? 'selected' : '' ?>>Active</option>
+                                <option value="0" <?= ((int) ($data['status'] ?? 1)) === 0 ? 'selected' : '' ?>>Disabled</option>
+                            </select>
+                        <?php else: ?>
+                            <input type="text" class="rs-input" value="<?= ((int) ($data['status'] ?? 1)) === 1 ? 'Active' : 'Disabled' ?>" disabled style="width: 100%; background: #f8fafc; cursor: not-allowed;" title="Only platform administrators can change workspace status.">
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

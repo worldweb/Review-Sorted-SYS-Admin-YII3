@@ -6,6 +6,9 @@ namespace App\Web\GlobalSettings\Action;
 
 use App\Domain\Setting\SettingRepositoryInterface;
 use App\Domain\User\UserRepositoryInterface;
+use App\Infrastructure\Persistence\Migration\MigrationSyncService;
+use App\Infrastructure\Persistence\Schema\DatabaseHealthService;
+use App\Infrastructure\Persistence\Schema\SchemaSynchronizationService;
 use App\Security\Authorization\RolePermissionService;
 use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -27,6 +30,9 @@ final class GlobalSettingsIndexAction
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
         private ?CsrfTokenInterface $csrfToken = null,
+        private ?DatabaseHealthService $dbHealthService = null,
+        private ?MigrationSyncService $migrationSyncService = null,
+        private ?SchemaSynchronizationService $schemaSyncService = null,
     ) {
     }
 
@@ -60,6 +66,51 @@ final class GlobalSettingsIndexAction
 
         if ($request->getMethod() === 'POST') {
             $post = (array) $request->getParsedBody();
+
+            // Handle Database Migration Execution (PART 2)
+            if (($post['action'] ?? '') === 'run_migration') {
+                if ($this->migrationSyncService !== null) {
+                    $migResult = $this->migrationSyncService->applyPendingMigrations();
+                    if (!empty($migResult['error'])) {
+                        $flash->set('error', 'Migration execution failed: ' . $migResult['error']);
+                    } elseif (($migResult['appliedCount'] ?? 0) > 0) {
+                        $appliedNames = implode(', ', (array) ($migResult['applied'] ?? []));
+                        $flash->set('success', 'Successfully applied ' . (int)$migResult['appliedCount'] . ' migration(s): ' . $appliedNames);
+                    } else {
+                        $flash->set('info', $migResult['message'] ?? 'No pending migrations were applied.');
+                    }
+                } else {
+                    $flash->set('error', 'Migration service is currently unavailable.');
+                }
+
+                return $this->redirect(\App\Environment::url('/global-settings?section=database_migration'));
+            }
+
+            // Handle Database Schema Synchronization (PART 1: RS-SYNC-005)
+            if (($post['action'] ?? '') === 'sync_database') {
+                $confirmBackup = (string) ($post['confirm_backup'] ?? '0');
+                if ($confirmBackup !== '1') {
+                    $flash->set('error', 'Database synchronization cancelled: You must acknowledge the pre-sync backup and DDL recovery notice before applying changes.');
+                    return $this->redirect(\App\Environment::url('/global-settings?section=database_migration'));
+                }
+
+                if ($this->schemaSyncService !== null) {
+                    $report = $this->schemaSyncService->executePlan();
+                    if (!empty($report['error'])) {
+                        $flash->set('error', (string) $report['error']);
+                    } elseif (($report['failedCount'] ?? 0) > 0) {
+                        $flash->set('error', 'Database schema synchronization encountered ' . (int)$report['failedCount'] . ' error(s). Check the execution report below.');
+                    } elseif (($report['successCount'] ?? 0) > 0) {
+                        $flash->set('success', 'Database schema synchronized successfully! Applied ' . (int)$report['successCount'] . ' safe operation(s).');
+                    } else {
+                        $flash->set('info', 'Database schema is already fully synchronized with the expected manifest. No changes were applied.');
+                    }
+                } else {
+                    $flash->set('error', 'Schema synchronization service is currently unavailable.');
+                }
+
+                return $this->redirect(\App\Environment::url('/global-settings?section=database_migration'));
+            }
 
             // Handle Role Permissions Save
             if (isset($post['RolePermissionsForm'])) {
@@ -102,6 +153,26 @@ final class GlobalSettingsIndexAction
         $roleMatrix = $this->rolePermissionService->getRoleMatrix($targetRole);
         $roleOptions = RolePermissionService::getEditableRoleOptions();
 
+        $dbHealth = [];
+        $schemaReport = [];
+        $migrationStatus = [];
+        $syncPlan = [];
+        $lastExecutionReport = null;
+
+        if ($section === 'database_migration') {
+            if ($this->dbHealthService !== null) {
+                $dbHealth = $this->dbHealthService->getConnectionHealth();
+                $schemaReport = $this->dbHealthService->inspectSchema();
+            }
+            if ($this->migrationSyncService !== null) {
+                $migrationStatus = $this->migrationSyncService->getMigrationStatus();
+            }
+            if ($this->schemaSyncService !== null) {
+                $syncPlan = $this->schemaSyncService->generatePlan();
+                $lastExecutionReport = $this->schemaSyncService->getLastExecutionReport();
+            }
+        }
+
         return $this->viewRenderer
             ->withViewPath('@src/Web/GlobalSettings/views')
             ->render('index', [
@@ -113,6 +184,11 @@ final class GlobalSettingsIndexAction
                 'currentUser' => $currentUser,
                 'flash' => $flash,
                 'csrfToken' => $this->csrfToken?->getValue() ?? '',
+                'dbHealth' => $dbHealth,
+                'schemaReport' => $schemaReport,
+                'migrationStatus' => $migrationStatus,
+                'syncPlan' => $syncPlan,
+                'lastExecutionReport' => $lastExecutionReport,
             ]);
     }
 

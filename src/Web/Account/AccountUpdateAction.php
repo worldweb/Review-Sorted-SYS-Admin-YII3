@@ -80,6 +80,12 @@ final class AccountUpdateAction
             $parsedBody = $request->getParsedBody();
             $postData = is_array($parsedBody) ? $parsedBody : [];
 
+            // Defense against mass assignment: non-platform-admins cannot modify seat limit (max_users) or account status
+            if (!$currentUser->isAdmin()) {
+                $postData['max_users'] = $account->getMaxUsers();
+                $postData['status'] = $account->getStatus();
+            }
+
             $saveData = AccountSaveData::fromArray($postData);
 
             if ($saveData->businessName === '') {

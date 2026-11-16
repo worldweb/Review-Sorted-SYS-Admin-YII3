@@ -106,9 +106,15 @@ include __DIR__ . '/../../Shared/Components/_page_header.php';
                                         <a href="<?= \App\Environment::url('/subscription/update?id=' . $p->getId()) ?>" class="rs-btn-icon rs-btn-icon--sm" title="Edit Plan">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                         </a>
-                                        <a href="<?= \App\Environment::url('/subscription/delete?id=' . $p->getId()) ?>" class="rs-btn-icon rs-btn-icon--sm rs-text-danger" title="Delete Plan" onclick="return confirm('Are you sure you want to delete this subscription plan?');">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                        </a>
+                                        <form method="post" action="<?= \App\Environment::url('/subscription/delete') ?>" style="display: inline-block; margin: 0;" onsubmit="return confirm('Are you sure you want to delete this subscription plan?');">
+                                            <?php if (!empty($csrf ?? $csrfToken ?? '')): ?>
+                                                <input type="hidden" name="_csrf" value="<?= Html::encode($csrf ?? $csrfToken ?? '') ?>">
+                                            <?php endif; ?>
+                                            <input type="hidden" name="id" value="<?= $p->getId() ?>">
+                                            <button type="submit" class="rs-btn-icon rs-btn-icon--sm rs-text-danger" style="background: none; border: none; cursor: pointer;" title="Delete Plan">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

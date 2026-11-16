@@ -146,7 +146,12 @@ $isFbAuth = !empty($configs);
                                         <span class="rs-badge rs-badge--success rs-badge--soft rs-d-flex rs-align-items-center rs-mr-3" style="margin-right: 0.75rem;"><span class="rs-mr-2" style="margin-right: 0.5rem;">●</span> Connected</span>
                                         <span class="rs-text-muted rs-text-xs" style="font-size: 0.75rem; color: #64748b;">Your account is successfully linked.</span>
                                     </div>
-                                    <a href="<?= \App\Environment::url('/settings/facebook/revoke') ?>" class="rs-btn rs-btn--outline rs-btn--danger rs-btn--sm" onclick="return confirm('Are you sure you want to disconnect?');">Disconnect</a>
+                                    <form method="post" action="<?= \App\Environment::url('/settings/facebook/revoke') ?>" style="display:inline-block; margin:0;" onsubmit="return confirm('Are you sure you want to disconnect?');">
+                                        <?php if (!empty($csrf ?? $csrfToken ?? '')): ?>
+                                            <input type="hidden" name="_csrf" value="<?= Html::encode($csrf ?? $csrfToken ?? '') ?>">
+                                        <?php endif; ?>
+                                        <button type="submit" class="rs-btn rs-btn--outline rs-btn--danger rs-btn--sm">Disconnect</button>
+                                    </form>
                                 <?php else: ?>
                                     <div class="rs-d-flex rs-align-items-center" style="display: flex; align-items: center;">
                                         <span class="rs-badge rs-badge--danger rs-badge--soft rs-d-flex rs-align-items-center rs-mr-3" style="margin-right: 0.75rem;"><span class="rs-mr-2" style="margin-right: 0.5rem;">●</span> Not Connected</span>
@@ -292,13 +297,19 @@ $isFbAuth = !empty($configs);
                                                 </svg>
                                                 <span>View</span>
                                             </a>
-                                            <a href="<?= \App\Environment::url('/settings/facebook/revoke?id=' . $cfg->getId()) ?>" class="rs-btn rs-btn--sm rs-btn--danger" onclick="return confirm('Are you sure you want to disconnect this Facebook page?');" title="Disconnect">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
-                                                    <line x1="12" y1="2" x2="12" y2="12"></line>
-                                                </svg>
-                                                <span>Disconnect</span>
-                                            </a>
+                                            <form method="post" action="<?= \App\Environment::url('/settings/facebook/revoke') ?>" style="display:inline-block; margin:0;" onsubmit="return confirm('Are you sure you want to disconnect this Facebook page?');">
+                                                <?php if (!empty($csrf ?? $csrfToken ?? '')): ?>
+                                                    <input type="hidden" name="_csrf" value="<?= Html::encode($csrf ?? $csrfToken ?? '') ?>">
+                                                <?php endif; ?>
+                                                <input type="hidden" name="id" value="<?= $cfg->getId() ?>">
+                                                <button type="submit" class="rs-btn rs-btn--sm rs-btn--danger" style="display:inline-flex; align-items:center; gap:4px;" title="Disconnect">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                                                        <line x1="12" y1="2" x2="12" y2="12"></line>
+                                                    </svg>
+                                                    <span>Disconnect</span>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

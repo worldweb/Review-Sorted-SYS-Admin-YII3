@@ -194,6 +194,12 @@ $eyeOffIcon = '<svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 
                         <input type="hidden" name="_csrf" value="<?= Html::encode($csrfToken) ?>">
                     <?php endif; ?>
 
+                    <!-- Anti-bot honeypot field -->
+                    <div style="position: absolute; left: -9999px; top: -9999px; visibility: hidden;" aria-hidden="true">
+                        <label for="reg-website-url-hp">Leave this field blank</label>
+                        <input type="text" id="reg-website-url-hp" name="website_url_hp" tabindex="-1" autocomplete="off">
+                    </div>
+
                     <!-- BUSINESS INFORMATION SECTION -->
                     <div class="new-client-section">
                         <div class="new-client-section-header">

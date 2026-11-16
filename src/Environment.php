@@ -109,6 +109,107 @@ final class Environment
         self::setBoolean('SESSION_COOKIE_SECURE', false);
         self::setBoolean('SESSION_COOKIE_HTTPONLY', true);
         self::setString('SESSION_COOKIE_SAMESITE', 'lax');
+
+        // Validate production secrets if running in genuine production
+        self::validateProductionConfig();
+    }
+
+    /**
+     * Validates required production secrets to prevent silent startup failures.
+     * Only throws if running in genuine production (not local, dev, or localhost testbeds).
+     */
+    public static function validateProductionConfig(): void
+    {
+        $issues = self::getProductionSecretIssues();
+        if (!empty($issues) && self::isStrictProduction()) {
+            throw new RuntimeException(
+                'Production configuration validation failed. The following required setting(s) are missing or invalid: '
+                . implode(', ', $issues)
+                . '. Please configure these environment variables before starting the production application.'
+            );
+        }
+    }
+
+    /**
+     * Checks for missing or unconfigured production secrets.
+     * Returns an array of descriptive issue messages (without exposing any secret values).
+     *
+     * @return list<string>
+     */
+    public static function getProductionSecretIssues(): array
+    {
+        $issues = [];
+
+        if (self::isStrictProduction()) {
+            if (self::dbName() === '') {
+                $issues[] = 'DB_NAME must not be empty';
+            }
+
+            if (str_starts_with(self::appUrl(), 'https://') && !self::sessionCookieSecure()) {
+                $issues[] = 'SESSION_COOKIE_SECURE must be true when application URL is HTTPS';
+            }
+        }
+
+        if (self::mailgunEnabled()) {
+            if (trim(self::mailgunApiKey()) === '') {
+                $issues[] = 'MAILGUN_API_KEY must be configured when MAILGUN_ENABLED is true';
+            }
+            if (trim(self::mailgunDomain()) === '') {
+                $issues[] = 'MAILGUN_DOMAIN must be configured when MAILGUN_ENABLED is true';
+            }
+        }
+
+        if (self::whatsappEnabled()) {
+            if (trim(self::whatsappToken()) === '') {
+                $issues[] = 'WHATSAPP_TOKEN must be configured when WHATSAPP_ENABLED is true';
+            }
+            if (trim(self::whatsappPhoneNumberId()) === '') {
+                $issues[] = 'WHATSAPP_PHONE_NUMBER_ID must be configured when WHATSAPP_ENABLED is true';
+            }
+        }
+
+        if (self::stripeMode() === 'live') {
+            if (trim(self::stripeSecretKey()) === '') {
+                $issues[] = 'STRIPE_LIVE_SECRET_KEY must be configured when STRIPE_MODE is live';
+            }
+            if (trim(self::stripeWebhookSecret()) === '') {
+                $issues[] = 'STRIPE_LIVE_WEBHOOK_SECRET must be configured when STRIPE_MODE is live';
+            }
+        }
+
+        if (trim(self::facebookAppId()) !== '' && trim(self::facebookAppSecret()) === '') {
+            $issues[] = 'FACEBOOK_APP_SECRET must be configured when FACEBOOK_APP_ID is set';
+        }
+
+        if (trim(self::googleClientId()) !== '' && trim(self::googleClientSecret()) === '') {
+            $issues[] = 'GOOGLE_CLIENT_SECRET must be configured when GOOGLE_CLIENT_ID is set';
+        }
+
+        return $issues;
+    }
+
+    /**
+     * Identifies whether the application is running in a live production environment
+     * rather than a developer workstation, test suite, or local development server.
+     */
+    public static function isStrictProduction(): bool
+    {
+        if (self::isDev() || self::isTest()) {
+            return false;
+        }
+
+        $appUrl = strtolower(self::appUrl());
+        if (
+            str_contains($appUrl, 'localhost')
+            || str_contains($appUrl, '127.0.0.1')
+            || str_contains($appUrl, '.test')
+            || str_contains($appUrl, '.local')
+            || str_contains($appUrl, 'sys-yii3')
+        ) {
+            return false;
+        }
+
+        return self::isProd();
     }
 
     public static function appEnv(): string

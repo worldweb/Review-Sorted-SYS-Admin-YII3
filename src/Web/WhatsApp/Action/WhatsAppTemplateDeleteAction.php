@@ -73,7 +73,7 @@ final class WhatsAppTemplateDeleteAction
             $this->whatsappRepo->deleteTemplate($id);
             $flash->add('success', sprintf('Template "%s" deleted successfully.', $template->getName()));
         } catch (\Throwable $e) {
-            $flash->add('error', 'Database error: ' . $e->getMessage());
+            $flash->add('error', \App\Environment::appDebug() ? ('Database error: ' . $e->getMessage()) : 'An unexpected database error occurred. Please try again later.');
         }
 
         return $this->redirect(\App\Environment::url('/whatsapp/templates'));

@@ -61,10 +61,10 @@ return [
             Route::methods(['GET', 'POST'], '/user/update')
                 ->action(Web\User\UserUpdateAction::class)
                 ->name('user_update'),
-            Route::methods(['GET', 'POST'], '/user/delete')
+            Route::post('/user/delete')
                 ->action(Web\User\UserDeleteAction::class)
                 ->name('user_delete'),
-            Route::get('/user/switch')
+            Route::post('/user/switch')
                 ->action(Web\User\UserSwitchAction::class)
                 ->name('user_switch'),
             Route::get('/profile')
@@ -90,7 +90,7 @@ return [
             Route::methods(['GET', 'POST'], '/accounts/update')
                 ->action(Web\Account\AccountUpdateAction::class)
                 ->name('accounts_update'),
-            Route::methods(['GET', 'POST'], '/accounts/delete')
+            Route::post('/accounts/delete')
                 ->action(Web\Account\AccountDeleteAction::class)
                 ->name('accounts_delete'),
             Route::methods(['GET', 'POST'], '/accounts/subscribe')
@@ -107,13 +107,13 @@ return [
             Route::methods(['GET', 'POST'], '/reviews/reply-all')
                 ->action(Web\Review\ReviewReplyAllAction::class)
                 ->name('reviews_reply_all'),
-            Route::methods(['GET', 'POST'], '/reviews/delete')
+            Route::post('/reviews/delete')
                 ->action(Web\Review\ReviewDeleteAction::class)
                 ->name('reviews_delete'),
             Route::methods(['GET', 'POST'], '/reviews/export')
                 ->action(Web\Review\ReviewExportAction::class)
                 ->name('reviews_export'),
-            Route::methods(['GET', 'POST'], '/reviews/sync')
+            Route::post('/reviews/sync')
                 ->action(Web\Review\ReviewSyncAction::class)
                 ->name('reviews_sync'),
 
@@ -286,10 +286,10 @@ return [
             Route::methods(['GET', 'POST'], '/settings/facebook/update')
                 ->action(Web\SocialConnection\Action\FacebookUpdateAction::class)
                 ->name('settings_facebook_update'),
-            Route::get('/settings/facebook/revoke')
+            Route::post('/settings/facebook/revoke')
                 ->action(Web\SocialConnection\Action\FacebookRevokeAction::class)
                 ->name('settings_facebook_revoke'),
-            Route::get('/settings/facebook/delete')
+            Route::post('/settings/facebook/delete')
                 ->action(Web\SocialConnection\Action\FacebookDeleteAction::class)
                 ->name('settings_facebook_delete'),
             Route::get('/settings/facebook/setup')
@@ -307,10 +307,10 @@ return [
             Route::methods(['GET', 'POST'], '/settings/google/update')
                 ->action(Web\SocialConnection\Action\GoogleUpdateAction::class)
                 ->name('settings_google_update'),
-            Route::get('/settings/google/revoke')
+            Route::post('/settings/google/revoke')
                 ->action(Web\SocialConnection\Action\GoogleRevokeAction::class)
                 ->name('settings_google_revoke'),
-            Route::get('/settings/google/delete')
+            Route::post('/settings/google/delete')
                 ->action(Web\SocialConnection\Action\GoogleDeleteAction::class)
                 ->name('settings_google_delete'),
             Route::get('/settings/google/setup')
@@ -319,7 +319,7 @@ return [
             Route::get('/settings/google/callback')
                 ->action(Web\SocialConnection\Action\GoogleCallbackAction::class)
                 ->name('settings_google_callback'),
-            Route::get('/settings/google/link')
+            Route::post('/settings/google/link')
                 ->action(Web\SocialConnection\Action\GoogleLinkAction::class)
                 ->name('settings_google_link'),
 
@@ -336,7 +336,7 @@ return [
             Route::get('/settings/facebook-api/view')
                 ->action(Web\SocialConnection\Action\FacebookApiViewAction::class)
                 ->name('settings_facebook_api_view'),
-            Route::get('/settings/facebook-api/delete')
+            Route::post('/settings/facebook-api/delete')
                 ->action(Web\SocialConnection\Action\FacebookApiDeleteAction::class)
                 ->name('settings_facebook_api_delete'),
 
@@ -353,7 +353,7 @@ return [
             Route::get('/settings/google-api/view')
                 ->action(Web\SocialConnection\Action\GoogleApiViewAction::class)
                 ->name('settings_google_api_view'),
-            Route::get('/settings/google-api/delete')
+            Route::post('/settings/google-api/delete')
                 ->action(Web\SocialConnection\Action\GoogleApiDeleteAction::class)
                 ->name('settings_google_api_delete'),
 
@@ -376,10 +376,10 @@ return [
             Route::methods(['GET', 'POST'], '/social-post/update')
                 ->action(Web\SocialPost\Action\SocialPostUpdateAction::class)
                 ->name('social_post_update'),
-            Route::get('/social-post/cancel')
+            Route::post('/social-post/cancel')
                 ->action(Web\SocialPost\Action\SocialPostCancelAction::class)
                 ->name('social_post_cancel'),
-            Route::get('/social-post/delete')
+            Route::post('/social-post/delete')
                 ->action(Web\SocialPost\Action\SocialPostDeleteAction::class)
                 ->name('social_post_delete'),
             Route::post('/social-post/retry')
@@ -399,7 +399,7 @@ return [
             Route::methods(['GET', 'POST'], '/subscription/update')
                 ->action(Web\Subscription\Action\SubscriptionUpdateAction::class)
                 ->name('subscription_update'),
-            Route::get('/subscription/delete')
+            Route::post('/subscription/delete')
                 ->action(Web\Subscription\Action\SubscriptionDeleteAction::class)
                 ->name('subscription_delete'),
             Route::methods(['GET', 'POST'], '/stripe-webhook/handle-stripe-event')
