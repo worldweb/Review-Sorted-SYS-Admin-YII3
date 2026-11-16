@@ -170,7 +170,7 @@ $this->beginPage();
                         </svg>
                         <span class="rs-badge rs-badge--danger rs-d-none" id="rs-notification-badge" style="position: absolute; top: 4px; right: 4px; font-size: 0.65rem; padding: 2px 5px; border-radius: 999px; line-height: 1; display: none;"></span>
                     </button>
-                    <div class="rs-dropdown__menu" id="rs-notification-menu" role="menu" style="width: 380px; max-width: 92vw; padding: 0; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); border: 1px solid var(--rs-border); overflow: hidden;">
+                    <div class="rs-dropdown__menu" id="rs-notification-menu" role="menu" style="width: 410px; max-width: 94vw; padding: 0; border-radius: 12px; box-shadow: 0 14px 36px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.06); border: 1px solid var(--rs-border); overflow: hidden;">
                         <div class="rs-p-3 rs-text-center rs-text-muted">
                             <p class="rs-m-0">No new notifications</p>
                         </div>

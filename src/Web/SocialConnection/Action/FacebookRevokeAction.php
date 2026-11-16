@@ -34,16 +34,30 @@ final class FacebookRevokeAction
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
         $flash = new Flash($this->session);
 
+        // Pre-fetch connection to determine account and page name before unlinking
+        $config = $id > 0 ? $this->connectionRepo->findById($id, $context) : null;
+        $accountId = $config?->getAccountId() ?? ($context->getAccountId() ?? 0);
+        $displayName = $config?->getDisplayName() ?? '';
+
         $this->connectionRepo->unlinkConfig($id, $context);
         $flash->set('info', 'Facebook connection has been unlinked.');
 
-        $accountId = $context->getAccountId() ?? 0;
         if ($this->notificationService !== null && $accountId > 0) {
+            $identifier = $displayName !== ''
+                ? "{$displayName} (#{$id})"
+                : ($id > 0 ? "ID: {$id}" : '');
+            $title = $identifier !== ''
+                ? "Facebook Connection Disconnected ({$identifier})"
+                : 'Facebook Connection Disconnected';
+            $message = $identifier !== ''
+                ? "Facebook page \"{$identifier}\" has been unlinked."
+                : 'Your Facebook page connection has been unlinked.';
+
             $this->notificationService->notifyAccountAdmins(
                 $accountId,
                 'connection',
-                'Facebook Connection Disconnected',
-                'Your Facebook page connection has been unlinked.',
+                $title,
+                $message,
                 \App\Environment::url('/settings/facebook'),
                 120
             );

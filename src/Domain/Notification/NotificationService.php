@@ -72,18 +72,19 @@ final class NotificationService
                 ->where(['account_id' => $accountId, 'status' => User::STATUS_ACTIVE])
                 ->column();
 
-            if (empty($userIds)) {
-                return 0;
-            }
-
             $count = 0;
             $now = time();
-            foreach ($userIds as $userId) {
-                $this->notificationRepo->create((int) $userId, $accountId, $type, $title, $message, $actionUrl, $now);
-                $count++;
+            if (!empty($userIds)) {
+                foreach ($userIds as $userId) {
+                    $this->notificationRepo->create((int) $userId, $accountId, $type, $title, $message, $actionUrl, $now);
+                    $count++;
+                }
             }
 
-            return $count;
+            // Also dispatch to platform administrators so they receive their own independent platform-wide notification records
+            $platformCount = $this->notifyPlatformAdmins($type, $title, $message, $actionUrl, $accountId, array_map('intval', $userIds));
+
+            return $count + $platformCount;
         } catch (Throwable $e) {
             $this->logger->warning('[NotificationService] notifyAccountUsers failed: ' . $e->getMessage());
             return 0;
@@ -105,6 +106,17 @@ final class NotificationService
             return 0;
         }
 
+        $lockKey = null;
+        $lockAcquired = false;
+        if ($dedupWindowSeconds > 0) {
+            $lockKey = 'notif_dedup_' . $accountId . '_' . substr(md5($type . ':' . $title), 0, 16);
+            try {
+                $lockAcquired = (bool) $this->db->createCommand("SELECT GET_LOCK(:key, 2)", [':key' => $lockKey])->queryScalar();
+            } catch (Throwable) {
+                $lockAcquired = false;
+            }
+        }
+
         try {
             if ($dedupWindowSeconds > 0 && $this->notificationRepo->existsSimilar($accountId, $type, $title, $dedupWindowSeconds)) {
                 return 0;
@@ -122,43 +134,59 @@ final class NotificationService
                 ])
                 ->column();
 
-            if (empty($adminIds)) {
-                return 0;
-            }
-
             $count = 0;
             $now = time();
-            foreach ($adminIds as $adminId) {
-                $this->notificationRepo->create((int) $adminId, $accountId, $type, $title, $message, $actionUrl, $now);
-                $count++;
+            if (!empty($adminIds)) {
+                foreach ($adminIds as $adminId) {
+                    $this->notificationRepo->create((int) $adminId, $accountId, $type, $title, $message, $actionUrl, $now);
+                    $count++;
+                }
             }
 
-            return $count;
+            // Also dispatch to platform administrators so they receive their own independent platform-wide notification records
+            $platformCount = $this->notifyPlatformAdmins($type, $title, $message, $actionUrl, $accountId, array_map('intval', $adminIds));
+
+            return $count + $platformCount;
         } catch (Throwable $e) {
             $this->logger->warning('[NotificationService] notifyAccountAdmins failed: ' . $e->getMessage());
             return 0;
+        } finally {
+            if ($lockAcquired && $lockKey !== null) {
+                try {
+                    $this->db->createCommand("SELECT RELEASE_LOCK(:key)", [':key' => $lockKey])->execute();
+                } catch (Throwable) {
+                }
+            }
         }
     }
 
     /**
      * Sends a notification to all active Platform Administrators (super and admin).
+     *
+     * @param int[] $excludeUserIds Optional list of user IDs already notified (prevents duplicate delivery).
      */
     public function notifyPlatformAdmins(
         string $type,
         string $title,
         ?string $message = null,
         ?string $actionUrl = null,
-        int $accountId = 0
+        int $accountId = 0,
+        array $excludeUserIds = []
     ): int {
         try {
-            $adminIds = (new Query($this->db))
+            $query = (new Query($this->db))
                 ->select(['u.id'])
                 ->distinct()
                 ->from(['u' => '{{%user}}'])
                 ->innerJoin(['a' => '{{%auth_assignment}}'], 'a.user_id = u.id')
                 ->where(['u.status' => User::STATUS_ACTIVE])
-                ->andWhere(['in', 'a.item_name', [User::ROLE_SUPER, User::ROLE_ADMIN]])
-                ->column();
+                ->andWhere(['in', 'a.item_name', [User::ROLE_SUPER, User::ROLE_ADMIN]]);
+
+            if (!empty($excludeUserIds)) {
+                $query->andWhere(['not in', 'u.id', $excludeUserIds]);
+            }
+
+            $adminIds = $query->column();
 
             if (empty($adminIds)) {
                 return 0;

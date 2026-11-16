@@ -265,6 +265,88 @@
             }
         },
 
+        escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        },
+
+        renderStarsHtml(rating) {
+            if (!rating || rating <= 0) return '';
+            const rounded = Math.min(5, Math.max(1, Math.round(rating)));
+            let html = '<div class="rs-notif-stars" style="display: inline-flex; align-items: center; gap: 2px;">';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rounded) {
+                    html += '<svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1" style="display:inline-block;flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+                } else {
+                    html += '<svg width="13" height="13" viewBox="0 0 24 24" fill="#e5e7eb" stroke="#d1d5db" stroke-width="1" style="display:inline-block;flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+                }
+            }
+            html += '<span style="font-size: 0.75rem; font-weight: 700; color: #b45309; margin-left: 5px; line-height: 1;">' + rating + '/5</span>';
+            html += '</div>';
+            return html;
+        },
+
+        getReviewerAvatarHtml(name) {
+            const initial = name && name.trim().length > 0 ? name.trim().charAt(0).toUpperCase() : '★';
+            return '<div style="position: relative; width: 38px; height: 38px; border-radius: 50%; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9375rem; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.25);">' +
+                this.escapeHtml(initial) +
+                '<div style="position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%; background: #f59e0b; color: #ffffff; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px #ffffff;">' +
+                    '<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>' +
+                '</div>' +
+            '</div>';
+        },
+
+        parseReviewData(item) {
+            // 1. Rating from title: e.g. "New Review (5★)" or "[Auto Masters] New Review (4★)"
+            let rating = null;
+            if (item.title) {
+                const rm = item.title.match(/\((\d+(?:\.\d+)?)\s*★\)/);
+                if (rm) {
+                    rating = parseFloat(rm[1]);
+                }
+            }
+
+            // 2. Business name from account_name or bracketed prefix in title
+            let businessName = item.account_name || '';
+            if (!businessName && item.title) {
+                const am = item.title.match(/^\[(.*?)\]/);
+                if (am) {
+                    businessName = am[1];
+                }
+            }
+
+            // 3. Reviewer name & review snippet from item.message
+            let reviewerName = '';
+            let snippet = '';
+            if (item.message) {
+                const mm = item.message.match(/^New review received from\s+([^:]+):\s*(.*)$/s);
+                if (mm) {
+                    reviewerName = mm[1].trim();
+                    let raw = mm[2].trim();
+                    if (raw.startsWith('"') && raw.endsWith('"') && raw.length >= 2) {
+                        raw = raw.substring(1, raw.length - 1);
+                    }
+                    snippet = raw;
+                } else {
+                    snippet = item.message;
+                }
+            }
+
+            if (!reviewerName) {
+                reviewerName = 'Customer';
+            }
+
+            return {
+                isReview: true,
+                rating: rating,
+                businessName: businessName,
+                reviewerName: reviewerName,
+                snippet: snippet
+            };
+        },
+
         renderNotifications(items, unreadCount) {
             const self = this;
             if (!this.menuEl) return;
@@ -294,7 +376,7 @@
                 const countBadge = document.createElement('span');
                 countBadge.className = 'rs-badge';
                 countBadge.id = 'rs-dropdown-unread-pill';
-                countBadge.style.cssText = 'font-size: 0.7rem; padding: 2px 7px; border-radius: 999px; background: rgba(35, 65, 55, 0.1); color: var(--rs-primary); font-weight: 600;';
+                countBadge.style.cssText = 'font-size: 0.71875rem; padding: 2px 8px; border-radius: 999px; background: rgba(35, 65, 55, 0.08); color: var(--rs-primary); font-weight: 600;';
                 countBadge.textContent = unreadCount + ' unread';
                 headerLeft.appendChild(countBadge);
             }
@@ -320,17 +402,18 @@
             // 2. Notification List Container
             const list = document.createElement('div');
             list.className = 'rs-notification-list';
-            list.style.cssText = 'max-height: 380px; overflow-y: auto;';
+            list.style.cssText = 'max-height: 400px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.18) transparent;';
 
             items.forEach(function(item) {
                 const isUnread = !item.is_read;
+                const isReview = (item.type === 'review' || item.type === 'new_review');
                 const meta = self.getTypeMeta(item.type);
 
                 const row = document.createElement('a');
                 row.href = item.action_url || '#';
                 row.id = 'rs-dropdown-notif-' + item.id;
-                row.className = 'rs-d-flex rs-align-items-start rs-text-decoration-none rs-dropdown-notif-row';
-                row.style.cssText = 'padding: 12px 16px; border-bottom: 1px solid rgba(0, 0, 0, 0.05); transition: background-color 0.15s ease; color: inherit; display: flex; align-items: flex-start; text-decoration: none; position: relative; gap: 12px; cursor: pointer;' +
+                row.className = 'rs-dropdown-notif-row';
+                row.style.cssText = 'padding: 12px 16px; border-bottom: 1px solid rgba(0, 0, 0, 0.06); transition: background-color 0.15s ease; color: inherit; display: flex; align-items: flex-start; text-decoration: none; position: relative; gap: 12px; cursor: pointer;' +
                     (isUnread ? 'background: rgba(35, 65, 55, 0.035); border-left: 3px solid var(--rs-primary);' : 'background: #ffffff; border-left: 3px solid transparent;');
 
                 row.addEventListener('mouseenter', function() {
@@ -340,65 +423,142 @@
                     row.style.backgroundColor = item.is_read ? '#ffffff' : 'rgba(35, 65, 55, 0.035)';
                 });
 
-                // Icon Avatar
-                const iconBox = document.createElement('div');
-                iconBox.style.cssText = 'flex-shrink: 0; width: 34px; height: 34px; border-radius: 8px; background: ' + meta.bg + '; color: ' + meta.color + '; display: flex; align-items: center; justify-content: center; margin-top: 2px;';
-                iconBox.innerHTML = meta.svg;
-                row.appendChild(iconBox);
+                if (isReview) {
+                    const rev = self.parseReviewData(item);
 
-                // Content Block
-                const content = document.createElement('div');
-                content.style.cssText = 'flex-grow: 1; min-width: 0;';
+                    // 1. Reviewer Avatar
+                    const avatarBox = document.createElement('div');
+                    avatarBox.innerHTML = self.getReviewerAvatarHtml(rev.reviewerName);
+                    row.appendChild(avatarBox.firstElementChild || avatarBox);
 
-                // Top Header Row inside Item
-                const topDiv = document.createElement('div');
-                topDiv.className = 'rs-d-flex rs-align-items-center rs-justify-content-between rs-gap-2 rs-mb-1';
+                    // 2. Review Content Block
+                    const content = document.createElement('div');
+                    content.style.cssText = 'flex-grow: 1; min-width: 0;';
 
-                const titleLeft = document.createElement('div');
-                titleLeft.className = 'rs-d-flex rs-align-items-center rs-gap-1';
-                titleLeft.style.cssText = 'min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+                    // Top Row: Reviewer Name + Unread Dot
+                    const topDiv = document.createElement('div');
+                    topDiv.className = 'rs-d-flex rs-align-items-center rs-justify-content-between rs-gap-2';
+                    topDiv.style.cssText = 'margin-bottom: 3px;';
 
-                if (item.account_name && !item.title.startsWith('[' + item.account_name + ']')) {
-                    const accBadge = document.createElement('span');
-                    accBadge.className = 'rs-badge';
-                    accBadge.style.cssText = 'font-size: 0.6875rem; padding: 1px 5px; border-radius: 4px; background: rgba(35, 65, 55, 0.08); color: var(--rs-primary); font-weight: 600; margin-right: 4px; flex-shrink: 0;';
-                    accBadge.textContent = item.account_name;
-                    titleLeft.appendChild(accBadge);
+                    const nameWrapper = document.createElement('div');
+                    nameWrapper.className = 'rs-d-flex rs-align-items-center rs-gap-2';
+                    nameWrapper.style.cssText = 'min-width: 0; overflow: hidden;';
+
+                    const reviewerEl = document.createElement('span');
+                    reviewerEl.className = isUnread ? 'rs-font-bold rs-text-main rs-dropdown-notif-title' : 'rs-font-medium rs-text-main rs-dropdown-notif-title';
+                    reviewerEl.style.cssText = 'font-size: 0.875rem; color: #111827; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700;';
+                    reviewerEl.textContent = rev.reviewerName;
+                    nameWrapper.appendChild(reviewerEl);
+
+                    if (isUnread) {
+                        const dot = document.createElement('span');
+                        dot.className = 'rs-dropdown-unread-dot';
+                        dot.style.cssText = 'width: 7px; height: 7px; border-radius: 50%; background: var(--rs-primary); flex-shrink: 0; display: inline-block;';
+                        nameWrapper.appendChild(dot);
+                    }
+                    topDiv.appendChild(nameWrapper);
+
+                    content.appendChild(topDiv);
+
+                    // Star Rating Row
+                    if (rev.rating !== null && rev.rating > 0) {
+                        const starsDiv = document.createElement('div');
+                        starsDiv.style.cssText = 'margin-bottom: 5px; display: flex; align-items: center;';
+                        starsDiv.innerHTML = self.renderStarsHtml(rev.rating);
+                        content.appendChild(starsDiv);
+                    }
+
+                    // Review snippet preview (italic quoted block)
+                    if (rev.snippet && rev.snippet !== '-') {
+                        const quoteDiv = document.createElement('div');
+                        quoteDiv.className = 'rs-dropdown-review-snippet';
+                        quoteDiv.style.cssText = 'font-size: 0.8125rem; color: #374151; line-height: 1.45; font-style: italic; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; padding: 4px 8px; background: rgba(0, 0, 0, 0.025); border-left: 2px solid #e5e7eb; border-radius: 4px;';
+                        quoteDiv.textContent = '“' + rev.snippet + '”';
+                        content.appendChild(quoteDiv);
+                    }
+
+                    // Meta Footer Row: Business Name · Time
+                    const metaDiv = document.createElement('div');
+                    metaDiv.className = 'rs-d-flex rs-align-items-center rs-gap-1 rs-text-muted';
+                    metaDiv.style.cssText = 'font-size: 0.71875rem; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;';
+
+                    if (rev.businessName) {
+                        const bizSpan = document.createElement('span');
+                        bizSpan.style.cssText = 'font-weight: 600; color: #4b5563; flex-shrink: 0;';
+                        bizSpan.textContent = rev.businessName;
+                        metaDiv.appendChild(bizSpan);
+
+                        const sep = document.createElement('span');
+                        sep.style.cssText = 'color: #9ca3af; margin: 0 2px;';
+                        sep.textContent = '·';
+                        metaDiv.appendChild(sep);
+                    }
+
+                    const timeSpan = document.createElement('span');
+                    timeSpan.textContent = item.time_ago || '';
+                    metaDiv.appendChild(timeSpan);
+
+                    content.appendChild(metaDiv);
+                    row.appendChild(content);
+
+                } else {
+                    // Generic notification item (social post, disconnect, warning, etc.)
+                    const iconBox = document.createElement('div');
+                    iconBox.style.cssText = 'flex-shrink: 0; width: 36px; height: 36px; border-radius: 8px; background: ' + meta.bg + '; color: ' + meta.color + '; display: flex; align-items: center; justify-content: center; margin-top: 2px;';
+                    iconBox.innerHTML = meta.svg;
+                    row.appendChild(iconBox);
+
+                    const content = document.createElement('div');
+                    content.style.cssText = 'flex-grow: 1; min-width: 0;';
+
+                    const topDiv = document.createElement('div');
+                    topDiv.className = 'rs-d-flex rs-align-items-center rs-justify-content-between rs-gap-2 rs-mb-1';
+
+                    const titleLeft = document.createElement('div');
+                    titleLeft.className = 'rs-d-flex rs-align-items-center rs-gap-1';
+                    titleLeft.style.cssText = 'min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+
+                    if (item.account_name && !item.title.startsWith('[' + item.account_name + ']')) {
+                        const accBadge = document.createElement('span');
+                        accBadge.className = 'rs-badge';
+                        accBadge.style.cssText = 'font-size: 0.6875rem; padding: 1px 5px; border-radius: 4px; background: rgba(35, 65, 55, 0.08); color: var(--rs-primary); font-weight: 600; margin-right: 4px; flex-shrink: 0;';
+                        accBadge.textContent = item.account_name;
+                        titleLeft.appendChild(accBadge);
+                    }
+
+                    const itemTitle = document.createElement('span');
+                    itemTitle.className = isUnread ? 'rs-font-bold rs-text-main rs-dropdown-notif-title' : 'rs-font-medium rs-text-main rs-dropdown-notif-title';
+                    itemTitle.style.cssText = 'font-size: 0.8125rem; color: #111827; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+                    itemTitle.textContent = item.title;
+                    titleLeft.appendChild(itemTitle);
+
+                    if (isUnread) {
+                        const dot = document.createElement('span');
+                        dot.className = 'rs-dropdown-unread-dot';
+                        dot.style.cssText = 'width: 7px; height: 7px; border-radius: 50%; background: var(--rs-primary); flex-shrink: 0; display: inline-block; margin-left: 2px;';
+                        titleLeft.appendChild(dot);
+                    }
+
+                    topDiv.appendChild(titleLeft);
+
+                    const itemTime = document.createElement('span');
+                    itemTime.className = 'rs-text-muted';
+                    itemTime.style.cssText = 'font-size: 0.6875rem; color: #9ca3af; white-space: nowrap; flex-shrink: 0;';
+                    itemTime.textContent = item.time_ago || '';
+                    topDiv.appendChild(itemTime);
+
+                    content.appendChild(topDiv);
+
+                    if (item.message) {
+                        const itemMsg = document.createElement('div');
+                        itemMsg.className = 'rs-text-secondary';
+                        itemMsg.style.cssText = 'font-size: 0.75rem; color: #6b7280; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px;';
+                        itemMsg.textContent = item.message;
+                        content.appendChild(itemMsg);
+                    }
+
+                    row.appendChild(content);
                 }
-
-                const itemTitle = document.createElement('span');
-                itemTitle.className = isUnread ? 'rs-font-bold rs-text-main rs-dropdown-notif-title' : 'rs-font-medium rs-text-main rs-dropdown-notif-title';
-                itemTitle.style.cssText = 'font-size: 0.8125rem; color: #111827; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
-                itemTitle.textContent = item.title;
-                titleLeft.appendChild(itemTitle);
-
-                if (isUnread) {
-                    const dot = document.createElement('span');
-                    dot.className = 'rs-dropdown-unread-dot';
-                    dot.style.cssText = 'width: 7px; height: 7px; border-radius: 50%; background: var(--rs-primary); flex-shrink: 0; display: inline-block; margin-left: 2px;';
-                    titleLeft.appendChild(dot);
-                }
-
-                topDiv.appendChild(titleLeft);
-
-                const itemTime = document.createElement('span');
-                itemTime.className = 'rs-text-muted';
-                itemTime.style.cssText = 'font-size: 0.6875rem; color: #9ca3af; white-space: nowrap; flex-shrink: 0;';
-                itemTime.textContent = item.time_ago || '';
-                topDiv.appendChild(itemTime);
-
-                content.appendChild(topDiv);
-
-                // Message preview
-                if (item.message) {
-                    const itemMsg = document.createElement('div');
-                    itemMsg.className = 'rs-text-secondary';
-                    itemMsg.style.cssText = 'font-size: 0.75rem; color: #6b7280; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px;';
-                    itemMsg.textContent = item.message;
-                    content.appendChild(itemMsg);
-                }
-
-                row.appendChild(content);
 
                 // Click event: mark read then navigate
                 row.addEventListener('click', function(e) {
