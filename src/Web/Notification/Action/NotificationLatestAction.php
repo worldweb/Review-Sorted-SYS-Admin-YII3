@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace App\Web\Notification\Action;
 
+use App\Domain\Notification\NotificationRepositoryInterface;
+use App\Domain\User\UserRepositoryInterface;
 use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Db\Connection\ConnectionInterface;
-use Yiisoft\Db\Query\Query;
 
 /**
- * Returns latest notifications and unread count for current tenant user.
+ * Returns latest notifications and unread count for current tenant user or platform administrator.
  */
 final class NotificationLatestAction
 {
     public function __construct(
-        private ConnectionInterface $db,
+        private NotificationRepositoryInterface $notificationRepo,
+        private UserRepositoryInterface $userRepo,
         private TenantContextProviderInterface $tenantContextProvider,
         private ResponseFactoryInterface $responseFactory,
     ) {
@@ -38,32 +39,33 @@ final class NotificationLatestAction
         }
 
         $userId = $context->getUserId();
-        $accountId = $context->getAccountId() ?? 0;
+        $currentUser = $this->userRepo->findById($userId, $context);
+        if ($currentUser === null) {
+            $response->getBody()->write((string) json_encode([
+                'success' => false,
+                'unread_count' => 0,
+                'items' => [],
+            ]));
+            return $response;
+        }
 
         try {
-            $unreadCount = (int) (new Query($this->db))
-                ->from('{{%user_notification}}')
-                ->where(['user_id' => $userId, 'is_read' => 0])
-                ->count();
-
-            $rows = (new Query($this->db))
-                ->from('{{%user_notification}}')
-                ->where(['user_id' => $userId])
-                ->orderBy(['created_at' => SORT_DESC])
-                ->limit(10)
-                ->all();
+            $unreadCount = $this->notificationRepo->countUnreadForUser($currentUser);
+            $notifications = $this->notificationRepo->findLatestForUser($currentUser, 10);
 
             $items = [];
-            foreach ($rows as $row) {
-                $timeAgo = $this->formatTimeAgo((int) ($row['created_at'] ?? time()));
+            foreach ($notifications as $notification) {
+                $timeAgo = $this->formatTimeAgo($notification->getCreatedAt());
                 $items[] = [
-                    'id' => (int) $row['id'],
-                    'type' => (string) ($row['type'] ?? 'info'),
-                    'title' => (string) ($row['title'] ?? ''),
-                    'message' => $row['message'] !== null ? (string) $row['message'] : null,
-                    'action_url' => $row['action_url'] !== null ? (string) $row['action_url'] : null,
-                    'is_read' => (bool) ($row['is_read'] ?? 0),
-                    'created_at' => (int) ($row['created_at'] ?? time()),
+                    'id' => $notification->getId(),
+                    'account_id' => $notification->getAccountId(),
+                    'account_name' => $notification->getAccountName(),
+                    'type' => $notification->getType(),
+                    'title' => $notification->getTitle(),
+                    'message' => $notification->getMessage(),
+                    'action_url' => $notification->getActionUrl(),
+                    'is_read' => $notification->isRead(),
+                    'created_at' => $notification->getCreatedAt(),
                     'time_ago' => $timeAgo,
                 ];
             }

@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace App\Web\Notification\Action;
 
+use App\Domain\Notification\NotificationRepositoryInterface;
+use App\Domain\User\UserRepositoryInterface;
 use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Db\Connection\ConnectionInterface;
-use Yiisoft\Db\Query\Query;
 
 /**
- * Marks single notification as read.
+ * Marks single notification as read with ownership validation.
  */
 final class NotificationMarkReadAction
 {
     public function __construct(
-        private ConnectionInterface $db,
+        private NotificationRepositoryInterface $notificationRepo,
+        private UserRepositoryInterface $userRepo,
         private TenantContextProviderInterface $tenantContextProvider,
         private ResponseFactoryInterface $responseFactory,
     ) {
@@ -25,6 +26,17 @@ final class NotificationMarkReadAction
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
+        if ($request->getMethod() !== 'POST') {
+            $response = $this->responseFactory->createResponse(405)
+                ->withHeader('Allow', 'POST')
+                ->withHeader('Content-Type', 'application/json');
+            $response->getBody()->write((string) json_encode([
+                'success' => false,
+                'error' => 'Method Not Allowed. POST is required.',
+            ]));
+            return $response;
+        }
+
         $context = $this->tenantContextProvider->get();
         $response = $this->responseFactory->createResponse(200)->withHeader('Content-Type', 'application/json');
 
@@ -34,24 +46,26 @@ final class NotificationMarkReadAction
         }
 
         $userId = $context->getUserId();
+        $currentUser = $this->userRepo->findById($userId, $context);
+        if ($currentUser === null) {
+            $response->getBody()->write((string) json_encode(['success' => false]));
+            return $response;
+        }
+
         $params = (array) ($request->getParsedBody() ?? []);
         $queryParams = $request->getQueryParams();
         $id = (int) ($params['id'] ?? $queryParams['id'] ?? 0);
 
         try {
+            $marked = false;
             if ($id > 0) {
-                $this->db->createCommand()
-                    ->update('{{%user_notification}}', ['is_read' => 1, 'read_at' => time()], ['id' => $id, 'user_id' => $userId])
-                    ->execute();
+                $marked = $this->notificationRepo->markAsRead($id, $userId);
             }
 
-            $unreadCount = (int) (new Query($this->db))
-                ->from('{{%user_notification}}')
-                ->where(['user_id' => $userId, 'is_read' => 0])
-                ->count();
+            $unreadCount = $this->notificationRepo->countUnreadForUser($currentUser);
 
             $response->getBody()->write((string) json_encode([
-                'success' => true,
+                'success' => $marked,
                 'unread_count' => $unreadCount,
             ]));
         } catch (\Throwable $e) {

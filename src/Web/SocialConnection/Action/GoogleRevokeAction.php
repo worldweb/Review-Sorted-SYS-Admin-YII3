@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Web\SocialConnection\Action;
 
+use App\Domain\Notification\NotificationService;
 use App\Domain\SocialConnection\SocialConnectionRepositoryInterface;
 use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -19,6 +20,7 @@ final class GoogleRevokeAction
         private TenantContextProviderInterface $tenantContextProvider,
         private SessionInterface $session,
         private ResponseFactoryInterface $responseFactory,
+        private ?NotificationService $notificationService = null,
     ) {
     }
 
@@ -34,6 +36,18 @@ final class GoogleRevokeAction
 
         $this->connectionRepo->unlinkConfig($id, $context);
         $flash->set('info', 'Google location connection has been unlinked.');
+
+        $accountId = $context->getAccountId() ?? 0;
+        if ($this->notificationService !== null && $accountId > 0) {
+            $this->notificationService->notifyAccountAdmins(
+                $accountId,
+                'connection',
+                'Google Connection Disconnected',
+                'Your Google Business Profile connection has been unlinked.',
+                \App\Environment::url('/settings/google'),
+                120
+            );
+        }
 
         return $this->redirect(\App\Environment::url('/settings/google'));
     }

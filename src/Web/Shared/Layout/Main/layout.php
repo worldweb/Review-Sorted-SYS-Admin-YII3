@@ -161,7 +161,8 @@ $this->beginPage();
                 <div class="rs-dropdown" id="rs-notifications-dropdown"
                     data-url-latest="<?= $base ?>/notification/latest"
                     data-url-mark-read="<?= $base ?>/notification/mark-read"
-                    data-url-mark-all-read="<?= $base ?>/notification/mark-all-read">
+                    data-url-mark-all-read="<?= $base ?>/notification/mark-all-read"
+                    data-url-history="<?= $base ?>/notifications">
                     <button type="button" class="rs-header__action-btn" id="rs-notification-bell-btn" aria-label="Notifications" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="position: relative;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -169,7 +170,7 @@ $this->beginPage();
                         </svg>
                         <span class="rs-badge rs-badge--danger rs-d-none" id="rs-notification-badge" style="position: absolute; top: 4px; right: 4px; font-size: 0.65rem; padding: 2px 5px; border-radius: 999px; line-height: 1; display: none;"></span>
                     </button>
-                    <div class="rs-dropdown__menu" id="rs-notification-menu" role="menu" style="min-width: 320px; max-width: 380px; padding: 0;">
+                    <div class="rs-dropdown__menu" id="rs-notification-menu" role="menu" style="width: 380px; max-width: 92vw; padding: 0; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); border: 1px solid var(--rs-border); overflow: hidden;">
                         <div class="rs-p-3 rs-text-center rs-text-muted">
                             <p class="rs-m-0">No new notifications</p>
                         </div>

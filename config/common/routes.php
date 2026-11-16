@@ -438,13 +438,16 @@ return [
                 ->name('hooks_instagram'),
 
             // Notifications
+            Route::get('/notifications')
+                ->action(Web\Notification\Action\NotificationIndexAction::class)
+                ->name('notifications_index'),
             Route::get('/notification/latest')
                 ->action(Web\Notification\Action\NotificationLatestAction::class)
                 ->name('notification_latest'),
-            Route::methods(['GET', 'POST'], '/notification/mark-read')
+            Route::post('/notification/mark-read')
                 ->action(Web\Notification\Action\NotificationMarkReadAction::class)
                 ->name('notification_mark_read'),
-            Route::methods(['GET', 'POST'], '/notification/mark-all-read')
+            Route::post('/notification/mark-all-read')
                 ->action(Web\Notification\Action\NotificationMarkAllReadAction::class)
                 ->name('notification_mark_all_read'),
 

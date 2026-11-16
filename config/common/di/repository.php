@@ -195,4 +195,9 @@ return [
     \App\Domain\SocialPost\Service\SocialPostingServiceInterface::class => \App\Domain\SocialPost\Service\SocialPostingService::class,
     \App\Domain\SocialPost\Service\SocialPostingService::class => \App\Domain\SocialPost\Service\SocialPostingService::class,
     \App\Domain\SocialPost\Service\SocialPostQueueWorkerService::class => \App\Domain\SocialPost\Service\SocialPostQueueWorkerService::class,
+
+    // In-App Notification System
+    \App\Domain\Notification\NotificationRepositoryInterface::class => \App\Infrastructure\Persistence\Notification\NotificationRepository::class,
+    \App\Infrastructure\Persistence\Notification\NotificationRepository::class => \App\Infrastructure\Persistence\Notification\NotificationRepository::class,
+    \App\Domain\Notification\NotificationService::class => \App\Domain\Notification\NotificationService::class,
 ];

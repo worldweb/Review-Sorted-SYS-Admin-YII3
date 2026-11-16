@@ -30,6 +30,7 @@ final class AuthorizationMiddleware implements MiddlewareInterface
         '/profile',
         '/profile/edit',
         '/site/search',
+        '/notifications',
     ];
 
     /**

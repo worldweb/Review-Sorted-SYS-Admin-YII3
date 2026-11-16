@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Web\Notification\Action;
 
+use App\Domain\Notification\NotificationRepositoryInterface;
 use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Db\Connection\ConnectionInterface;
 
 /**
- * Marks all notifications as read for current user.
+ * Marks all notifications as read for current user or platform administrator.
  */
 final class NotificationMarkAllReadAction
 {
     public function __construct(
-        private ConnectionInterface $db,
+        private NotificationRepositoryInterface $notificationRepo,
         private TenantContextProviderInterface $tenantContextProvider,
         private ResponseFactoryInterface $responseFactory,
     ) {
@@ -24,6 +24,17 @@ final class NotificationMarkAllReadAction
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
+        if ($request->getMethod() !== 'POST') {
+            $response = $this->responseFactory->createResponse(405)
+                ->withHeader('Allow', 'POST')
+                ->withHeader('Content-Type', 'application/json');
+            $response->getBody()->write((string) json_encode([
+                'success' => false,
+                'error' => 'Method Not Allowed. POST is required.',
+            ]));
+            return $response;
+        }
+
         $context = $this->tenantContextProvider->get();
         $response = $this->responseFactory->createResponse(200)->withHeader('Content-Type', 'application/json');
 
@@ -35,9 +46,7 @@ final class NotificationMarkAllReadAction
         $userId = $context->getUserId();
 
         try {
-            $this->db->createCommand()
-                ->update('{{%user_notification}}', ['is_read' => 1, 'read_at' => time()], ['user_id' => $userId, 'is_read' => 0])
-                ->execute();
+            $this->notificationRepo->markAllAsRead($userId);
 
             $response->getBody()->write((string) json_encode([
                 'success' => true,

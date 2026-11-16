@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\SocialPost\Service;
 
+use App\Domain\Notification\NotificationService;
 use App\Domain\SocialPost\SocialPostRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
@@ -18,6 +19,7 @@ final class SocialPostQueueWorkerService
         private SocialPostingServiceInterface $postingService,
         private SocialPlatformResolverFactoryInterface $resolverFactory,
         private ?LoggerInterface $logger = null,
+        private ?NotificationService $notificationService = null,
     ) {
     }
 
@@ -93,12 +95,33 @@ final class SocialPostQueueWorkerService
 
             if ($result->isSuccess()) {
                 $stats['published']++;
+                if ($this->notificationService !== null) {
+                    $platformName = ucfirst($dest->getPlatform());
+                    $this->notificationService->notifyAccountAdmins(
+                        $dest->getAccountId(),
+                        'social_post',
+                        "Social Post Published ({$platformName})",
+                        "Your social post has been successfully published to {$platformName}.",
+                        \App\Environment::url('/social-post/view?id=' . $dest->getSocialPostId())
+                    );
+                }
             } elseif ($result->isRetryable()) {
                 $stats['retried']++;
             } elseif ($result->isAmbiguous()) {
                 $stats['ambiguous']++;
             } else {
                 $stats['failed']++;
+                if ($this->notificationService !== null) {
+                    $platformName = ucfirst($dest->getPlatform());
+                    $errorText = $result->getErrorMessage() ?? 'Destination delivery error';
+                    $this->notificationService->notifyAccountAdmins(
+                        $dest->getAccountId(),
+                        'social_post_failed',
+                        "Social Post Failed ({$platformName})",
+                        "Post failed to deliver to {$platformName}: {$errorText}",
+                        \App\Environment::url('/social-post/view?id=' . $dest->getSocialPostId())
+                    );
+                }
             }
         }
 

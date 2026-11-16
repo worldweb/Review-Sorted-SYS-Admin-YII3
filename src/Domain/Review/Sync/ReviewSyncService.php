@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Review\Sync;
 
+use App\Domain\Notification\NotificationService;
 use App\Domain\Review\Review;
 use App\Domain\Review\ReviewRepositoryInterface;
 use App\Domain\SocialConnection\ServiceConfig;
@@ -30,6 +31,7 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
         private SocialConnectionRepositoryInterface $connectionRepo,
         private GoogleReviewSyncClientInterface $googleClient,
         private FacebookReviewSyncClientInterface $facebookClient,
+        private ?NotificationService $notificationService = null,
         ?LoggerInterface $logger = null,
     ) {
         $this->logger = $logger ?? new NullLogger();
@@ -338,16 +340,6 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
     private function dispatchNewReviewNotification(int $accountId, int $reviewId, array $reviewData): void
     {
         try {
-            $activeUsers = (new Query($this->db))
-                ->select(['id'])
-                ->from('{{%user}}')
-                ->where(['account_id' => $accountId, 'status' => 1])
-                ->column();
-
-            if (empty($activeUsers)) {
-                return;
-            }
-
             $rate = isset($reviewData['review_rate']) ? (float) $reviewData['review_rate'] : null;
             $rateStr = $rate !== null && $rate > 0 ? " ({$rate}★)" : '';
             $customerName = (string) ($reviewData['customer_name'] ?? 'A Customer');
@@ -360,8 +352,24 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
             }
             $message = "New review received from {$customerName}: \"{$textSnippet}\"";
             $actionUrl = \App\Environment::url('/reviews/view?id=' . $reviewId);
-            $now = time();
 
+            if ($this->notificationService !== null) {
+                $this->notificationService->notifyAccountUsers($accountId, 'review', $title, $message, $actionUrl);
+                return;
+            }
+
+            // Fallback direct dispatch if service not injected
+            $activeUsers = (new Query($this->db))
+                ->select(['id'])
+                ->from('{{%user}}')
+                ->where(['account_id' => $accountId, 'status' => 1])
+                ->column();
+
+            if (empty($activeUsers)) {
+                return;
+            }
+
+            $now = time();
             foreach ($activeUsers as $userId) {
                 $this->db->createCommand(
                     'INSERT INTO {{%user_notification}} (`user_id`, `account_id`, `type`, `title`, `message`, `action_url`, `is_read`, `created_at`) ' .
