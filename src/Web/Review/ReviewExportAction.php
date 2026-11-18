@@ -7,6 +7,7 @@ namespace App\Web\Review;
 use App\Domain\Review\ReviewRepositoryInterface;
 use App\Domain\User\UserRepositoryInterface;
 use App\Security\Authorization\AccessDecisionManager;
+use App\Security\CsvSanitizer;
 use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -88,16 +89,16 @@ final class ReviewExportAction
             // CSV Column Headers matching Yii 2
             fputcsv($outputStream, ['Date', 'Customer', 'Page', 'Rating', 'Status', 'Text']);
 
-            // Stream rows directly from database cursor generator into the stream
+            // Stream rows directly from database cursor generator into the stream (escaped against CSV injection)
             foreach ($this->reviewRepo->getExportData($exportParams, $context) as $row) {
-                fputcsv($outputStream, [
+                fputcsv($outputStream, CsvSanitizer::escapeRow([
                     $row['date'],
                     $row['customer'],
                     $row['page'],
                     $row['rating'],
                     $row['status'],
                     $row['text'],
-                ]);
+                ]));
             }
 
             rewind($outputStream);

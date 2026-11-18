@@ -107,6 +107,105 @@ final class MetaWhatsAppClient implements MetaWhatsAppClientInterface
         return $data;
     }
 
+    public function sendTemplateMessage(
+        string $phone,
+        string $templateName,
+        string $languageCode = 'en_US',
+        array $components = [],
+    ): array {
+        if (!$this->enabled || $this->token === '' || $this->phoneNumberId === '') {
+            if (\App\Environment::isProd()) {
+                if (!$this->enabled) {
+                    throw new RuntimeException(
+                        '[MetaWhatsAppClient] Live WhatsApp messaging is disabled in production (WHATSAPP_ENABLED is false). Simulated sending is prohibited in production.'
+                    );
+                }
+                throw new RuntimeException(
+                    '[MetaWhatsAppClient] Cannot send WhatsApp template message in production: WHATSAPP_TOKEN or WHATSAPP_PHONE_NUMBER_ID is missing.'
+                );
+            }
+
+            $this->logger?->info(sprintf(
+                '[MetaWhatsAppClient: Simulated Send Template] Phone: %s, Template: %s, Lang: %s (Network disabled)',
+                $phone,
+                $templateName,
+                $languageCode
+            ));
+
+            return [
+                'messaging_product' => 'whatsapp',
+                'contacts' => [
+                    ['input' => $phone, 'wa_id' => ltrim($phone, '+')],
+                ],
+                'messages' => [
+                    ['id' => 'wamid.simulated.tpl.' . bin2hex(random_bytes(16))],
+                ],
+            ];
+        }
+
+        $url = sprintf(
+            'https://graph.facebook.com/%s/%s/messages',
+            $this->apiVersion,
+            $this->phoneNumberId
+        );
+
+        $payload = [
+            'messaging_product' => 'whatsapp',
+            'to' => $phone,
+            'type' => 'template',
+            'template' => [
+                'name' => $templateName,
+                'language' => [
+                    'code' => $languageCode,
+                ],
+            ],
+        ];
+
+        if (!empty($components)) {
+            $payload['template']['components'] = $components;
+        }
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $this->token,
+                'Content-Type: application/json',
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_SSL_VERIFYPEER => true,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlErr = curl_error($ch);
+
+        if ($response === false || $curlErr !== '') {
+            throw new RuntimeException('WhatsApp API connection failed: ' . ($curlErr ?: 'Unknown error'));
+        }
+
+        if ($httpCode < 200 || $httpCode >= 300) {
+            $errDetail = sprintf('WhatsApp API HTTP %d', $httpCode);
+            $errData = json_decode((string) $response, true);
+            if (!empty($errData['error']['message'])) {
+                $errDetail .= ': ' . $errData['error']['message'];
+            }
+            if (!empty($errData['error']['code'])) {
+                $errDetail .= ' (Code ' . $errData['error']['code'] . ')';
+            }
+            throw new RuntimeException($errDetail);
+        }
+
+        $data = json_decode((string) $response, true);
+        if (!is_array($data)) {
+            throw new RuntimeException('Invalid JSON response from WhatsApp API.');
+        }
+
+        return $data;
+    }
+
     public function isConfigured(): bool
     {
         return $this->enabled && $this->token !== '' && $this->phoneNumberId !== '';

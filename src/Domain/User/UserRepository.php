@@ -413,6 +413,29 @@ final class UserRepository implements UserRepositoryInterface
         return $affected >= 0;
     }
 
+    public function hasDependencies(int $id): bool
+    {
+        $chatCount = (int) (new Query($this->db))
+            ->from('{{%chat_message}}')
+            ->where(['user_id' => $id])
+            ->count();
+
+        if ($chatCount > 0) {
+            return true;
+        }
+
+        $replyCount = (int) (new Query($this->db))
+            ->from('{{%review_reply}}')
+            ->where(['user_id' => $id])
+            ->count();
+
+        if ($replyCount > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function deleteUser(int $id, ?\App\Security\TenantContextInterface $context = null): bool
     {
         // Guard against deleting super admin or user outside tenant boundary
@@ -430,16 +453,37 @@ final class UserRepository implements UserRepositoryInterface
             $userWhere['account_id'] = $context->getAccountId();
         }
 
-        $this->db->createCommand()->delete(
-            '{{%auth_assignment}}',
-            ['user_id' => (string) $id]
-        )->execute();
+        // FUNC-06 Guarded deletion:
+        // If dependent records exist (chat messages, review replies), deactivate safely to preserve
+        // foreign key integrity, historical audit logs, and auth_assignment role mapping.
+        if ($this->hasDependencies($id)) {
+            $affected = $this->db->createCommand()->update(
+                '{{%user}}',
+                ['status' => User::STATUS_INACTIVE, 'updated_at' => time()],
+                $userWhere
+            )->execute();
 
-        $affected = $this->db->createCommand()->delete(
-            '{{%user}}',
-            $userWhere
-        )->execute();
+            return $affected > 0;
+        }
 
-        return $affected > 0;
+        // If zero dependent records exist, perform clean transactional hard deletion
+        $transaction = $this->db->beginTransaction();
+        try {
+            $this->db->createCommand()->delete(
+                '{{%auth_assignment}}',
+                ['user_id' => (string) $id]
+            )->execute();
+
+            $affected = $this->db->createCommand()->delete(
+                '{{%user}}',
+                $userWhere
+            )->execute();
+
+            $transaction->commit();
+            return $affected > 0;
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 }

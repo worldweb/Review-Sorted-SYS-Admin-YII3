@@ -354,8 +354,69 @@ final class AccountRepository implements AccountRepositoryInterface
         return $affected >= 0;
     }
 
+    public function hasDependencies(int $id): bool
+    {
+        $userCount = (int) (new Query($this->db))
+            ->from('{{%user}}')
+            ->where(['account_id' => $id])
+            ->count();
+
+        if ($userCount > 0) {
+            return true;
+        }
+
+        $reviewCount = (int) (new Query($this->db))
+            ->from('{{%review}}')
+            ->where(['account_id' => $id])
+            ->count();
+
+        if ($reviewCount > 0) {
+            return true;
+        }
+
+        $chatCount = (int) (new Query($this->db))
+            ->from('{{%chat_message}}')
+            ->where(['account_id' => $id])
+            ->count();
+
+        if ($chatCount > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function deleteAccount(int $id): bool
     {
+        // FUNC-06 Guarded deletion:
+        // If dependent records exist, suspend/deactivate the account and its tenant users
+        // to preserve foreign key constraints, historical reviews, and audit trails.
+        if ($this->hasDependencies($id)) {
+            $transaction = $this->db->beginTransaction();
+            try {
+                // Suspend the workspace
+                $affected = $this->db->createCommand()->update(
+                    '{{%account}}',
+                    ['status' => Account::STATUS_INACTIVE, 'updated_at' => time()],
+                    ['id' => $id]
+                )->execute();
+
+                // Deactivate any active users under this workspace
+                $this->db->createCommand()->update(
+                    '{{%user}}',
+                    ['status' => \App\Domain\User\User::STATUS_INACTIVE, 'updated_at' => time()],
+                    ['account_id' => $id]
+                )->execute();
+
+                $transaction->commit();
+                return $affected > 0;
+            } catch (\Throwable $e) {
+                $transaction->rollBack();
+                throw $e;
+            }
+        }
+
+        // Zero dependencies: safe to hard delete workspace
         $affected = $this->db->createCommand()->delete(
             '{{%account}}',
             ['id' => $id]

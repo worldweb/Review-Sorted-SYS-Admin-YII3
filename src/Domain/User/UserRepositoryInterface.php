@@ -85,5 +85,11 @@ interface UserRepositoryInterface
      * Delete an existing user record with optional tenant boundary scoping.
      * (Prepared for write environment; guarded in read-only environment).
      */
+    /**
+     * Checks whether the user has dependent records (such as chat messages or review replies)
+     * that would prevent hard deletion due to foreign key constraints.
+     */
+    public function hasDependencies(int $id): bool;
+
     public function deleteUser(int $id, ?\App\Security\TenantContextInterface $context = null): bool;
 }

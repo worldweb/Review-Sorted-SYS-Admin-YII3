@@ -12,6 +12,7 @@ use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 use Yiisoft\Csrf\CsrfTokenInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
@@ -28,6 +29,7 @@ final class AccountUpdateAction
         private AccessDecisionManager $accessDecision,
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
+        private ?LoggerInterface $logger = null,
         private ?CsrfTokenInterface $csrfToken = null,
     ) {
     }
@@ -108,7 +110,10 @@ final class AccountUpdateAction
                     $this->accountRepo->updateAccount($targetId, $saveData);
                     return $this->redirect(\App\Environment::url('/accounts/view?id=' . $targetId));
                 } catch (\Throwable $e) {
-                    $errors['general'] = 'Failed to update account: ' . $e->getMessage();
+                    $this->logger?->error('Account update failed: ' . $e->getMessage(), ['exception' => $e]);
+                    $errors['general'] = \App\Environment::appDebug()
+                        ? ('Failed to update account: ' . $e->getMessage())
+                        : 'Failed to update workspace. Please verify your inputs or try again later.';
                 }
             }
         }

@@ -62,6 +62,20 @@ $this->beginPage();
     <link rel="stylesheet" href="<?= $asset('/css/responsive.css') ?>">
 
     <style>
+        html:has(body.rs-layout-guest),
+        body.rs-layout-guest {
+            min-height: 100%;
+            height: auto !important;
+            overflow-y: auto !important;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+        .rs-auth-container {
+            min-height: 100%;
+            height: auto;
+            width: 100%;
+            overflow-y: visible;
+        }
         .rs-auth-layout {
             min-height: 100vh;
             display: flex;

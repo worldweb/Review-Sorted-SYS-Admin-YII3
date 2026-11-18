@@ -9,7 +9,10 @@ use App\Domain\Chat\ChatRepositoryInterface;
 use App\Domain\Review\Sync\ReviewSyncServiceInterface;
 use App\Domain\SocialConnection\ServiceConfig;
 use App\Domain\SocialConnection\SocialConnectionRepositoryInterface;
+use App\Domain\WhatsApp\WhatsAppQueue;
+use App\Domain\WhatsApp\WhatsAppRepositoryInterface;
 use App\Environment;
+use App\Security\RateLimiter\FileRateLimiter;
 use App\Security\TenantContext;
 use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -21,9 +24,9 @@ use Throwable;
 
 /**
  * HooksMessagesAction.
- * Handles incoming webhooks for Facebook Messenger, Instagram Direct, and Page Review feeds at /hooks/messages.
+ * Handles incoming webhooks for Facebook Messenger, Instagram Direct, WhatsApp Cloud API, and Page Review feeds at /hooks/messages.
  * Validates hub.mode and hub.verify_token against configured environment secrets on handshake.
- * Parses and ingests incoming Messenger payloads into domain Chat and ChatMessage tables with tenant isolation.
+ * Parses and ingests incoming payloads into domain Chat, ChatMessage, and WhatsAppQueue tables with tenant isolation.
  */
 final class HooksMessagesAction
 {
@@ -34,6 +37,8 @@ final class HooksMessagesAction
         private ChatRepositoryInterface $chatRepository,
         private SocialConnectionRepositoryInterface $socialConnectionRepository,
         private ?ReviewSyncServiceInterface $reviewSyncService = null,
+        private ?WhatsAppRepositoryInterface $whatsAppRepository = null,
+        private ?FileRateLimiter $rateLimiter = null,
         ?LoggerInterface $logger = null,
     ) {
         $this->logger = $logger ?? new NullLogger();
@@ -41,6 +46,20 @@ final class HooksMessagesAction
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
+        // Generous rate limit (600 req/60s) for inbound webhooks to prevent volumetric flood while preserving provider retries
+        $limiter = $this->rateLimiter ?? new FileRateLimiter();
+        $ip = $limiter->getClientIp($request);
+        $rateKey = "webhook:messages:{$ip}";
+        if (!$limiter->check($rateKey, 600, 60)) {
+            $retryAfter = $limiter->getRetryAfter($rateKey, 60);
+            $this->logger->warning("HooksMessagesAction: Rate limit exceeded for IP {$ip}");
+            $response = $this->responseFactory->createResponse(429)
+                ->withHeader('Content-Type', 'text/plain')
+                ->withHeader('Retry-After', (string) $retryAfter);
+            $response->getBody()->write('Too Many Requests');
+            return $response;
+        }
+
         if ($request->getMethod() === 'GET') {
             return $this->handleHandshake($request);
         }
@@ -145,8 +164,8 @@ final class HooksMessagesAction
         }
 
         $object = (string) ($data['object'] ?? '');
-        if ($object !== 'page' && $object !== 'instagram') {
-            $this->logger->info("Facebook Webhook: ignoring unsupported object type: {$object}");
+        if ($object !== 'page' && $object !== 'instagram' && $object !== 'whatsapp_business_account') {
+            $this->logger->info("Meta Webhook: ignoring unsupported object type: {$object}");
             $response = $this->responseFactory->createResponse(200)
                 ->withHeader('Content-Type', 'text/plain');
             $response->getBody()->write('IGNORED');
@@ -166,14 +185,24 @@ final class HooksMessagesAction
                 continue;
             }
 
-            $entryPageId = (string) ($entry['id'] ?? '');
+            $entryId = (string) ($entry['id'] ?? '');
 
-            // 1. Messenger messages processing
+            // 1. WhatsApp Business Account processing
+            if ($object === 'whatsapp_business_account') {
+                if (isset($entry['changes']) && is_array($entry['changes'])) {
+                    $this->processWhatsAppChanges($entry['changes'], $entryId);
+                }
+                continue;
+            }
+
+            $entryPageId = $entryId;
+
+            // 2. Messenger messages processing
             if (isset($entry['messaging']) && is_array($entry['messaging'])) {
                 $this->processMessagingEvents($entry['messaging'], $entryPageId, (int) ($entry['time'] ?? time()));
             }
 
-            // 2. Rating & Review events processing
+            // 3. Rating & Review events processing
             if (isset($entry['changes']) && is_array($entry['changes'])) {
                 $this->processChangesEvents($entry['changes'], $entryPageId);
             }
@@ -412,5 +441,116 @@ final class HooksMessagesAction
         }
 
         return $fallbackName ?? 'Facebook User';
+    }
+
+    /**
+     * Processes inbound WhatsApp Cloud API webhook changes.
+     *
+     * @param array<int, array<string, mixed>> $changes
+     */
+    private function processWhatsAppChanges(array $changes, string $wabaId): void
+    {
+        foreach ($changes as $change) {
+            if (!is_array($change)) {
+                continue;
+            }
+
+            $field = (string) ($change['field'] ?? '');
+            if ($field !== 'messages') {
+                $this->logger->debug("WhatsApp Webhook: ignoring non-message field: {$field}");
+                continue;
+            }
+
+            $value = $change['value'] ?? [];
+            if (!is_array($value)) {
+                continue;
+            }
+
+            // 1. Process outbound delivery status updates
+            if (isset($value['statuses']) && is_array($value['statuses'])) {
+                $this->processWhatsAppStatuses($value['statuses'], $wabaId);
+            }
+
+            // 2. Process inbound customer messages
+            if (isset($value['messages']) && is_array($value['messages'])) {
+                $this->processWhatsAppInboundMessages($value['messages'], $value, $wabaId);
+            }
+        }
+    }
+
+    /**
+     * Processes WhatsApp delivery and read status receipts.
+     *
+     * @param array<int, array<string, mixed>> $statuses
+     */
+    private function processWhatsAppStatuses(array $statuses, string $wabaId): void
+    {
+        foreach ($statuses as $statusObj) {
+            if (!is_array($statusObj)) {
+                continue;
+            }
+
+            $providerMsgId = (string) ($statusObj['id'] ?? '');
+            $statusName = (string) ($statusObj['status'] ?? '');
+            $recipientId = (string) ($statusObj['recipient_id'] ?? '');
+
+            if ($providerMsgId === '') {
+                continue;
+            }
+
+            $this->logger->info("WhatsApp Webhook: Status update for {$providerMsgId}: {$statusName}", [
+                'waba_id' => $wabaId,
+                'recipient_id' => $recipientId,
+                'status' => $statusName,
+            ]);
+
+            if ($this->whatsAppRepository !== null) {
+                if ($statusName === 'failed') {
+                    $errors = $statusObj['errors'] ?? [];
+                    $this->logger->warning("WhatsApp message failed to deliver for provider message ID {$providerMsgId}", [
+                        'errors' => $errors,
+                    ]);
+                    $this->whatsAppRepository->updateQueueStatusByProviderId($providerMsgId, WhatsAppQueue::STATUS_FAILED);
+                } elseif ($statusName === 'sent' || $statusName === 'delivered' || $statusName === 'read') {
+                    $this->whatsAppRepository->updateQueueStatusByProviderId($providerMsgId, WhatsAppQueue::STATUS_SENT);
+                }
+            }
+        }
+    }
+
+    /**
+     * Processes inbound WhatsApp messages from customers.
+     *
+     * @param array<int, array<string, mixed>> $messages
+     * @param array<string, mixed> $value
+     */
+    private function processWhatsAppInboundMessages(array $messages, array $value, string $wabaId): void
+    {
+        $metadata = $value['metadata'] ?? [];
+        $displayPhone = is_array($metadata) ? (string) ($metadata['display_phone_number'] ?? '') : '';
+
+        foreach ($messages as $msg) {
+            if (!is_array($msg)) {
+                continue;
+            }
+
+            $sender = (string) ($msg['from'] ?? '');
+            $msgId = (string) ($msg['id'] ?? '');
+            $msgType = (string) ($msg['type'] ?? 'unknown');
+            $body = '';
+
+            if ($msgType === 'text' && isset($msg['text']['body'])) {
+                $body = (string) $msg['text']['body'];
+            }
+
+            $this->logger->info("WhatsApp Webhook: Received inbound customer message from {$sender}", [
+                'waba_id' => $wabaId,
+                'display_phone' => $displayPhone,
+                'sender' => $sender,
+                'message_id' => $msgId,
+                'type' => $msgType,
+                'body_snippet' => mb_substr($body, 0, 100),
+            ]);
+        }
     }
 }

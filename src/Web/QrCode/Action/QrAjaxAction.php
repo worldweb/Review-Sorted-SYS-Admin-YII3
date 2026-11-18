@@ -8,6 +8,7 @@ use App\Domain\Account\AccountRepositoryInterface;
 use App\Domain\QrCode\QrCodeRepositoryInterface;
 use App\Domain\QrCode\Service\QrCodeServiceInterface;
 use App\Domain\User\UserRepositoryInterface;
+use App\Security\RateLimiter\FileRateLimiter;
 use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -35,6 +36,7 @@ final class QrAjaxAction
         private TenantContextProviderInterface $tenantContextProvider,
         private ResponseFactoryInterface $responseFactory,
         private Aliases $aliases,
+        private ?FileRateLimiter $rateLimiter = null,
         ?LoggerInterface $logger = null,
     ) {
         $this->logger = $logger ?? new NullLogger();
@@ -42,6 +44,23 @@ final class QrAjaxAction
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
+        $limiter = $this->rateLimiter ?? new FileRateLimiter();
+        $ip = $limiter->getClientIp($request);
+        $rateKey = "qr_ajax:{$ip}";
+        if (!$limiter->check($rateKey, 30, 60)) {
+            $retryAfter = $limiter->getRetryAfter($rateKey, 60);
+            $response = $this->responseFactory->createResponse(429)
+                ->withHeader('Content-Type', 'application/json; charset=UTF-8')
+                ->withHeader('Retry-After', (string) $retryAfter);
+            $response->getBody()->write((string) json_encode([
+                'status' => 0,
+                'error' => 'Too Many Requests',
+                'message' => 'Rate limit exceeded. Please wait before generating more previews.',
+                'html' => $this->errorHtml('Too many requests. Please wait before generating another preview.'),
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            return $response;
+        }
+
         if (strtoupper($request->getMethod()) !== 'POST') {
             return $this->jsonResponse([
                 'status' => 0,

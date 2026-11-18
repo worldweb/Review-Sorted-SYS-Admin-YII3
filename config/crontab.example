@@ -1,0 +1,26 @@
+# ==============================================================================
+# REVIEWS SORTED (YII 3) — PRODUCTION CRONTAB TEMPLATE
+# ==============================================================================
+# Install by copying the entries below to your crontab:
+#   crontab -e
+# Ensure paths match your actual deployment directory and PHP binary location.
+#
+# Environment requirements:
+# - Recommended user: www-data, nginx, or your designated application user.
+# - Do not run queue processing as root.
+# ==============================================================================
+
+# Outbound Email Queue Dispatch (Every minute)
+* * * * * cd /path/to/sys-yii3 && php yii email/process-queue --batch-size=100 >> runtime/logs/cron-email.log 2>&1
+
+# Outbound WhatsApp Queue Dispatch (Every minute)
+* * * * * cd /path/to/sys-yii3 && php yii whatsapp/process-queue --batch-size=100 >> runtime/logs/cron-whatsapp.log 2>&1
+
+# Multi-Platform Social Post Publishing Queue (Every minute)
+* * * * * cd /path/to/sys-yii3 && php yii social-post/process-queue --batch-size=50 >> runtime/logs/cron-social.log 2>&1
+
+# Stripe Subscription Expiration & Grace Period Transitions (Every hour)
+0 * * * * cd /path/to/sys-yii3 && php yii subscription/expire >> runtime/logs/cron-subscription.log 2>&1
+
+# Scheduled Customer Review Sync - Google & Facebook (Every 2 hours)
+0 */2 * * * cd /path/to/sys-yii3 && php yii review/sync >> runtime/logs/cron-reviews.log 2>&1

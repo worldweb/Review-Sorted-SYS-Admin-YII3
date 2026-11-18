@@ -121,5 +121,7 @@ interface WhatsAppRepositoryInterface
 
     public function markQueueFailed(int $id): bool;
 
+    public function updateQueueStatusByProviderId(string $providerMessageId, int $status): bool;
+
     public function recoverStaleQueueJobs(int $timeoutMinutes = 15): int;
 }

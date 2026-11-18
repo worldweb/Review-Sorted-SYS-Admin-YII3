@@ -25,6 +25,8 @@ $eyeOffIcon = '<svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 
 <style>
     .new-client-page {
         min-height: 100vh;
+        height: auto;
+        overflow-y: visible;
         background-color: var(--rs-bg-app, #f9fafb);
         display: flex;
         flex-direction: column;

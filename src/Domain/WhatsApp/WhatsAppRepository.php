@@ -507,6 +507,23 @@ final class WhatsAppRepository implements WhatsAppRepositoryInterface
         )->execute() > 0;
     }
 
+    public function updateQueueStatusByProviderId(string $providerMessageId, int $status): bool
+    {
+        $cleanId = trim($providerMessageId);
+        if ($cleanId === '') {
+            return false;
+        }
+
+        return $this->db->createCommand(
+            'UPDATE {{%whatsapp_queue}} SET status = :status, updated_at = :now WHERE provider_message_id = :pId',
+            [
+                ':status' => $status,
+                ':now' => time(),
+                ':pId' => $cleanId,
+            ]
+        )->execute() > 0;
+    }
+
     public function recoverStaleQueueJobs(int $timeoutMinutes = 15): int
     {
         $staleThreshold = date('Y-m-d H:i:s', time() - ($timeoutMinutes * 60));

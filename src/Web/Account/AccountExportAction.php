@@ -7,6 +7,7 @@ namespace App\Web\Account;
 use App\Domain\Account\AccountRepositoryInterface;
 use App\Domain\Account\AccountSearchFilter;
 use App\Domain\User\UserRepositoryInterface;
+use App\Security\CsvSanitizer;
 use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -48,7 +49,7 @@ final class AccountExportAction
 
         foreach ($accounts as $acc) {
             $contactName = trim(($acc->getFirstName() ?? '') . ' ' . ($acc->getLastName() ?? ''));
-            fputcsv($fp, [
+            fputcsv($fp, CsvSanitizer::escapeRow([
                 $acc->getId(),
                 $acc->getBusinessName() ?? '',
                 $contactName,
@@ -56,7 +57,7 @@ final class AccountExportAction
                 $acc->getStatusName(),
                 $acc->getMaxUsers(),
                 $acc->getCreatedAtStr(),
-            ]);
+            ]));
         }
 
         rewind($fp);

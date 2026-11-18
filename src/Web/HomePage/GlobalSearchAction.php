@@ -75,8 +75,9 @@ final class GlobalSearchAction
                 ->from('{{%account}}')
                 ->where(['like', 'business_name', $queryStr]);
 
-            if (!$isUnrestricted && $accountId !== null) {
-                $accQuery->andWhere(['id' => $accountId]);
+            if (!$isUnrestricted) {
+                $scopedId = ($accountId !== null && $accountId > 0) ? $accountId : 0;
+                $accQuery->andWhere(['id' => $scopedId]);
             }
 
             $accRows = $accQuery->limit(5)->all();
@@ -107,8 +108,9 @@ final class GlobalSearchAction
                 ->from('{{%user}}')
                 ->where(['or', ['like', 'name', $queryStr], ['like', 'email', $queryStr]]);
 
-            if (!$isUnrestricted && $accountId !== null) {
-                $userQuery->andWhere(['account_id' => $accountId]);
+            if (!$isUnrestricted) {
+                $scopedId = ($accountId !== null && $accountId > 0) ? $accountId : 0;
+                $userQuery->andWhere(['account_id' => $scopedId]);
             }
 
             $userRows = $userQuery->limit(5)->all();
@@ -139,8 +141,9 @@ final class GlobalSearchAction
                 ->from('{{%review}}')
                 ->where(['or', ['like', 'customer_name', $queryStr], ['like', 'review_text', $queryStr]]);
 
-            if (!$isUnrestricted && $accountId !== null) {
-                $reviewQuery->andWhere(['account_id' => $accountId]);
+            if (!$isUnrestricted) {
+                $scopedId = ($accountId !== null && $accountId > 0) ? $accountId : 0;
+                $reviewQuery->andWhere(['account_id' => $scopedId]);
             }
 
             $revRows = $reviewQuery->limit(5)->all();

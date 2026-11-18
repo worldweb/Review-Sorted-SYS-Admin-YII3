@@ -64,10 +64,65 @@ final class WhatsAppQueueWorkerService
             }
 
             try {
-                $response = $this->metaWhatsAppClient->sendTextMessage(
-                    phone: $item->getPhone(),
-                    message: $item->getMessage(),
-                );
+                $rawMessage = $item->getMessage();
+                $templateData = null;
+
+                // Check if message payload is structured JSON specifying a template
+                if (str_starts_with(trim($rawMessage), '{')) {
+                    $decoded = json_decode($rawMessage, true);
+                    if (is_array($decoded) && !empty($decoded['template'])) {
+                        $templateData = $decoded;
+                    }
+                }
+
+                if ($templateData !== null) {
+                    // Direct template dispatch
+                    $response = $this->metaWhatsAppClient->sendTemplateMessage(
+                        phone: $item->getPhone(),
+                        templateName: (string) $templateData['template'],
+                        languageCode: (string) ($templateData['language'] ?? 'en_US'),
+                        components: (array) ($templateData['components'] ?? [])
+                    );
+                } else {
+                    // Attempt free-text message dispatch (standard inside 24h customer-service window)
+                    try {
+                        $response = $this->metaWhatsAppClient->sendTextMessage(
+                            phone: $item->getPhone(),
+                            message: $rawMessage,
+                        );
+                    } catch (Throwable $sendErr) {
+                        // Check if rejected by Meta because recipient is outside the 24-hour service window (Error 131047)
+                        $errMsg = $sendErr->getMessage();
+                        $isOutside24hWindow = str_contains($errMsg, '131047')
+                            || str_contains($errMsg, 'outside the allowed window')
+                            || str_contains($errMsg, '24 hours');
+
+                        $fallbackTemplate = \App\Environment::get('WHATSAPP_CAMPAIGN_TEMPLATE_NAME');
+
+                        if ($isOutside24hWindow && !empty($fallbackTemplate) && is_string($fallbackTemplate)) {
+                            $this->logger?->info(sprintf(
+                                '[WhatsAppQueueWorker] Message #%d outside 24h window; retrying with configured template: %s',
+                                $item->getId(),
+                                $fallbackTemplate
+                            ));
+                            $response = $this->metaWhatsAppClient->sendTemplateMessage(
+                                phone: $item->getPhone(),
+                                templateName: $fallbackTemplate,
+                                languageCode: 'en_US',
+                                components: [
+                                    [
+                                        'type' => 'body',
+                                        'parameters' => [
+                                            ['type' => 'text', 'text' => $rawMessage],
+                                        ],
+                                    ],
+                                ]
+                            );
+                        } else {
+                            throw $sendErr;
+                        }
+                    }
+                }
 
                 $providerMessageId = null;
                 if (!empty($response['messages'][0]['id'])) {

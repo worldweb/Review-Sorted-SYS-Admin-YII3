@@ -34,6 +34,7 @@ final class Environment
         self::setEnvironment();
         self::setBoolean('APP_C3', false);
         self::setBoolean('APP_DEBUG', false);
+        self::setString('APP_KEY', '');
         self::setString('APP_NAME', 'Reviews Sorted');
         self::setString('APP_URL', 'http://localhost/sys-yii3');
         self::setStringAllowEmpty('APP_BASE_PATH', '/sys-yii3');
@@ -139,6 +140,13 @@ final class Environment
     public static function getProductionSecretIssues(): array
     {
         $issues = [];
+
+        if (self::isStrictProduction() || self::isProd()) {
+            $keyIssue = self::validateAppKey(self::appKey());
+            if ($keyIssue !== null) {
+                $issues[] = $keyIssue;
+            }
+        }
 
         if (self::isStrictProduction()) {
             if (self::dbName() === '') {
@@ -309,6 +317,52 @@ final class Environment
     public static function appC3(): bool
     {
         return (bool) (self::$values['APP_C3'] ?? false);
+    }
+
+    public static function appKey(): string
+    {
+        return (string) (self::$values['APP_KEY'] ?? '');
+    }
+
+    /**
+     * Validates that an APP_KEY is cryptographically secure and formatted as an encoded 32-byte (256-bit) key.
+     * Supported formats:
+     * 1. Exactly 64 hexadecimal characters representing 32 bytes (e.g. openssl rand -hex 32).
+     * 2. Valid Base64 that strictly decodes to exactly 32 bytes, with optional 'base64:' prefix (e.g. openssl rand -base64 32).
+     *
+     * @return string|null Error description if invalid, or null if valid.
+     */
+    public static function validateAppKey(string $key): ?string
+    {
+        $clean = trim($key);
+        if ($clean === '') {
+            return 'APP_KEY must be configured in production environment';
+        }
+
+        // 1. Base64 with 'base64:' prefix
+        if (str_starts_with($clean, 'base64:')) {
+            $rawB64 = substr($clean, 7);
+            $decoded = base64_decode($rawB64, true);
+            if ($decoded === false || strlen($decoded) !== 32) {
+                return 'APP_KEY with base64: prefix is malformed or does not represent exactly 32 bytes';
+            }
+            return null;
+        }
+
+        // 2. Exactly 64-character hexadecimal string representing 32 bytes
+        if (strlen($clean) === 64 && ctype_xdigit($clean)) {
+            return null;
+        }
+
+        // 3. Standard 44-character Base64 string representing exactly 32 bytes
+        if (strlen($clean) === 44 && preg_match('/^[A-Za-z0-9+\/]{43}=$/', $clean)) {
+            $decoded = base64_decode($clean, true);
+            if ($decoded !== false && strlen($decoded) === 32) {
+                return null;
+            }
+        }
+
+        return 'APP_KEY is weak, malformed, or invalid. Production requires a cryptographically secure 32-byte key encoded as either 64 hexadecimal characters or Base64 strictly decoding to 32 bytes (e.g. openssl rand -hex 32 or openssl rand -base64 32)';
     }
 
     // Session / Cookies

@@ -168,10 +168,21 @@ final class QrDownloadAction
 
     private function resolveSafeDiskPath(string $storedPath, string $baseDir): ?string
     {
+        $realBase = realpath($baseDir);
+        if ($realBase === false) {
+            return null;
+        }
+
         $candidate = $baseDir . DIRECTORY_SEPARATOR . ltrim($storedPath, '/\\');
         $realPath = realpath($candidate);
 
         if ($realPath === false) {
+            return null;
+        }
+
+        // Enforce directory containment to prevent path traversal
+        $prefix = rtrim($realBase, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        if (!str_starts_with($realPath, $prefix)) {
             return null;
         }
 

@@ -79,5 +79,11 @@ interface AccountRepositoryInterface
      * Delete an existing tenant account record.
      * (Prepared for write environment; guarded in read-only environment).
      */
+    /**
+     * Checks whether the workspace has dependent records (such as users, reviews, or chat messages)
+     * that would prevent hard deletion due to foreign key constraints.
+     */
+    public function hasDependencies(int $id): bool;
+
     public function deleteAccount(int $id): bool;
 }

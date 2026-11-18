@@ -79,6 +79,21 @@ final class AuthenticationMiddleware implements MiddlewareInterface
             }
         }
 
+        // 2b. If not in session or cookie, attempt stateless API authentication (Bearer token or X-Api-Key)
+        if ($identity === null) {
+            $authHeader = $request->getHeaderLine('Authorization');
+            $apiToken = null;
+            if (preg_match('/^Bearer\s+(.+)$/i', trim($authHeader), $matches)) {
+                $apiToken = trim($matches[1]);
+            } elseif ($request->hasHeader('X-Api-Key')) {
+                $apiToken = trim($request->getHeaderLine('X-Api-Key'));
+            }
+
+            if ($apiToken !== null && $apiToken !== '') {
+                $identity = $this->authRepo->findAuthIdentityByAuthKey($apiToken);
+            }
+        }
+
         // 3. Verify user status & tenant account status
         $authenticatedUser = null;
         if ($identity !== null && $identity->isActive()) {
@@ -137,12 +152,43 @@ final class AuthenticationMiddleware implements MiddlewareInterface
             return $this->createRedirectResponse($homeUrl);
         }
 
-        // Unauthenticated guests accessing protected routes are redirected to login
+        // Unauthenticated guests accessing protected routes are redirected to login or returned 401 JSON for APIs
         if ($authenticatedUser === null && !$isPublic) {
+            if ($this->isApiRoute($path, $base)) {
+                $response = $this->responseFactory->createResponse(401)
+                    ->withHeader('Content-Type', 'application/json; charset=UTF-8');
+                $response->getBody()->write((string) json_encode([
+                    'error' => 'Unauthorized',
+                    'message' => 'Authentication required',
+                ], JSON_UNESCAPED_SLASHES));
+                return $response;
+            }
+
             return $this->createRedirectResponse($loginUrl);
         }
 
         return $handler->handle($request);
+    }
+
+    /**
+     * Determines whether a path is an API endpoint requiring JSON responses instead of redirects.
+     */
+    private function isApiRoute(string $path, string $base = ''): bool
+    {
+        $normalizedPath = '/' . ltrim($path, '/');
+
+        if (str_starts_with($normalizedPath, '/accountapi') || str_starts_with($normalizedPath, '/api/')) {
+            return true;
+        }
+
+        if ($base !== '') {
+            $normalizedBase = '/' . trim($base, '/');
+            if (str_starts_with($normalizedPath, $normalizedBase . '/accountapi') || str_starts_with($normalizedPath, $normalizedBase . '/api/')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

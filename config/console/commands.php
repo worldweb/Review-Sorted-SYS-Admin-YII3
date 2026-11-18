@@ -13,4 +13,5 @@ return [
     'review/sync' => Console\ReviewSyncCommand::class,
     'review/sync-google' => Console\ReviewSyncGoogleCommand::class,
     'review/sync-facebook' => Console\ReviewSyncFacebookCommand::class,
+    'db/sync' => Console\DatabaseSyncCommand::class,
 ];

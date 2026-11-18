@@ -43,6 +43,16 @@ $actions = $actionButtons;
 include __DIR__ . '/../../Shared/Components/_page_header.php';
 ?>
 
+<?php if (isset($flash) && $flash !== null): ?>
+    <?php foreach ($flash->getAll() as $type => $messages): ?>
+        <?php foreach ($messages as $message): ?>
+            <div class="rs-alert rs-alert--<?= $type === 'error' ? 'danger' : Html::encode((string) $type) ?> rs-mb-4" role="alert">
+                <?= Html::encode($message) ?>
+            </div>
+        <?php endforeach; ?>
+    <?php endforeach; ?>
+<?php endif; ?>
+
 <!-- Data Grid -->
 <div class="rs-card">
     <form method="get" action="<?= \App\Environment::url('/users') ?>" id="users-filter-form">

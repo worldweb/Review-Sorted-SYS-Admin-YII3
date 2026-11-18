@@ -14,6 +14,8 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Csrf\CsrfTokenInterface;
+use Yiisoft\Session\Flash\Flash;
+use Yiisoft\Session\SessionInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
 /**
@@ -30,6 +32,7 @@ final class UserListAction
         private AccessDecisionManager $accessDecision,
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
+        private ?SessionInterface $session = null,
         private ?CsrfTokenInterface $csrfToken = null,
     ) {
     }
@@ -88,6 +91,8 @@ final class UserListAction
             }
         }
 
+        $flash = $this->session !== null ? new Flash($this->session) : null;
+
         return $this->viewRenderer
             ->render(__DIR__ . '/views/index', [
                 'users' => $users,
@@ -99,6 +104,7 @@ final class UserListAction
                 'canAddAccountAdmin' => $canAddAccountAdmin,
                 'canAddWorker' => $canAddWorker,
                 'accountsList' => $accountsList,
+                'flash' => $flash,
                 'csrfToken' => $this->csrfToken?->getValue(),
             ]);
     }

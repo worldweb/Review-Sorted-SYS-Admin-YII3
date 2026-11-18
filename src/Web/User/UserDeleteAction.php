@@ -10,6 +10,9 @@ use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
+use Yiisoft\Session\Flash\Flash;
+use Yiisoft\Session\SessionInterface;
 
 /**
  * UserDeleteAction.
@@ -22,6 +25,8 @@ final class UserDeleteAction
         private TenantContextProviderInterface $tenantContextProvider,
         private AccessDecisionManager $accessDecision,
         private ResponseFactoryInterface $responseFactory,
+        private ?SessionInterface $session = null,
+        private ?LoggerInterface $logger = null,
     ) {
     }
 
@@ -60,9 +65,20 @@ final class UserDeleteAction
         }
 
         try {
+            $hasDeps = $this->userRepo->hasDependencies($targetId);
             $this->userRepo->deleteUser($targetId, $context);
+            if ($this->session !== null) {
+                $msg = $hasDeps
+                    ? 'User has existing activity records and was deactivated successfully.'
+                    : 'User deleted successfully.';
+                (new Flash($this->session))->add('success', $msg);
+            }
         } catch (\Throwable $e) {
-            return $this->redirect(\App\Environment::url('/users?msg=' . urlencode($e->getMessage())));
+            $this->logger?->error('User deletion failed: ' . $e->getMessage(), ['exception' => $e]);
+            if ($this->session !== null) {
+                (new Flash($this->session))->add('error', 'Unable to delete user. Please ensure the user has no dependent records, or disable the user instead.');
+            }
+            return $this->redirect(\App\Environment::url('/users'));
         }
 
         return $this->redirect(\App\Environment::url('/users'));

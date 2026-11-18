@@ -15,7 +15,9 @@ use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 use Yiisoft\Csrf\CsrfTokenInterface;
+use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
 /**
@@ -31,6 +33,8 @@ final class ClientRegistrationAction
         private TenantContextProviderInterface $tenantContextProvider,
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
+        private ?ConnectionInterface $db = null,
+        private ?LoggerInterface $logger = null,
         private ?CsrfTokenInterface $csrfToken = null,
         private ?FileRateLimiter $rateLimiter = null,
     ) {
@@ -107,6 +111,7 @@ final class ClientRegistrationAction
             }
 
             if (empty($errors)) {
+                $transaction = $this->db?->beginTransaction();
                 try {
                     $accountId = $this->accountRepo->createAccount(new AccountSaveData(
                         businessName: $businessName,
@@ -124,9 +129,15 @@ final class ClientRegistrationAction
                         accountId: $accountId,
                     ));
 
+                    $transaction?->commit();
+
                     return $this->redirect(\App\Environment::url('/login?registered=1'));
                 } catch (\Throwable $e) {
-                    $errors['general'] = 'Registration failed: ' . $e->getMessage();
+                    $transaction?->rollBack();
+                    $this->logger?->error('Registration failed: ' . $e->getMessage(), ['exception' => $e]);
+                    $errors['general'] = \App\Environment::appDebug()
+                        ? ('Registration failed: ' . $e->getMessage())
+                        : 'Registration failed due to a server error. Please verify your details or contact support.';
                 }
             }
         }

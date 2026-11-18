@@ -10,6 +10,8 @@ use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Yiisoft\Session\Flash\Flash;
+use Yiisoft\Session\SessionInterface;
 
 /**
  * AccountDeleteAction.
@@ -22,6 +24,7 @@ final class AccountDeleteAction
         private UserRepositoryInterface $userRepo,
         private TenantContextProviderInterface $tenantContextProvider,
         private ResponseFactoryInterface $responseFactory,
+        private ?SessionInterface $session = null,
     ) {
     }
 
@@ -47,7 +50,20 @@ final class AccountDeleteAction
         $id = isset($body['id']) ? (int) $body['id'] : ((int) ($request->getQueryParams()['id'] ?? 0));
 
         if ($id > 0) {
-            $this->accountRepo->deleteAccount($id);
+            try {
+                $hasDeps = $this->accountRepo->hasDependencies($id);
+                $this->accountRepo->deleteAccount($id);
+                if ($this->session !== null) {
+                    $msg = $hasDeps
+                        ? 'Workspace has existing activity records and was deactivated successfully.'
+                        : 'Workspace deleted successfully.';
+                    (new Flash($this->session))->add('success', $msg);
+                }
+            } catch (\Throwable) {
+                if ($this->session !== null) {
+                    (new Flash($this->session))->add('error', 'Unable to delete workspace. Please deactivate it instead.');
+                }
+            }
         }
 
         return $this->redirect(\App\Environment::url('/accounts'));
