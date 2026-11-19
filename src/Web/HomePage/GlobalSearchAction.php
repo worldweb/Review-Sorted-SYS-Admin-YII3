@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Web\HomePage;
 
+use App\Domain\Account\AccountRepositoryInterface;
+use App\Domain\User\User;
+use App\Domain\User\UserRepositoryInterface;
+use App\Security\Authorization\RbacInterface;
 use App\Security\TenantContextProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -20,6 +24,9 @@ final class GlobalSearchAction
         private ConnectionInterface $db,
         private TenantContextProviderInterface $tenantContextProvider,
         private ResponseFactoryInterface $responseFactory,
+        private ?RbacInterface $rbac = null,
+        private ?AccountRepositoryInterface $accountRepo = null,
+        private ?UserRepositoryInterface $userRepo = null,
     ) {
     }
 
@@ -56,8 +63,30 @@ final class GlobalSearchAction
         $isUnrestricted = $context->isUnrestricted();
         $accountId = $context->getAccountId();
 
+        /** @var User|null $currentUser */
+        $currentUser = $request->getAttribute('currentUser');
+        if ($currentUser === null && $this->userRepo !== null && !$context->isGuest()) {
+            $currentUser = $this->userRepo->findById($context->getUserId(), $context);
+        }
+
+        $isAdmin = $isUnrestricted || ($currentUser !== null && ($currentUser->isAdmin() || $currentUser->isSuperAdmin()));
+
+        // QR Code visibility check: Admin/Super Admin, OR (user has /qrcode/* permission AND account has qr_code enabled)
+        $hasQrAccess = false;
+        if ($isAdmin) {
+            $hasQrAccess = true;
+        } elseif ($currentUser !== null && $this->rbac !== null && $this->rbac->can($currentUser, '/qrcode/*')) {
+            $targetAccountId = $currentUser->getAccountId() ?? $accountId;
+            if ($targetAccountId !== null && $this->accountRepo !== null) {
+                $acc = $this->accountRepo->findById($targetAccountId, $context);
+                if ($acc !== null && $acc->isQrCodeEnabled()) {
+                    $hasQrAccess = true;
+                }
+            }
+        }
+
         // 1. Navigation items
-        $navMatches = $this->searchNavigation($queryStr, $isUnrestricted);
+        $navMatches = $this->searchNavigation($queryStr, $isAdmin, $hasQrAccess);
         if (!empty($navMatches)) {
             $categories[] = [
                 'name' => 'Navigation & Settings',
@@ -178,7 +207,7 @@ final class GlobalSearchAction
         return $response;
     }
 
-    private function searchNavigation(string $q, bool $isAdmin): array
+    private function searchNavigation(string $q, bool $isAdmin, bool $hasQrAccess): array
     {
         $allNav = [
             ['title' => 'Dashboard', 'subtitle' => 'Application overview and KPIs', 'url' => \App\Environment::url('/')],
@@ -187,11 +216,14 @@ final class GlobalSearchAction
             ['title' => 'Social Posting', 'subtitle' => 'Compose and schedule multi-channel posts', 'url' => \App\Environment::url('/social-post/create')],
             ['title' => 'E-mails', 'subtitle' => 'Email templates and campaign dispatch', 'url' => \App\Environment::url('/email/index')],
             ['title' => 'WhatsApp Messages', 'subtitle' => 'WhatsApp templates and campaigns', 'url' => \App\Environment::url('/whatsapp/index')],
-            ['title' => 'QR Code', 'subtitle' => 'QR Code studio, customization, and landing pages', 'url' => \App\Environment::url('/qrcode/index')],
             ['title' => 'User Management', 'subtitle' => 'Manage administrators and workspace users', 'url' => \App\Environment::url('/users')],
             ['title' => 'Accounts', 'subtitle' => 'Workspace settings and seat allocations', 'url' => \App\Environment::url('/accounts')],
             ['title' => 'Location Groups', 'subtitle' => 'Group social destinations for posting', 'url' => \App\Environment::url('/location-group/index')],
         ];
+
+        if ($hasQrAccess) {
+            $allNav[] = ['title' => 'QR Code', 'subtitle' => 'QR Code studio, customization, and landing pages', 'url' => \App\Environment::url('/qrcode/index')];
+        }
 
         if ($isAdmin) {
             $allNav[] = ['title' => 'Subscriptions', 'subtitle' => 'Platform subscription plans and tiers', 'url' => \App\Environment::url('/subscription/index')];

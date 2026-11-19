@@ -31,7 +31,8 @@ final class RolePermissionService
      *     category: string,
      *     editable: bool,
      *     state: string,
-     *     permissions: string[]
+     *     permissions: string[],
+     *     isGranted: bool
      * }>
      */
     public function getRoleMatrix(string $roleName): array
@@ -67,29 +68,36 @@ final class RolePermissionService
 
         $matrix = [];
         foreach ($features as $key => $feature) {
+            $isRoleAllowed = in_array($roleName, $feature['allowed_roles'], true);
             $isEditable = FeatureRegistry::isFeatureEditableForRole($key, $roleName);
 
             $allAllowed = true;
-            $isInherited = true;
+            $hasDirectCoverage = false;
+            $hasInheritedCoverage = false;
 
             foreach ($feature['permissions'] as $permName) {
-                $hasDirect = isset($directPermissions[$permName]);
-                $hasInherited = isset($inheritedPermissions[$permName]);
+                $isDirect = $this->isPermissionCovered($permName, $directPermissions);
+                $isInherited = $this->isPermissionCovered($permName, $inheritedPermissions);
 
-                if (!$hasDirect && !$hasInherited) {
+                if (!$isDirect && !$isInherited) {
                     $allAllowed = false;
                 }
-                if ($hasDirect) {
-                    $isInherited = false;
+                if ($isDirect) {
+                    $hasDirectCoverage = true;
+                }
+                if ($isInherited) {
+                    $hasInheritedCoverage = true;
                 }
             }
 
             if ($roleName === User::ROLE_SUPER) {
                 $state = 'protected';
-            } elseif (!$isEditable) {
+            } elseif (!$isRoleAllowed) {
+                $state = 'restricted';
+            } elseif (!$feature['editable']) {
                 $state = 'protected';
             } elseif ($allAllowed) {
-                $state = $isInherited ? 'inherited' : 'allowed';
+                $state = $hasDirectCoverage ? 'allowed' : 'inherited';
             } else {
                 $state = 'denied';
             }
@@ -100,12 +108,71 @@ final class RolePermissionService
                 'description'  => $feature['description'],
                 'category'     => $feature['category'],
                 'editable'     => $isEditable,
-                'state'        => $state, // 'allowed', 'inherited', 'protected', 'denied'
+                'state'        => $state, // 'allowed', 'inherited', 'protected', 'restricted', 'denied'
                 'permissions'  => $feature['permissions'],
+                'isGranted'    => $allAllowed,
             ];
         }
 
         return $matrix;
+    }
+
+    /**
+     * Checks if a required permission is covered by a set of granted permissions.
+     *
+     * Supports:
+     * - Global root wildcard ('/*')
+     * - Direct exact string match
+     * - User administration aliases ('/user/*' covers '/user', '/users', '/user/*', '/users/*', '/user/switch', '/users/switch', etc.)
+     * - Route wildcard prefix matching ('prefix/*' covers 'prefix' and any subpath under 'prefix/')
+     * - Settings and social connections prefix coverage ('/settings/facebook' or '/facebook/*' covers '/settings/facebook/*', etc.)
+     *
+     * @param string $requiredPerm The permission string being tested.
+     * @param array<string, bool> $grantedPermissions Map of granted permission names [perm => true].
+     */
+    public function isPermissionCovered(string $requiredPerm, array $grantedPermissions): bool
+    {
+        // 1. Global wildcard covers all permissions
+        if (isset($grantedPermissions['/*'])) {
+            return true;
+        }
+
+        // 2. Direct exact match
+        if (isset($grantedPermissions[$requiredPerm])) {
+            return true;
+        }
+
+        $cleanRequired = '/' . trim($requiredPerm, '/');
+
+        // 3. User administration aliases: '/user/*' covers all /user/* and /users/* routes
+        if (isset($grantedPermissions['/user/*'])) {
+            if ($cleanRequired === '/user' || str_starts_with($cleanRequired, '/user/')
+                || $cleanRequired === '/users' || str_starts_with($cleanRequired, '/users/')) {
+                return true;
+            }
+        }
+
+        // 4. Check if any granted permission is a wildcard prefix that covers $requiredPerm
+        // E.g., granted '/reviews/*' covers '/reviews' or '/reviews/export'
+        foreach ($grantedPermissions as $grantedPerm => $_) {
+            if (str_ends_with($grantedPerm, '/*')) {
+                $prefix = substr($grantedPerm, 0, -2);
+                if ($cleanRequired === $prefix || str_starts_with($cleanRequired, $prefix . '/')) {
+                    return true;
+                }
+            }
+        }
+
+        // 5. Settings / Social connections matching:
+        // '/settings/facebook' covers '/settings/facebook/*' and vice-versa
+        if (str_starts_with($cleanRequired, '/settings/facebook') && (isset($grantedPermissions['/settings/facebook']) || isset($grantedPermissions['/facebook/*']))) {
+            return true;
+        }
+        if (str_starts_with($cleanRequired, '/settings/google') && (isset($grantedPermissions['/settings/google']) || isset($grantedPermissions['/google/*']))) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

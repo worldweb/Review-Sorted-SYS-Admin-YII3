@@ -257,17 +257,17 @@ final class NavigationMenuProvider
             }
         }
 
-        // 7. QR Code
+        // 7. QR Code (Requires Admin OR both RBAC permission and account-level enablement)
         $hasQrAccess = false;
         if ($isAdmin) {
             $hasQrAccess = true;
-        } elseif ($currentUser->getAccountId() !== null && $this->accountRepo !== null) {
-            $acc = $this->accountRepo->findById($currentUser->getAccountId());
-            if ($acc !== null && $acc->isQrCodeEnabled()) {
-                $hasQrAccess = true;
-            }
         } elseif ($this->rbac->can($userId, '/qrcode/*')) {
-            $hasQrAccess = true;
+            if ($currentUser->getAccountId() !== null && $this->accountRepo !== null) {
+                $acc = $this->accountRepo->findById($currentUser->getAccountId());
+                if ($acc !== null && $acc->isQrCodeEnabled()) {
+                    $hasQrAccess = true;
+                }
+            }
         }
 
         if ($hasQrAccess) {

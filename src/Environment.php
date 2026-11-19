@@ -40,10 +40,6 @@ final class Environment
         self::setStringAllowEmpty('APP_BASE_PATH', '/sys-yii3');
         self::setString('APP_TIMEZONE', 'Australia/Perth');
         date_default_timezone_set(self::appTimezone());
-        self::setString('FRONTEND_URL', 'http://localhost/sys-yii3');
-        self::setString('BACKEND_URL', 'http://localhost/sys-yii3');
-        self::setString('API_BASE_URL', 'http://localhost/sys-yii3/accountapi');
-        self::setString('ASSET_BASE_URL', '/sys-yii3/assets');
         self::setNonEmptyStringOrNull('APP_HOST_PATH', null);
 
         // Filesystem directory paths
@@ -53,7 +49,6 @@ final class Environment
         self::setString('UPLOAD_DIR', dirname(__DIR__) . '/public/assets/qr');
 
         // Database
-        self::setString('DB_DRIVER', 'mysql');
         self::setString('DB_HOST', 'localhost');
         self::setString('DB_PORT', '3306');
         self::setString('DB_NAME', 'sortedreviews_sys');
@@ -102,9 +97,6 @@ final class Environment
         // QR Code Custom Landing & Development Safe Host
         self::setString('QR_CODE_GENERATION_BASE_URL', self::getRawValue('QR_CODE_GENERATION_BASE_URL') ?? self::getRawValue('RS_QR_CODE_GENERATION_BASE_URL') ?? '');
         self::setString('LOCAL_QR_SAFE_HOST', self::getRawValue('LOCAL_QR_SAFE_HOST') ?? self::getRawValue('RS_LOCAL_QR_SAFE_HOST') ?? 'sys.test');
-
-        // WYSIWYG / TinyMCE
-        self::setString('TINYMCE_LICENSE_KEY', self::getRawValue('TINYMCE_LICENSE_KEY') ?? 'gpl');
 
         // Security / Cookies
         self::setBoolean('SESSION_COOKIE_SECURE', false);
@@ -289,26 +281,6 @@ final class Environment
         return (string) self::$values['APP_TIMEZONE'];
     }
 
-    public static function frontendUrl(): string
-    {
-        return (string) self::$values['FRONTEND_URL'];
-    }
-
-    public static function backendUrl(): string
-    {
-        return (string) self::$values['BACKEND_URL'];
-    }
-
-    public static function apiBaseUrl(): string
-    {
-        return (string) self::$values['API_BASE_URL'];
-    }
-
-    public static function assetBaseUrl(): string
-    {
-        return (string) self::$values['ASSET_BASE_URL'];
-    }
-
     public static function appHostPath(): ?string
     {
         return self::$values['APP_HOST_PATH'] ?? null;
@@ -382,11 +354,6 @@ final class Environment
     }
 
     // Database
-    public static function dbDriver(): string
-    {
-        return (string) self::$values['DB_DRIVER'];
-    }
-
     public static function dbHost(): string
     {
         return (string) self::$values['DB_HOST'];
@@ -541,12 +508,6 @@ final class Environment
     {
         $val = trim((string) (self::$values['LOCAL_QR_SAFE_HOST'] ?? ''));
         return $val !== '' ? $val : 'sys.test';
-    }
-
-    // WYSIWYG Editor
-    public static function tinymceLicenseKey(): string
-    {
-        return (string) (self::$values['TINYMCE_LICENSE_KEY'] ?? 'gpl');
     }
 
     // Helper to get raw value

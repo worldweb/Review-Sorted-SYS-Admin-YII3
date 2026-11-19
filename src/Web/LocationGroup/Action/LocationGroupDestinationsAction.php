@@ -35,7 +35,7 @@ final class LocationGroupDestinationsAction
         }
 
         $currentUser = $this->userRepo->findById($context->getUserId(), $context);
-        if ($currentUser === null || (!$currentUser->isAdmin() && !$currentUser->isAccountAdmin() && !($this->rbac?->can($currentUser, '/location-group/*') ?? false))) {
+        if ($currentUser === null || (!$currentUser->isAdmin() && !($this->rbac?->can($currentUser, '/location-group/*') ?? false))) {
             return $this->jsonResponse(['success' => false, 'message' => 'Forbidden'], 403);
         }
 

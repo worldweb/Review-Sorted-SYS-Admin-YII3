@@ -90,6 +90,26 @@ final class ReviewSyncResult
         return !empty($this->errors);
     }
 
+    public function getChannelsFailed(): int
+    {
+        return count($this->errors);
+    }
+
+    public function getChannelsSuccessful(): int
+    {
+        return max(0, $this->channelsProcessed - count($this->errors));
+    }
+
+    public function isFullFailure(): bool
+    {
+        return $this->channelsProcessed > 0 && count($this->errors) >= $this->channelsProcessed;
+    }
+
+    public function isPartialSuccess(): bool
+    {
+        return $this->hasErrors() && $this->getChannelsSuccessful() > 0;
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -97,6 +117,8 @@ final class ReviewSyncResult
     {
         return [
             'channels_processed' => $this->channelsProcessed,
+            'channels_successful' => $this->getChannelsSuccessful(),
+            'channels_failed' => $this->getChannelsFailed(),
             'reviews_fetched' => $this->reviewsFetched,
             'reviews_inserted' => $this->reviewsInserted,
             'reviews_updated' => $this->reviewsUpdated,

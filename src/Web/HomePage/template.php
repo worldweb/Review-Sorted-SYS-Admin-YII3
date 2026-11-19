@@ -68,7 +68,7 @@ $this->setTitle('Dashboard');
             </div>
         </div>
         <div class="rs-d-flex rs-align-items-center rs-gap-2">
-            <?php if ($canCreatePost ?? true): ?>
+            <?php if (!empty($canCreatePost)): ?>
                 <a href="<?= Environment::url('/social-post/create') ?>" class="rs-btn rs-btn--primary">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Create Post
@@ -118,7 +118,9 @@ $this->setTitle('Dashboard');
                 </div>
                 <div class="rs-kpi-card__footer rs-d-flex rs-justify-content-between rs-align-items-center">
                     <span class="rs-text-muted">Unique queued posts</span>
-                    <a href="<?= Environment::url('/social-post?status=queued') ?>" style="font-weight: 600; font-size: var(--rs-font-size-xs);">View Queue &rarr;</a>
+                    <?php if (!empty($canCreatePost)): ?>
+                        <a href="<?= Environment::url('/social-post?status=queued') ?>" style="font-weight: 600; font-size: var(--rs-font-size-xs);">View Queue &rarr;</a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -158,7 +160,9 @@ $this->setTitle('Dashboard');
                     </div>
                     <div class="rs-kpi-card__footer rs-d-flex rs-justify-content-between rs-align-items-center">
                         <span class="rs-text-muted">Lifetime published</span>
-                        <a href="<?= Environment::url('/social-post') ?>" style="font-weight: 600; font-size: var(--rs-font-size-xs);">View Posts &rarr;</a>
+                        <?php if (!empty($canCreatePost)): ?>
+                            <a href="<?= Environment::url('/social-post') ?>" style="font-weight: 600; font-size: var(--rs-font-size-xs);">View Posts &rarr;</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -199,9 +203,11 @@ $this->setTitle('Dashboard');
                     <h2 class="rs-card__title" style="margin: 0; font-size: 1.15rem; font-weight: 700;">
                         Upcoming Scheduled Posts (Next 5)
                     </h2>
-                    <a href="<?= Environment::url('/social-post?status=queued') ?>" class="rs-btn rs-btn--secondary rs-btn--sm">
-                        View Publishing Queue &rarr;
-                    </a>
+                    <?php if (!empty($canCreatePost)): ?>
+                        <a href="<?= Environment::url('/social-post?status=queued') ?>" class="rs-btn rs-btn--secondary rs-btn--sm">
+                            View Publishing Queue &rarr;
+                        </a>
+                    <?php endif; ?>
                 </div>
                 <div class="rs-card__body rs-p-0">
                     <?php if (empty($upcomingPosts)): ?>
@@ -213,12 +219,14 @@ $this->setTitle('Dashboard');
                             <p style="margin: 0 0 20px 0; color: var(--rs-text-muted); font-size: var(--rs-font-size-sm); max-width: 420px; display: inline-block;">
                                 There are currently no social publishing posts queued for future delivery in this workspace.
                             </p>
-                            <div>
-                                <a href="<?= Environment::url('/social-post/create') ?>" class="rs-btn rs-btn--primary rs-btn--sm">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                    Schedule a Post Now
-                                </a>
-                            </div>
+                            <?php if (!empty($canCreatePost)): ?>
+                                <div>
+                                    <a href="<?= Environment::url('/social-post/create') ?>" class="rs-btn rs-btn--primary rs-btn--sm">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        Schedule a Post Now
+                                    </a>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     <?php else: ?>
                         <div class="rs-table-responsive">
@@ -229,7 +237,9 @@ $this->setTitle('Dashboard');
                                         <th>Post Content</th>
                                         <th>Target Platform(s)</th>
                                         <th style="width: 90px; text-align: center;">Status</th>
-                                        <th style="width: 70px; text-align: right;">Action</th>
+                                        <?php if (!empty($canCreatePost)): ?>
+                                            <th style="width: 70px; text-align: right;">Action</th>
+                                        <?php endif; ?>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -267,9 +277,15 @@ $this->setTitle('Dashboard');
                                                 <div class="rs-text-muted" style="font-size: var(--rs-font-size-xs);"><?= Html::encode($formattedTime) ?></div>
                                             </td>
                                             <td>
-                                                <a href="<?= Environment::url('/social-post/view?id=' . $post->getId()) ?>" style="font-weight: 600; color: var(--rs-text-main); text-decoration: none;">
-                                                    <?= Html::encode($preview) ?>
-                                                </a>
+                                                <?php if (!empty($canCreatePost)): ?>
+                                                    <a href="<?= Environment::url('/social-post/view?id=' . $post->getId()) ?>" style="font-weight: 600; color: var(--rs-text-main); text-decoration: none;">
+                                                        <?= Html::encode($preview) ?>
+                                                    </a>
+                                                <?php else: ?>
+                                                    <span style="font-weight: 600; color: var(--rs-text-main);">
+                                                        <?= Html::encode($preview) ?>
+                                                    </span>
+                                                <?php endif; ?>
                                                 <?php if ($tenantContext->isUnrestricted() && $post->getAccountBusinessName() !== null): ?>
                                                     <div class="rs-text-muted" style="font-size: var(--rs-font-size-xs);">
                                                         Workspace: <?= Html::encode($post->getAccountBusinessName()) ?>
@@ -302,11 +318,13 @@ $this->setTitle('Dashboard');
                                             <td style="text-align: center;">
                                                 <span class="rs-badge rs-badge--warning">Queued</span>
                                             </td>
-                                            <td style="text-align: right; white-space: nowrap;">
-                                                <a href="<?= Environment::url('/social-post/view?id=' . $post->getId()) ?>" class="rs-btn rs-btn--secondary rs-btn--sm" title="View details">
-                                                    View
-                                                </a>
-                                            </td>
+                                            <?php if (!empty($canCreatePost)): ?>
+                                                <td style="text-align: right; white-space: nowrap;">
+                                                    <a href="<?= Environment::url('/social-post/view?id=' . $post->getId()) ?>" class="rs-btn rs-btn--secondary rs-btn--sm" title="View details">
+                                                        View
+                                                    </a>
+                                                </td>
+                                            <?php endif; ?>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -326,7 +344,7 @@ $this->setTitle('Dashboard');
                     </h2>
                 </div>
                 <div class="rs-card__body rs-d-flex rs-flex-column rs-gap-3">
-                    <?php if ($canCreatePost ?? true): ?>
+                    <?php if (!empty($canCreatePost)): ?>
                     <!-- Action 1: Create Post (All Roles with permission) -->
                     <a href="<?= Environment::url('/social-post/create') ?>" class="rs-btn rs-btn--primary" style="justify-content: flex-start; padding: 12px 16px;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -342,7 +360,7 @@ $this->setTitle('Dashboard');
                     </a>
                     <?php endif; ?>
 
-                    <?php if ($canCreatePost ?? true): ?>
+                    <?php if (!empty($canCreatePost)): ?>
                     <!-- Action 3: View Publishing Queue (All Roles with permission) -->
                     <a href="<?= Environment::url('/social-post') ?>" class="rs-btn rs-btn--secondary" style="justify-content: flex-start; padding: 12px 16px;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>

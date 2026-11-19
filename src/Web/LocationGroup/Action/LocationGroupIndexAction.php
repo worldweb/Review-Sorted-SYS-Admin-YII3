@@ -48,8 +48,8 @@ final class LocationGroupIndexAction
             return $this->redirect(\App\Environment::url('/login'));
         }
 
-        // Authorization check: Admin, account admin, or explicitly granted location-group permission
-        if (!$currentUser->isAdmin() && !$currentUser->isAccountAdmin() && !($this->rbac?->can($currentUser, '/location-group/*') ?? false)) {
+        // Authorization check: Platform Admin or user with location-group RBAC permission
+        if (!$currentUser->isAdmin() && !($this->rbac?->can($currentUser, '/location-group/*') ?? false)) {
             $response = $this->responseFactory->createResponse(403);
             $response->getBody()->write('Forbidden: You are not authorized to manage location groups.');
             return $response;

@@ -14,7 +14,8 @@ use Yiisoft\Html\Html;
  *     category: string,
  *     editable: bool,
  *     state: string,
- *     permissions: string[]
+ *     permissions: string[],
+ *     isGranted?: bool
  * }> $roleMatrix
  * @var string $targetRole
  * @var array<string, string> $roleOptions
@@ -69,13 +70,14 @@ use Yiisoft\Html\Html;
                     <?php foreach ($roleMatrix as $featureKey => $item): ?>
                         <?php
                         $isAllowed = ($item['state'] === 'allowed' || $item['state'] === 'inherited');
-                        $isProtected = ($item['state'] === 'protected' || !$item['editable']);
+                        $isProtected = ($item['state'] === 'protected' || $item['state'] === 'restricted' || !$item['editable']);
                         $isInherited = ($item['state'] === 'inherited');
+                        $isGranted = !empty($item['isGranted']);
                         ?>
                         <tr style="<?= $isProtected ? 'background-color: #fcfcfc;' : '' ?>">
                             <td style="text-align: center; vertical-align: middle;">
                                 <?php if ($isProtected): ?>
-                                    <input type="checkbox" disabled checked style="cursor: not-allowed; opacity: 0.6;">
+                                    <input type="checkbox" disabled <?= $isGranted ? 'checked' : '' ?> style="cursor: not-allowed; opacity: 0.6;">
                                 <?php else: ?>
                                     <input type="checkbox" 
                                            name="RolePermissionsForm[selected_features][]" 
@@ -94,10 +96,20 @@ use Yiisoft\Html\Html;
                                 </span>
                             </td>
                             <td>
-                                <?php if ($item['state'] === 'protected'): ?>
-                                    <span class="rs-badge" style="font-size: 11px; padding: 4px 10px; background-color: #334155; color: #ffffff;">
-                                        🔒 System Protected
+                                <?php if ($item['state'] === 'restricted'): ?>
+                                    <span class="rs-badge" style="font-size: 11px; padding: 4px 10px; background-color: #475569; color: #ffffff;" title="Restricted to higher administrative roles.">
+                                        🔒 Restricted to Higher Roles
                                     </span>
+                                <?php elseif ($item['state'] === 'protected'): ?>
+                                    <?php if ($isGranted): ?>
+                                        <span class="rs-badge" style="font-size: 11px; padding: 4px 10px; background-color: #334155; color: #ffffff;" title="System protected core capability.">
+                                            🔒 System Protected (Granted)
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="rs-badge" style="font-size: 11px; padding: 4px 10px; background-color: #475569; color: #ffffff;" title="System protected core capability.">
+                                            🔒 System Protected
+                                        </span>
+                                    <?php endif; ?>
                                 <?php elseif ($item['state'] === 'inherited'): ?>
                                     <span class="rs-badge rs-badge--info" style="font-size: 11px; padding: 4px 10px; background-color: #0284c7; color: #ffffff;">
                                         ↳ Allowed (Inherited)

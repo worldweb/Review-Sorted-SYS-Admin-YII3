@@ -151,6 +151,55 @@ $renderStars = static function (?float $rawRate): string {
         </div>
     </div>
 
+    <!-- Manual Review Sync Information Banner (Visible only during active synchronization) -->
+    <div id="sync-info-banner" class="rs-alert rs-alert--info rs-mb-4" style="display: none; background-color: #f0f7ff; border: 1px solid #bae0ff; border-left: 4px solid #1677ff; color: #1e293b; padding: 12px 16px; border-radius: 6px; align-items: flex-start; gap: 12px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1677ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <div style="font-size: 13px; line-height: 1.5;">
+            <div style="font-weight: 700; color: #0958d9; margin-bottom: 2px;">Manual Review Sync Information</div>
+            <div>Manual sync fetches only the latest reviews (up to 2 pages or 200 reviews per connected location). It does not fetch all historical reviews. Full historical synchronization is handled separately by scheduled background synchronization.</div>
+        </div>
+    </div>
+
+    <!-- Review Synchronization Progress Card -->
+    <style>@keyframes rs-spin { 100% { transform: rotate(360deg); } }</style>
+    <div id="sync-progress-card" class="rs-card rs-p-4 rs-mb-4" style="display: none; border-left: 4px solid var(--rs-primary, #2563eb); background: #ffffff;">
+        <div class="rs-d-flex rs-align-items-center rs-justify-content-between rs-mb-2">
+            <div class="rs-d-flex rs-align-items-center rs-gap-2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" class="rs-sync-spinner" style="animation: rs-spin 1s linear infinite;"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                <span id="sync-progress-title" class="rs-font-bold rs-text-sm rs-text-main">Synchronizing Reviews...</span>
+            </div>
+            <span id="sync-progress-percent" class="rs-text-xs rs-font-bold" style="color: var(--rs-primary, #2563eb);">0%</span>
+        </div>
+        <div style="height: 8px; background-color: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
+            <div id="sync-progress-bar" style="width: 0%; height: 100%; background-color: var(--rs-primary, #2563eb); transition: width 0.3s ease;"></div>
+        </div>
+        <div class="rs-d-flex rs-align-items-center rs-justify-content-between rs-text-xs rs-text-muted">
+            <span id="sync-progress-details">Initializing sync...</span>
+            <span id="sync-progress-stats">0 fetched &bull; 0 inserted &bull; 0 updated</span>
+        </div>
+
+        <!-- Active Sync Tab Warning (Visible while sync is running) -->
+        <div id="sync-active-warning" class="rs-mt-3 rs-p-2" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; display: none; align-items: flex-start; gap: 8px; font-size: 12px; color: #475569; line-height: 1.4;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span><strong>Please keep this browser tab open until synchronization is complete.</strong> Closing the tab or browser before completion may interrupt the sync, and remaining locations may not be processed.</span>
+        </div>
+
+        <div id="sync-pause-banner" class="rs-mt-3 rs-p-3" style="display: none; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px;">
+            <div class="rs-d-flex rs-align-items-center rs-justify-content-between">
+                <span id="sync-pause-msg" class="rs-text-xs" style="color: #92400e;">Network issue encountered.</span>
+                <div class="rs-d-flex rs-gap-2">
+                    <button type="button" id="btn-sync-resume" class="rs-btn rs-btn--xs rs-btn--primary">Resume Sync</button>
+                    <button type="button" id="btn-sync-cancel" class="rs-btn rs-btn--xs rs-btn--outline">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div id="sync-error-list" class="rs-mt-3 rs-text-xs rs-text-danger" style="display: none; max-height: 120px; overflow-y: auto; background: #fef2f2; padding: 8px; border-radius: 4px;"></div>
+    </div>
+
     <!-- Reviews Grid Table Card -->
     <div class="rs-card rs-mb-6">
         <form method="GET" action="<?= \App\Environment::url('/reviews') ?>" id="reviews-filter-form">
@@ -399,57 +448,208 @@ function triggerReviewSync() {
     const btn = document.getElementById('btn-sync-reviews');
     const textSpan = document.getElementById('sync-btn-text');
     const spinnerSpan = document.getElementById('sync-btn-spinner');
+    const progressCard = document.getElementById('sync-progress-card');
+    const progressBar = document.getElementById('sync-progress-bar');
+    const progressPercent = document.getElementById('sync-progress-percent');
+    const progressTitle = document.getElementById('sync-progress-title');
+    const progressDetails = document.getElementById('sync-progress-details');
+    const progressStats = document.getElementById('sync-progress-stats');
+    const pauseBanner = document.getElementById('sync-pause-banner');
+    const pauseMsg = document.getElementById('sync-pause-msg');
+    const btnResume = document.getElementById('btn-sync-resume');
+    const btnCancel = document.getElementById('btn-sync-cancel');
+    const errorList = document.getElementById('sync-error-list');
+    const activeWarning = document.getElementById('sync-active-warning');
+    const syncInfoBanner = document.getElementById('sync-info-banner');
 
     if (!btn || btn.disabled) {
         return;
     }
 
-    if (!confirm('Fetch latest reviews from connected Google and Facebook accounts now?')) {
+    const confirmMessage = 'Fetch latest reviews from connected Google and Facebook accounts now?\n\n'
+        + '• Manual sync fetches only the latest reviews (up to 200 per location).\n'
+        + '• Please keep this browser tab open until synchronization completes.';
+
+    if (!confirm(confirmMessage)) {
         return;
     }
 
     btn.disabled = true;
     if (textSpan) textSpan.style.display = 'none';
     if (spinnerSpan) spinnerSpan.style.display = 'inline';
-
-    const formData = new FormData();
-    if (window.reviewSyncCsrf) {
-        formData.append('_csrf', window.reviewSyncCsrf);
+    if (progressCard) progressCard.style.display = 'block';
+    if (syncInfoBanner) syncInfoBanner.style.display = 'flex';
+    if (activeWarning) activeWarning.style.display = 'flex';
+    if (pauseBanner) pauseBanner.style.display = 'none';
+    if (errorList) {
+        errorList.style.display = 'none';
+        errorList.innerHTML = '';
     }
 
     const channelSelect = document.querySelector('select[name="service_config"]');
-    if (channelSelect && channelSelect.value) {
-        formData.append('channel_id', channelSelect.value);
+    const channelId = channelSelect && channelSelect.value ? channelSelect.value : null;
+
+    let currentLastChannelId = 0;
+    let hasAttemptedRetry = false;
+    let isCancelled = false;
+
+    const accumulated = {
+        totalChannels: 0,
+        channelsProcessed: 0,
+        fetched: 0,
+        inserted: 0,
+        updated: 0,
+        errors: []
+    };
+
+    if (btnCancel) {
+        btnCancel.onclick = function () {
+            isCancelled = true;
+            finishSync(accumulated, true);
+        };
     }
 
-    fetch(window.reviewSyncUrl, {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: formData
-    })
-    .then(function (response) {
-        return response.json();
-    })
-    .then(function (data) {
-        if (data.success) {
-            alert(data.message || 'Reviews synced successfully.');
-            window.location.reload();
-        } else {
-            alert(data.error || data.message || 'Review synchronization failed.');
-            btn.disabled = false;
-            if (textSpan) textSpan.style.display = 'inline';
-            if (spinnerSpan) spinnerSpan.style.display = 'none';
+    if (btnResume) {
+        btnResume.onclick = function () {
+            if (pauseBanner) pauseBanner.style.display = 'none';
+            hasAttemptedRetry = false;
+            runChunk(currentLastChannelId);
+        };
+    }
+
+    function runChunk(lastChannelId) {
+        if (isCancelled) {
+            return;
         }
-    })
-    .catch(function (err) {
-        console.error('Review sync request failed:', err);
-        alert('An unexpected error occurred while synchronizing reviews. Please check system logs.');
+
+        const formData = new FormData();
+        if (window.reviewSyncCsrf) {
+            formData.append('_csrf', window.reviewSyncCsrf);
+        }
+        formData.append('last_channel_id', lastChannelId);
+        formData.append('limit', 10);
+        formData.append('max_pages', 2);
+        if (channelId) {
+            formData.append('channel_id', channelId);
+        }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(function () {
+            controller.abort();
+        }, 90000); // 90-second safety timeout per chunk
+
+        fetch(window.reviewSyncUrl, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData,
+            signal: controller.signal
+        })
+        .then(function (response) {
+            clearTimeout(timeoutId);
+            return response.json();
+        })
+        .then(function (data) {
+            if (!data.success) {
+                throw new Error(data.error || data.message || 'Server reported an error during synchronization.');
+            }
+
+            // Reset automatic retry on successful chunk response
+            hasAttemptedRetry = false;
+
+            accumulated.totalChannels = data.total_channels || 0;
+            accumulated.channelsProcessed += (data.channels_processed || 0);
+            accumulated.fetched += (data.reviews_fetched || 0);
+            accumulated.inserted += (data.reviews_inserted || 0);
+            accumulated.updated += (data.reviews_updated || 0);
+            if (data.errors && data.errors.length) {
+                accumulated.errors.push(...data.errors);
+            }
+
+            currentLastChannelId = data.last_channel_id || 0;
+
+            const total = accumulated.totalChannels > 0 ? accumulated.totalChannels : accumulated.channelsProcessed;
+            const pct = total > 0 ? Math.min(100, Math.round((accumulated.channelsProcessed / total) * 100)) : 100;
+
+            if (progressBar) progressBar.style.width = pct + '%';
+            if (progressPercent) progressPercent.innerText = pct + '%';
+            if (progressDetails) {
+                progressDetails.innerText = 'Processed ' + accumulated.channelsProcessed + ' of ' + total + ' channel(s)...';
+            }
+            if (progressStats) {
+                progressStats.innerText = accumulated.fetched + ' fetched • ' + accumulated.inserted + ' inserted • ' + accumulated.updated + ' updated';
+            }
+
+            if (data.has_more) {
+                // Process next chunk sequentially
+                runChunk(currentLastChannelId);
+            } else {
+                // All chunks completed
+                finishSync(accumulated, false);
+            }
+        })
+        .catch(function (err) {
+            clearTimeout(timeoutId);
+            console.warn('Chunk sync error at last_channel_id=' + lastChannelId + ':', err);
+
+            // One automatic retry with 3-second delay
+            if (!hasAttemptedRetry) {
+                hasAttemptedRetry = true;
+                if (progressDetails) {
+                    progressDetails.innerText = 'Network delay. Retrying current chunk in 3 seconds...';
+                }
+                setTimeout(function () {
+                    runChunk(lastChannelId);
+                }, 3000);
+            } else {
+                // Second failure: show manual resume/cancel banner
+                if (pauseBanner) pauseBanner.style.display = 'block';
+                if (pauseMsg) {
+                    pauseMsg.innerText = 'Network delay on chunk (' + (err.message || 'Timeout') + '). You can resume or cancel.';
+                }
+            }
+        });
+    }
+
+    function finishSync(acc, cancelled) {
         btn.disabled = false;
         if (textSpan) textSpan.style.display = 'inline';
         if (spinnerSpan) spinnerSpan.style.display = 'none';
-    });
+
+        if (progressBar) progressBar.style.width = '100%';
+        if (progressPercent) progressPercent.innerText = '100%';
+        if (progressTitle) {
+            progressTitle.innerText = cancelled ? 'Synchronization Cancelled' : 'Synchronization Complete';
+        }
+        if (pauseBanner) pauseBanner.style.display = 'none';
+        if (activeWarning) activeWarning.style.display = 'none';
+        if (syncInfoBanner) syncInfoBanner.style.display = 'none';
+
+        let msg = (cancelled ? 'Synchronization cancelled. ' : 'Review synchronization completed: ')
+            + acc.channelsProcessed + ' channel(s) processed, '
+            + acc.fetched + ' review(s) fetched, '
+            + acc.inserted + ' inserted, '
+            + acc.updated + ' updated.';
+
+        if (acc.errors.length > 0) {
+            msg += '\n\n' + acc.errors.length + ' channel(s) reported warnings.';
+            if (errorList) {
+                errorList.style.display = 'block';
+                errorList.innerHTML = '<strong>Channel Warnings:</strong><br>' + acc.errors.map(function (e) {
+                    return '• ' + e;
+                }).join('<br>');
+            }
+        }
+
+        setTimeout(function () {
+            alert(msg);
+            window.location.reload();
+        }, 400);
+    }
+
+    // Start with initial channel ID 0
+    runChunk(0);
 }
 
 function submitBulkReply() {

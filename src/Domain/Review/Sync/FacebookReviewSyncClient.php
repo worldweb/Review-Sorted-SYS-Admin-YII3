@@ -33,7 +33,7 @@ final class FacebookReviewSyncClient implements FacebookReviewSyncClientInterfac
         $this->logger = $logger ?? new NullLogger();
     }
 
-    public function fetchReviews(ServiceConfig|array $config): array
+    public function fetchReviews(ServiceConfig|array $config, int $maxPages = 2): array
     {
         $configId = $config instanceof ServiceConfig ? $config->getId() : (int) ($config['id'] ?? 0);
         $pageToken = $config instanceof ServiceConfig ? $config->getPageToken() : (string) ($config['page_token'] ?? '');
@@ -41,13 +41,15 @@ final class FacebookReviewSyncClient implements FacebookReviewSyncClientInterfac
         $label = $config instanceof ServiceConfig ? $config->getLabel() : (string) ($config['label'] ?? "Page #{$pageId}");
 
         if (trim($pageToken) === '') {
-            $this->logger->warning("[FacebookReviewSync] ServiceConfig #{$configId} ({$label}) has no page_token.");
-            return [];
+            $msg = "Facebook Page {$label} has no access token configured. Please connect Facebook in Settings.";
+            $this->logger->warning("[FacebookReviewSync] ServiceConfig #{$configId} ({$label}): {$msg}");
+            throw new ReviewSyncException($msg);
         }
 
         if (trim($pageId) === '') {
-            $this->logger->warning("[FacebookReviewSync] ServiceConfig #{$configId} ({$label}) has no page_id.");
-            return [];
+            $msg = "Facebook Page {$label} has no page_id configured. Please reconnect Facebook in Settings.";
+            $this->logger->warning("[FacebookReviewSync] ServiceConfig #{$configId} ({$label}): {$msg}");
+            throw new ReviewSyncException($msg);
         }
 
         $endpoint = self::GRAPH_API_BASE . self::GRAPH_API_VERSION . '/' . rawurlencode($pageId) . '/ratings';
@@ -75,13 +77,16 @@ final class FacebookReviewSyncClient implements FacebookReviewSyncClientInterfac
 
                 $statusCode = $response->getStatusCode();
                 if ($statusCode !== 200) {
-                    $this->logger->warning("[FacebookReviewSync] Facebook Graph API returned status {$statusCode} for {$label} on page {$pageCounter}.");
-                    break;
+                    $msg = "Facebook Graph API returned HTTP status {$statusCode} for {$label} on page {$pageCounter}.";
+                    $this->logger->warning("[FacebookReviewSync] {$msg}");
+                    throw new ReviewSyncException($msg);
                 }
 
                 $body = json_decode((string) $response->getBody(), true);
                 if (!is_array($body)) {
-                    break;
+                    $msg = "Facebook Graph API returned non-JSON response for {$label} on page {$pageCounter}.";
+                    $this->logger->warning("[FacebookReviewSync] {$msg}");
+                    throw new ReviewSyncException($msg);
                 }
 
                 $rawItems = (array) ($body['data'] ?? []);
@@ -94,25 +99,43 @@ final class FacebookReviewSyncClient implements FacebookReviewSyncClientInterfac
 
                 $nextUrl = !empty($body['paging']['next']) ? (string) $body['paging']['next'] : null;
 
-                // Safety guard against infinite pagination loops
-                if ($pageCounter >= 50) {
-                    $this->logger->warning("[FacebookReviewSync] Reached maximum pagination limit (50 pages) for {$label}.");
+                // Safety guard against exceeding requested pagination limit
+                if ($pageCounter >= $maxPages) {
+                    if ($nextUrl !== null) {
+                        $this->logger->info("[FacebookReviewSync] Reached pagination limit ({$maxPages} page(s)) for {$label}. Additional historical reviews remain available.");
+                    }
                     break;
                 }
             } catch (RequestException $e) {
                 $errMsg = $e->getMessage();
-                if ($e->hasResponse()) {
-                    $res = $e->getResponse();
-                    $errJson = json_decode((string) ($res ? $res->getBody() : ''), true);
-                    if (is_array($errJson) && isset($errJson['error']['message'])) {
-                        $errMsg = (string) $errJson['error']['message'];
+                $response = method_exists($e, 'getResponse') ? $e->getResponse() : null;
+                $statusCode = $response !== null ? $response->getStatusCode() : 0;
+                $fbCode = null;
+                $fbType = null;
+                if ($response !== null) {
+                    $errJson = json_decode((string) $response->getBody(), true);
+                    if (is_array($errJson) && isset($errJson['error'])) {
+                        $fbErr = $errJson['error'];
+                        $errMsg = (string) ($fbErr['message'] ?? $errMsg);
+                        $fbCode = isset($fbErr['code']) ? (int) $fbErr['code'] : null;
+                        $fbType = isset($fbErr['type']) ? (string) $fbErr['type'] : null;
                     }
                 }
-                $this->logger->error("[FacebookReviewSync] Request error fetching reviews for {$label}: {$errMsg}");
-                break;
+
+                if ($fbCode === 190 || $fbType === 'OAuthException' || $statusCode === 401 || $statusCode === 403) {
+                    $codeStr = $fbCode !== null ? " (Error {$fbCode}: {$fbType})" : " (HTTP {$statusCode})";
+                    $msg = "Facebook session expired or authorization revoked{$codeStr} for {$label}: {$errMsg}. Please reconnect Facebook in Settings.";
+                } else {
+                    $msg = "Facebook Graph API request failed for {$label} on page {$pageCounter}: {$errMsg}";
+                }
+                $this->logger->error("[FacebookReviewSync] {$msg}");
+                throw new ReviewSyncException($msg, $e->getCode(), $e);
+            } catch (ReviewSyncException $e) {
+                throw $e;
             } catch (Throwable $e) {
-                $this->logger->error("[FacebookReviewSync] Unexpected error fetching reviews for {$label}: " . $e->getMessage());
-                break;
+                $msg = "Unexpected error fetching Facebook reviews for {$label}: " . $e->getMessage();
+                $this->logger->error("[FacebookReviewSync] {$msg}");
+                throw new ReviewSyncException($msg, 0, $e);
             }
         } while ($nextUrl !== null && $nextUrl !== '');
 

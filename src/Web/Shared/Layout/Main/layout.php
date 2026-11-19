@@ -191,7 +191,7 @@ $this->beginPage();
                         </svg>
                     </div>
                     <div class="rs-dropdown__menu" role="menu">
-                        <a href="<?= \App\Environment::url('/user/update?id=' . $user->getId()) ?>" class="rs-dropdown__item" role="menuitem">My Profile</a>
+                        <a href="<?= \App\Environment::url('/profile/edit') ?>" class="rs-dropdown__item" role="menuitem">My Profile</a>
                         <?php if ($user->isAdmin()): ?>
                             <a href="<?= $base ?>/global-settings/index" class="rs-dropdown__item" role="menuitem">Global Settings</a>
                         <?php endif; ?>
