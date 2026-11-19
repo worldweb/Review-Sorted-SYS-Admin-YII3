@@ -4294,6 +4294,30 @@ return array (
         'autoIncrement' => false,
         'unsigned' => false,
       ),
+      'google_place_id' => 
+      array (
+        'type' => 'string',
+        'dbType' => 'varchar(255)',
+        'phpType' => 'string',
+        'size' => 255,
+        'scale' => NULL,
+        'allowNull' => true,
+        'defaultValue' => NULL,
+        'autoIncrement' => false,
+        'unsigned' => false,
+      ),
+      'google_maps_uri' => 
+      array (
+        'type' => 'text',
+        'dbType' => 'text',
+        'phpType' => 'string',
+        'size' => NULL,
+        'scale' => NULL,
+        'allowNull' => true,
+        'defaultValue' => NULL,
+        'autoIncrement' => false,
+        'unsigned' => false,
+      ),
       'page_name' => 
       array (
         'type' => 'string',
@@ -4374,6 +4398,15 @@ return array (
         'columns' => 
         array (
           0 => 'account_id',
+        ),
+        'isPrimary' => false,
+        'isUnique' => false,
+      ),
+      'idx_service_config_google_place_id' => 
+      array (
+        'columns' => 
+        array (
+          0 => 'google_place_id',
         ),
         'isPrimary' => false,
         'isUnique' => false,

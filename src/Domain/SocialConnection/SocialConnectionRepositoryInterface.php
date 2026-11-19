@@ -119,10 +119,15 @@ interface SocialConnectionRepositoryInterface
      * Upsert a Google Business Profile location connection in service_config.
      * Prevents duplicate rows by matching (account_id, service_id = 1, page_id).
      *
-     * @param array{name: string, title?: string, storeCode?: string, account_name?: string} $locationData
+     * @param array{name: string, title?: string, storeCode?: string, account_name?: string, metadata?: array{placeId?: string, mapsUri?: string}, google_place_id?: string, google_maps_uri?: string} $locationData
      * @param array<string, mixed> $tokenPayload
      */
     public function upsertGoogleLocation(int $accountId, ?int $apiId, array $locationData, array $tokenPayload, bool $linked = true): ?ServiceConfig;
+
+    /**
+     * Updates Google location metadata (Place ID and Maps URL) for a ServiceConfig without modifying page_id.
+     */
+    public function updateGoogleLocationMetadata(int $id, ?string $placeId, ?string $mapsUri, ?TenantContextInterface $context = null): bool;
 
     /**
      * Link selected Google location service configurations (set linked = 1).

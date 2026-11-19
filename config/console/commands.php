@@ -13,5 +13,6 @@ return [
     'review/sync' => Console\ReviewSyncCommand::class,
     'review/sync-google' => Console\ReviewSyncGoogleCommand::class,
     'review/sync-facebook' => Console\ReviewSyncFacebookCommand::class,
+    'google/fetch-location-metadata' => Console\GoogleLocationMetadataCommand::class,
     'db/sync' => Console\DatabaseSyncCommand::class,
 ];

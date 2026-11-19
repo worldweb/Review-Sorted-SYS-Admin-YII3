@@ -31,6 +31,11 @@ final class ReviewRepository implements ReviewRepositoryInterface
             ->select([
                 'r.*',
                 'service_config_label' => 'sc.label',
+                'service_config_page_id' => 'sc.page_id',
+                'service_config_google_place_id' => 'sc.google_place_id',
+                'service_config_google_maps_uri' => 'sc.google_maps_uri',
+                'service_config_api_key' => 'sc.api_key',
+                'service_config_client_id' => 'sc.client_id',
                 'service_label' => 's.label',
                 'sub_service_name' => 'sub.name',
                 'sub_service_type' => 'sub.type',
@@ -522,6 +527,11 @@ final class ReviewRepository implements ReviewRepositoryInterface
             ->select([
                 'r.*',
                 'service_config_label' => 'sc.label',
+                'service_config_page_id' => 'sc.page_id',
+                'service_config_google_place_id' => 'sc.google_place_id',
+                'service_config_google_maps_uri' => 'sc.google_maps_uri',
+                'service_config_api_key' => 'sc.api_key',
+                'service_config_client_id' => 'sc.client_id',
                 'service_label' => 's.label',
                 'sub_service_name' => 'sub.name',
                 'sub_service_type' => 'sub.type',

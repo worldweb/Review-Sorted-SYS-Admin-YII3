@@ -81,6 +81,7 @@ return [
     \Yiisoft\Session\Flash\FlashInterface::class => \Yiisoft\Session\Flash\Flash::class,
 
     // Review Synchronization Clients and Services
+    \App\Domain\SocialConnection\GoogleLocationMetadataService::class => \App\Domain\SocialConnection\GoogleLocationMetadataService::class,
     \App\Domain\Review\Sync\GoogleReviewSyncClientInterface::class => \App\Domain\Review\Sync\GoogleReviewSyncClient::class,
     \App\Domain\Review\Sync\GoogleReviewSyncClient::class => \App\Domain\Review\Sync\GoogleReviewSyncClient::class,
     \App\Domain\Review\Sync\FacebookReviewSyncClientInterface::class => \App\Domain\Review\Sync\FacebookReviewSyncClient::class,

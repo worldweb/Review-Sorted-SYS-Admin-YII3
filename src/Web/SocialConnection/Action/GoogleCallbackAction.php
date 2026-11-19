@@ -241,12 +241,18 @@ final class GoogleCallbackAction
                 ],
                 'query' => [
                     'pageSize' => 100,
-                    'readMask' => 'name,title,storeCode,labels',
+                    'readMask' => 'name,title,storeCode,labels,metadata',
                 ],
             ]);
 
             $body = json_decode((string) $resp->getBody(), true);
             $locations = (array) ($body['locations'] ?? []);
+            foreach ($locations as &$locItem) {
+                if (!empty($locItem['locationKey']['placeId']) && empty($locItem['metadata']['placeId'])) {
+                    $locItem['metadata']['placeId'] = $locItem['locationKey']['placeId'];
+                }
+            }
+            unset($locItem);
             if (!empty($locations)) {
                 return $locations;
             }
@@ -273,6 +279,12 @@ final class GoogleCallbackAction
 
             $body = json_decode((string) $resp->getBody(), true);
             $locations = (array) ($body['locations'] ?? []);
+            foreach ($locations as &$locItem) {
+                if (!empty($locItem['locationKey']['placeId']) && empty($locItem['metadata']['placeId'])) {
+                    $locItem['metadata']['placeId'] = $locItem['locationKey']['placeId'];
+                }
+            }
+            unset($locItem);
         } catch (Throwable $e) {
             $this->logger->warning(sprintf(
                 '[GoogleCallback] GBP v4 locations endpoint failed for %s: %s',

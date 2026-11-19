@@ -45,6 +45,8 @@ final class ServiceConfig
         private ?string $clientId = null,
         private ?string $token = null,
         private ?string $pageId = null,
+        private ?string $googlePlaceId = null,
+        private ?string $googleMapsUri = null,
         private ?string $pageName = null,
         private ?string $pageToken = null,
         private int $linked = self::LINKED_YES,
@@ -71,6 +73,8 @@ final class ServiceConfig
             clientId: isset($row['client_id']) ? (string) $row['client_id'] : null,
             token: isset($row['token']) ? (string) $row['token'] : null,
             pageId: isset($row['page_id']) ? (string) $row['page_id'] : null,
+            googlePlaceId: isset($row['google_place_id']) ? (string) $row['google_place_id'] : null,
+            googleMapsUri: isset($row['google_maps_uri']) ? (string) $row['google_maps_uri'] : null,
             pageName: isset($row['page_name']) ? (string) $row['page_name'] : null,
             pageToken: isset($row['page_token']) ? (string) $row['page_token'] : null,
             linked: (int) ($row['linked'] ?? self::LINKED_YES),
@@ -135,6 +139,16 @@ final class ServiceConfig
     public function getPageId(): ?string
     {
         return $this->pageId;
+    }
+
+    public function getGooglePlaceId(): ?string
+    {
+        return $this->googlePlaceId;
+    }
+
+    public function getGoogleMapsUri(): ?string
+    {
+        return $this->googleMapsUri;
     }
 
     public function getPageName(): ?string

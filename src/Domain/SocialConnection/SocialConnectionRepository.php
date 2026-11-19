@@ -556,6 +556,21 @@ final class SocialConnectionRepository implements SocialConnectionRepositoryInte
         $linkedVal = $linked ? ServiceConfig::LINKED_YES : ServiceConfig::LINKED_NO;
         $now = time();
 
+        // Extract metadata if available
+        $placeId = null;
+        if (!empty($locationData['metadata']['placeId'])) {
+            $placeId = (string) $locationData['metadata']['placeId'];
+        } elseif (!empty($locationData['google_place_id'])) {
+            $placeId = (string) $locationData['google_place_id'];
+        }
+
+        $mapsUri = null;
+        if (!empty($locationData['metadata']['mapsUri'])) {
+            $mapsUri = (string) $locationData['metadata']['mapsUri'];
+        } elseif (!empty($locationData['google_maps_uri'])) {
+            $mapsUri = (string) $locationData['google_maps_uri'];
+        }
+
         try {
             // Find existing row by (account_id, service_id = 1, page_id)
             $existing = (new Query($this->db))
@@ -594,6 +609,13 @@ final class SocialConnectionRepository implements SocialConnectionRepositoryInte
                 if ($apiId !== null && $apiId > 0) {
                     $updateFields['api_id'] = $apiId;
                 }
+                // Only update metadata if non-empty, preventing accidental clearing of previously saved metadata
+                if ($placeId !== null && $placeId !== '') {
+                    $updateFields['google_place_id'] = $placeId;
+                }
+                if ($mapsUri !== null && $mapsUri !== '') {
+                    $updateFields['google_maps_uri'] = $mapsUri;
+                }
                 $this->db->createCommand()
                     ->update('{{%service_config}}', $updateFields, ['id' => $configId])
                     ->execute();
@@ -605,6 +627,8 @@ final class SocialConnectionRepository implements SocialConnectionRepositoryInte
                     'label' => $title,
                     'token' => $storeCode,
                     'page_id' => $pageId,
+                    'google_place_id' => ($placeId !== null && $placeId !== '') ? $placeId : null,
+                    'google_maps_uri' => ($mapsUri !== null && $mapsUri !== '') ? $mapsUri : null,
                     'page_name' => $pageId,
                     'page_token' => $tokenJson,
                     'linked' => $linkedVal,
@@ -714,6 +738,34 @@ final class SocialConnectionRepository implements SocialConnectionRepositoryInte
             }
         } catch (\Throwable) {
             // Ignore account_api sync errors if table or foreign constraints differ
+        }
+    }
+
+    public function updateGoogleLocationMetadata(int $id, ?string $placeId, ?string $mapsUri, ?TenantContextInterface $context = null): bool
+    {
+        $existing = $this->findById($id, $context);
+        if ($existing === null) {
+            return false;
+        }
+
+        $updates = ['updated_at' => time()];
+        if ($placeId !== null && $placeId !== '') {
+            $updates['google_place_id'] = $placeId;
+        }
+        if ($mapsUri !== null && $mapsUri !== '') {
+            $updates['google_maps_uri'] = $mapsUri;
+        }
+
+        if (count($updates) === 1) {
+            return false;
+        }
+
+        try {
+            return $this->db->createCommand()
+                ->update('{{%service_config}}', $updates, ['id' => $id])
+                ->execute() > 0;
+        } catch (\Throwable) {
+            return false;
         }
     }
 }

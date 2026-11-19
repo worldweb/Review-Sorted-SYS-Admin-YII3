@@ -54,6 +54,11 @@ final class Review
         private ?string $subServiceType = null,
         private ?int $replyCount = 0,
         private ?bool $isServiceReady = true,
+        private ?string $serviceConfigPageId = null,
+        private ?string $serviceConfigGooglePlaceId = null,
+        private ?string $serviceConfigGoogleMapsUri = null,
+        private ?string $serviceConfigApiKey = null,
+        private ?string $serviceConfigClientId = null,
     ) {
     }
 
@@ -89,6 +94,11 @@ final class Review
             subServiceType: isset($row['sub_service_type']) ? (string) $row['sub_service_type'] : null,
             replyCount: isset($row['reply_count']) ? (int) $row['reply_count'] : 0,
             isServiceReady: isset($row['is_service_ready']) ? (bool) $row['is_service_ready'] : true,
+            serviceConfigPageId: isset($row['service_config_page_id']) ? (string) $row['service_config_page_id'] : null,
+            serviceConfigGooglePlaceId: isset($row['service_config_google_place_id']) ? (string) $row['service_config_google_place_id'] : null,
+            serviceConfigGoogleMapsUri: isset($row['service_config_google_maps_uri']) ? (string) $row['service_config_google_maps_uri'] : null,
+            serviceConfigApiKey: isset($row['service_config_api_key']) ? (string) $row['service_config_api_key'] : null,
+            serviceConfigClientId: isset($row['service_config_client_id']) ? (string) $row['service_config_client_id'] : null,
         );
     }
 
@@ -212,6 +222,31 @@ final class Review
         return $this->serviceConfigLabel;
     }
 
+    public function getServiceConfigPageId(): ?string
+    {
+        return $this->serviceConfigPageId;
+    }
+
+    public function getServiceConfigGooglePlaceId(): ?string
+    {
+        return $this->serviceConfigGooglePlaceId;
+    }
+
+    public function getServiceConfigGoogleMapsUri(): ?string
+    {
+        return $this->serviceConfigGoogleMapsUri;
+    }
+
+    public function getServiceConfigApiKey(): ?string
+    {
+        return $this->serviceConfigApiKey;
+    }
+
+    public function getServiceConfigClientId(): ?string
+    {
+        return $this->serviceConfigClientId;
+    }
+
     public function getServiceLabel(): ?string
     {
         return $this->serviceLabel;
@@ -264,6 +299,136 @@ final class Review
             return ucfirst(strtolower($this->type));
         }
         return 'Post reply';
+    }
+
+    /**
+     * Resolves the Google Maps URL for the review's associated connected store listing.
+     * Preferred URL hierarchy:
+     * 1. Official Google Maps URL (if available in service_config).
+     * 2. Google Place ID URL (if Place ID is available and verified).
+     * 3. Store-name-based Google Maps search URL (fallback).
+     * 4. Google Business Profile reviews management URL (ultimate fallback).
+     */
+    public function getGoogleMapsUrl(): string
+    {
+        $storeName = trim($this->serviceConfigLabel ?? '');
+
+        // 1. Check for direct official Google Maps URL (highest priority: google_maps_uri from service_config)
+        $candidateUrls = [
+            $this->serviceConfigGoogleMapsUri,
+            $this->serviceConfigPageId,
+            $this->serviceConfigApiKey,
+            $this->serviceConfigClientId,
+        ];
+        foreach ($candidateUrls as $candidate) {
+            if ($candidate !== null && self::isValidGoogleMapsUrl($candidate)) {
+                return trim($candidate);
+            }
+        }
+
+        // 2. Check for verified Google Place ID (highest priority: google_place_id from service_config)
+        $candidatePlaceIds = [
+            $this->serviceConfigGooglePlaceId,
+            $this->serviceConfigPageId,
+            $this->serviceConfigApiKey,
+            $this->serviceConfigClientId,
+        ];
+        foreach ($candidatePlaceIds as $candidate) {
+            if ($candidate !== null && self::isValidGooglePlaceId($candidate)) {
+                $queryPart = $storeName !== '' ? urlencode($storeName) : 'Google';
+                return 'https://www.google.com/maps/search/?api=1&query=' . $queryPart . '&query_place_id=' . urlencode(trim($candidate));
+            }
+        }
+
+        // 3. Fallback to store-name-based search if store name available
+        if ($storeName !== '') {
+            return 'https://www.google.com/maps/search/?api=1&query=' . urlencode($storeName);
+        }
+
+        // 4. Ultimate fallback to Google Business Profile portal
+        return 'https://business.google.com/reviews';
+    }
+
+    /**
+     * Validates that a string is a safe, official Google Maps HTTPS URL.
+     */
+    public static function isValidGoogleMapsUrl(?string $url): bool
+    {
+        if ($url === null) {
+            return false;
+        }
+
+        $trimmed = trim($url);
+        if ($trimmed === '' || !filter_var($trimmed, FILTER_VALIDATE_URL)) {
+            return false;
+        }
+
+        $parts = parse_url($trimmed);
+        if (!is_array($parts) || strtolower($parts['scheme'] ?? '') !== 'https') {
+            return false;
+        }
+
+        $host = strtolower($parts['host'] ?? '');
+        $path = $parts['path'] ?? '';
+
+        // Allow official Google Maps host domains
+        if ($host === 'maps.google.com' || $host === 'maps.app.goo.gl') {
+            return true;
+        }
+
+        // Allow regional Google Maps host domains (e.g. maps.google.com.au, maps.google.co.uk)
+        if (preg_match('/^maps\.google\.(?:com|[a-z]{2})(?:\.[a-z]{2})?$/i', $host) === 1) {
+            return true;
+        }
+
+        if (preg_match('/^(?:www\.)?google\.(?:com|[a-z]{2})(?:\.[a-z]{2})?$/i', $host) === 1 && str_starts_with($path, '/maps')) {
+            return true;
+        }
+
+        if ($host === 'goo.gl' && str_starts_with($path, '/maps')) {
+            return true;
+        }
+
+        // Allow Google Local / Business Profile links
+        if ($host === 'search.google.com' && str_starts_with($path, '/local')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Validates that an identifier is a genuine Google Place ID format.
+     */
+    public static function isValidGooglePlaceId(?string $placeId): bool
+    {
+        if ($placeId === null) {
+            return false;
+        }
+
+        $trimmed = trim($placeId);
+        if ($trimmed === '') {
+            return false;
+        }
+
+        // Cannot contain path separators, slashes, or query characters
+        if (str_contains($trimmed, '/') || str_contains($trimmed, '\\') || str_contains($trimmed, '?') || str_contains($trimmed, ' ')) {
+            return false;
+        }
+
+        // Standard Google Place IDs start with ChIJ (27 chars, base64url charset)
+        if (preg_match('/^ChIJ[A-Za-z0-9_-]{20,70}$/', $trimmed) === 1) {
+            return true;
+        }
+
+        // Secondary Place ID format check for other Google Place ID prefixes (e.g. GhIJ or E-prefixed Place IDs)
+        if (preg_match('/^[A-Za-z0-9_-]{25,80}$/', $trimmed) === 1 && !is_numeric($trimmed)) {
+            if (!str_contains($trimmed, 'locations') && !str_contains($trimmed, 'accounts')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
