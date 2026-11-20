@@ -43,6 +43,16 @@ interface TenantContextInterface
     public function isWorker(): bool;
 
     /**
+     * Get the authenticated user ID for the current context, if authenticated.
+     */
+    public function getUserId(): ?int;
+
+    /**
+     * Get the RBAC role of the authenticated user for the current context.
+     */
+    public function getRole(): ?string;
+
+    /**
      * Get the active or primary account ID for the current context.
      */
     public function getAccountId(): ?int;

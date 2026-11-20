@@ -29,8 +29,9 @@ use Yiisoft\Html\Html;
 $user = $currentUser ?? null;
 if ($user === null && isset($tenantContextProvider, $userRepo)) {
     $context = $tenantContextProvider->get();
-    if ($context->isAuthenticated()) {
-        $user = $userRepo->findById($context->getUserId(), $context);
+    $userId = $context->getUserId();
+    if ($context->isAuthenticated() && $userId !== null) {
+        $user = $userRepo->findById($userId, $context);
     }
 }
 
