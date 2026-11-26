@@ -1,20 +1,28 @@
 
-name: Deploy Yii3 to Production via FTP
+name: Deploy Yii3 Applications
 
 on:
   push:
     branches:
       - sys-development
+      - main
 
   workflow_dispatch:
 
+# Keep deployments separate for each branch.
 concurrency:
-  group: production-ftp-deployment
+  group: yii3-deployment-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Deploy to Production
+
+  # ==========================================
+  # EXISTING SERVER - FTP DEPLOYMENT
+  # Trigger: sys-development branch
+  # ==========================================
+  deploy-existing-server:
+    name: Deploy Existing Server via FTP
+    if: github.ref == 'refs/heads/sys-development'
     runs-on: ubuntu-latest
 
     steps:
@@ -66,3 +74,59 @@ jobs:
 
           bye
           EOF
+
+  # ==========================================
+  # DIGITALOCEAN STAGING - SSH DEPLOYMENT
+  # Trigger: main branch
+  # ==========================================
+  deploy-staging:
+    name: Deploy DigitalOcean Staging via SSH
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+
+      - name: Configure SSH known hosts
+        env:
+          STAGING_KNOWN_HOSTS: ${{ secrets.STAGING_KNOWN_HOSTS }}
+        run: |
+          set -e
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          if [ -z "$STAGING_KNOWN_HOSTS" ]; then
+            echo "STAGING_KNOWN_HOSTS is missing"
+            exit 1
+          fi
+
+          printf '%s\n' "$STAGING_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy main branch to staging
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_HOST }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+          STAGING_PORT: ${{ secrets.STAGING_PORT }}
+        run: |
+          set -e
+
+          : "${STAGING_HOST:?STAGING_HOST is missing}"
+          : "${STAGING_USER:?STAGING_USER is missing}"
+          : "${STAGING_PORT:=22}"
+
+          ssh \
+            -p "$STAGING_PORT" \
+            -o BatchMode=yes \
+            "$STAGING_USER@$STAGING_HOST" \
+            'cd /var/www/yii3 &&
+             git fetch origin main &&
+             git reset --hard origin/main &&
+             composer install --no-dev --optimize-autoloader --no-interaction'
