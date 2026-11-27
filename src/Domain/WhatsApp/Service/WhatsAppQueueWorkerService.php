@@ -53,7 +53,7 @@ final class WhatsAppQueueWorkerService
         // Fail-fast guard in production: refuse to process/claim queue items if live provider is not configured
         if (\App\Environment::isProd() && !$this->metaWhatsAppClient->isConfigured()) {
             throw new RuntimeException(
-                '[WhatsAppQueueWorker] Cannot process WhatsApp queue: Meta WhatsApp client is not configured for live messaging in production. Ensure WHATSAPP_ENABLED=true and credentials are set in .env.'
+                '[WhatsAppQueueWorker] Cannot process WhatsApp queue: Meta WhatsApp client is not configured for live messaging in production. Ensure WHATSAPP_TOKEN and WHATSAPP_PHONE_NUMBER_ID are set in .env.'
             );
         }
 

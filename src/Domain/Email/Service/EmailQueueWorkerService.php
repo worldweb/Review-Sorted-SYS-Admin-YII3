@@ -53,7 +53,7 @@ final class EmailQueueWorkerService
         // Fail-fast guard in production: refuse to process/claim queue items if live provider is not configured
         if (\App\Environment::isProd() && !$this->mailgunClient->isConfigured()) {
             throw new RuntimeException(
-                '[EmailQueueWorker] Cannot process email queue: Mailgun is not configured for live sending in production. Ensure MAILGUN_ENABLED=true and credentials are set in .env.'
+                '[EmailQueueWorker] Cannot process email queue: Mailgun is not configured for live sending in production. Ensure MAILGUN_API_KEY is set in .env.'
             );
         }
 

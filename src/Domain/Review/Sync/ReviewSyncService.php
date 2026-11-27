@@ -75,7 +75,7 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
             $result->getReviewsUnchanged()
         );
 
-        if ($result->getReviewsInserted() > 0 || $result->getReviewsUpdated() > 0 || $result->hasErrors()) {
+        if ($result->getReviewsInserted() > 0 || $result->getReviewsUpdated() > 0) {
             $this->logger->info($summaryMsg);
         } else {
             $this->logger->debug($summaryMsg);
@@ -122,7 +122,7 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
             $result->getReviewsUnchanged()
         );
 
-        if ($result->getReviewsInserted() > 0 || $result->getReviewsUpdated() > 0 || $result->hasErrors()) {
+        if ($result->getReviewsInserted() > 0 || $result->getReviewsUpdated() > 0) {
             $this->logger->info($summaryMsg);
         } else {
             $this->logger->debug($summaryMsg);
@@ -290,9 +290,13 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
                 updated: $updated,
                 unchanged: $unchanged
             );
-        } catch (Throwable $e) {
+        } catch (ReviewSyncException $e) {
             $errMsg = "Failed syncing {$platformName} {$label} (ID: {$scId}): " . $e->getMessage();
-            $this->logger->error("[ReviewSync] {$errMsg}");
+            $this->logger->warning("[ReviewSync] {$errMsg}");
+            $result->addChannelResult(0, 0, 0, 0, $errMsg);
+        } catch (Throwable $e) {
+            $errMsg = "Unexpected error syncing {$platformName} {$label} (ID: {$scId}): " . $e->getMessage();
+            $this->logger->error("[ReviewSync] {$errMsg}", ['exception' => $e]);
             $result->addChannelResult(0, 0, 0, 0, $errMsg);
         } finally {
             try {

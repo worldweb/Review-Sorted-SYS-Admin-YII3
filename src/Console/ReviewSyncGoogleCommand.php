@@ -48,21 +48,27 @@ final class ReviewSyncGoogleCommand extends Command
         }
 
         $now = date('Y-m-d H:i:s');
-        $output->writeln("<info>[ReviewSyncGoogle] Starting Google review synchronization at {$now}...</info>");
+        if ($output->isVerbose()) {
+            $output->writeln("<info>[ReviewSyncGoogle] Starting Google review synchronization at {$now}...</info>");
+        }
 
         try {
             $result = $this->syncService->syncGoogleReviews($accountId, $channelId);
 
-            $output->writeln(sprintf(
-                '<info>[ReviewSyncGoogle] Processed %d location(s): %d fetched, %d inserted, %d updated, %d unchanged.</info>',
-                $result->getChannelsProcessed(),
-                $result->getReviewsFetched(),
-                $result->getReviewsInserted(),
-                $result->getReviewsUpdated(),
-                $result->getReviewsUnchanged()
-            ));
+            $hasChanges = ($result->getReviewsInserted() > 0 || $result->getReviewsUpdated() > 0);
+            if ($hasChanges || $result->hasErrors() || $output->isVerbose()) {
+                $output->writeln(sprintf(
+                    '<info>[ReviewSyncGoogle] Processed %d location(s) (%d failed): %d fetched, %d inserted, %d updated, %d unchanged.</info>',
+                    $result->getChannelsProcessed(),
+                    $result->getChannelsFailed(),
+                    $result->getReviewsFetched(),
+                    $result->getReviewsInserted(),
+                    $result->getReviewsUpdated(),
+                    $result->getReviewsUnchanged()
+                ));
+            }
 
-            if ($result->hasErrors()) {
+            if ($result->hasErrors() && $output->isVerbose()) {
                 foreach ($result->getErrors() as $err) {
                     $output->writeln("<comment>[ReviewSyncGoogle Warning] {$err}</comment>");
                 }

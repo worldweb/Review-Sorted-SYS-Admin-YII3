@@ -88,11 +88,11 @@ final class Environment
         // Social Platforms & Webhooks
         self::setString('FACEBOOK_APP_ID', '');
         self::setString('FACEBOOK_APP_SECRET', '');
-        self::setString('FACEBOOK_REDIRECT_URI', 'http://localhost/sys-yii3/settings/facebook/callback');
+        self::setString('FACEBOOK_REDIRECT_URI', '');
         self::setString('FACEBOOK_VERIFY_TOKEN', self::getRawValue('FACEBOOK_VERIFY_TOKEN') ?? self::getRawValue('RS_FACEBOOK_VERIFY_TOKEN') ?? '');
         self::setString('GOOGLE_CLIENT_ID', '');
         self::setString('GOOGLE_CLIENT_SECRET', '');
-        self::setString('GOOGLE_REDIRECT_URI', 'http://localhost/sys-yii3/settings/google/callback');
+        self::setString('GOOGLE_REDIRECT_URI', '');
 
         // QR Code Custom Landing & Development Safe Host
         self::setString('QR_CODE_GENERATION_BASE_URL', self::getRawValue('QR_CODE_GENERATION_BASE_URL') ?? self::getRawValue('RS_QR_CODE_GENERATION_BASE_URL') ?? '');

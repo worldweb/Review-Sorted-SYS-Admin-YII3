@@ -94,6 +94,51 @@ final class MailgunClient implements MailgunClientInterface
         return isset($data['id']) ? (string) $data['id'] : null;
     }
 
+    public function getEvents(string $messageId): array
+    {
+        $cleanId = trim(str_replace(['<', '>'], '', $messageId));
+        if ($cleanId === '') {
+            return [];
+        }
+
+        if (!$this->isConfigured()) {
+            if (\App\Environment::isProd()) {
+                throw new RuntimeException(
+                    '[MailgunClient] Cannot query Mailgun events in production: Mailgun is not configured.'
+                );
+            }
+            return [];
+        }
+
+        $url = rtrim($this->endpoint, '/')
+            . '/v3/' . rawurlencode($this->domain)
+            . '/events?message-id=' . rawurlencode($cleanId);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_HTTPGET => true,
+            CURLOPT_USERPWD => 'api:' . $this->apiKey,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_SSL_VERIFYPEER => true,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlErr = curl_error($ch);
+
+        if ($response === false || $curlErr !== '') {
+            throw new RuntimeException('Mailgun events connection failed: ' . ($curlErr ?: 'Unknown error'));
+        }
+
+        if ($httpCode < 200 || $httpCode >= 300) {
+            throw new RuntimeException(sprintf('Mailgun Events API returned HTTP %d', $httpCode));
+        }
+
+        $data = json_decode((string) $response, true);
+        return is_array($data) && isset($data['items']) && is_array($data['items']) ? $data['items'] : [];
+    }
+
     public function isConfigured(): bool
     {
         return $this->enabled && $this->apiKey !== '' && $this->apiKey !== 'disabled';

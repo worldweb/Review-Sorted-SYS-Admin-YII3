@@ -522,12 +522,48 @@ final class EmailRepository implements EmailRepositoryInterface
     public function markQueueDelivered(int $id): bool
     {
         return $this->db->createCommand(
-            'UPDATE {{%email_queue}} SET status = :delivered WHERE id = :id',
+            'UPDATE {{%email_queue}} SET status = :delivered WHERE id = :id AND status IN (:sent, :accepted)',
             [
                 ':delivered' => EmailQueue::STATUS_DELIVERED,
                 ':id' => $id,
+                ':sent' => EmailQueue::STATUS_SENT,
+                ':accepted' => EmailQueue::STATUS_ACCEPTED,
             ]
         )->execute() > 0;
+    }
+
+    public function markQueueAccepted(int $id): bool
+    {
+        return $this->db->createCommand(
+            'UPDATE {{%email_queue}} SET status = :accepted WHERE id = :id AND status = :sent',
+            [
+                ':accepted' => EmailQueue::STATUS_ACCEPTED,
+                ':id' => $id,
+                ':sent' => EmailQueue::STATUS_SENT,
+            ]
+        )->execute() > 0;
+    }
+
+    public function findPendingDeliveryWithExternalId(int $limit = 100): array
+    {
+        // Mailgun retains event logs for at most 30 days; order newest-first so recent emails are never starved
+        $retentionCutoff = date('Y-m-d H:i:s', strtotime('-30 days'));
+        $rows = (new Query($this->db))
+            ->from('{{%email_queue}}')
+            ->where(['status' => [EmailQueue::STATUS_SENT, EmailQueue::STATUS_ACCEPTED]])
+            ->andWhere(['not', ['external_id' => null]])
+            ->andWhere(['!=', 'external_id', ''])
+            ->andWhere(['or', ['sent_at' => null], ['>=', 'sent_at', $retentionCutoff]])
+            ->orderBy(['id' => SORT_DESC])
+            ->limit($limit)
+            ->all();
+
+        $items = [];
+        foreach ($rows as $row) {
+            $items[] = EmailQueue::fromDatabaseRow($row);
+        }
+
+        return $items;
     }
 
     public function recoverStaleQueueJobs(int $timeoutMinutes = 15): int

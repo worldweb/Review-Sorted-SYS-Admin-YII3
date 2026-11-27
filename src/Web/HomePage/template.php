@@ -402,7 +402,7 @@ $this->setTitle('Dashboard');
         </div>
     </div>
 
-    <?php if ($currentUser !== null && $currentUser->isAdmin()): ?>
+    <?php if ($currentUser !== null && $currentUser->isAdmin() && !Environment::isProd() && $debug): ?>
         <!-- Admin-Only Technical Runtime Diagnostics (Compact Collapsible) -->
         <details class="rs-card rs-p-4 rs-mt-4" style="font-size: var(--rs-font-size-sm); color: var(--rs-text-muted); background: var(--rs-surface);">
             <summary style="cursor: pointer; font-weight: 600; color: var(--rs-text-main); display: flex; align-items: center; gap: 8px;">

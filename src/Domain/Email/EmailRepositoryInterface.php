@@ -116,5 +116,14 @@ interface EmailRepositoryInterface
 
     public function markQueueDelivered(int $id): bool;
 
+    public function markQueueAccepted(int $id): bool;
+
+    /**
+     * Fetch sent/accepted queue records that have an external Mailgun message ID for status polling.
+     *
+     * @return array<int, EmailQueue>
+     */
+    public function findPendingDeliveryWithExternalId(int $limit = 100): array;
+
     public function recoverStaleQueueJobs(int $timeoutMinutes = 15): int;
 }

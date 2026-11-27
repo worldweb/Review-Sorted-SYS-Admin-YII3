@@ -65,8 +65,9 @@ final class ReviewSyncCommand extends Command
             $hasChanges = ($result->getReviewsInserted() > 0 || $result->getReviewsUpdated() > 0);
             if ($hasChanges || $result->hasErrors() || $output->isVerbose()) {
                 $output->writeln(sprintf(
-                    '<info>[ReviewSync] Processed %d channel(s): %d fetched, %d inserted, %d updated, %d unchanged.</info>',
+                    '<info>[ReviewSync] Processed %d channel(s) (%d failed): %d fetched, %d inserted, %d updated, %d unchanged.</info>',
                     $result->getChannelsProcessed(),
+                    $result->getChannelsFailed(),
                     $result->getReviewsFetched(),
                     $result->getReviewsInserted(),
                     $result->getReviewsUpdated(),
@@ -74,7 +75,7 @@ final class ReviewSyncCommand extends Command
                 ));
             }
 
-            if ($result->hasErrors()) {
+            if ($result->hasErrors() && $output->isVerbose()) {
                 foreach ($result->getErrors() as $err) {
                     $output->writeln("<comment>[ReviewSync Warning] {$err}</comment>");
                 }

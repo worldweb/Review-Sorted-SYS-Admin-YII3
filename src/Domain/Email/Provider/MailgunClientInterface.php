@@ -28,6 +28,13 @@ interface MailgunClientInterface
     ): ?string;
 
     /**
+     * Queries Mailgun Events API for delivery events matching a message ID.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getEvents(string $messageId): array;
+
+    /**
      * Checks if provider credentials and network dispatch are active.
      */
     public function isConfigured(): bool;

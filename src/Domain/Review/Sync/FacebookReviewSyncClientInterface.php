@@ -20,5 +20,34 @@ interface FacebookReviewSyncClientInterface
      * @return array<int, array<string, mixed>>
      */
     public function fetchReviews(ServiceConfig|array $config, int $maxPages = 2): array;
+
+    /**
+     * Fetches Facebook Page tagged mentions (/{pageId}/tagged).
+     *
+     * @param ServiceConfig|array<string, mixed> $config
+     * @return array<int, array<string, mixed>>
+     */
+    public function fetchPageMentions(ServiceConfig|array $config, ?string $lastObjId = null, int $maxPages = 5): array;
+
+    /**
+     * Fetches Instagram Business tagged mentions (/{instaId}/tags).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function fetchInstagramMentions(
+        string $instaObjId,
+        string $pageToken,
+        string $label,
+        ?string $lastObjId = null,
+        int $maxPages = 5,
+    ): array;
+
+    /**
+     * Fetches Facebook Page post comments/replies (/{pageId}/feed -> /{postId}/comments).
+     *
+     * @param ServiceConfig|array<string, mixed> $config
+     * @return array<int, array<string, mixed>>
+     */
+    public function fetchPostReplies(ServiceConfig|array $config, int $maxPages = 2): array;
 }
 

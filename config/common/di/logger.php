@@ -7,6 +7,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Yiisoft\Definitions\ReferencesArray;
 use Yiisoft\Log\Logger;
+use Yiisoft\Log\Message;
 use Yiisoft\Log\StreamTarget;
 
 /** @var array $params */
@@ -31,6 +32,35 @@ return [
                     LogLevel::ERROR,
                     LogLevel::WARNING,
                 ],
+        ],
+        'setFormat()' => [
+            static function (Message $message): string {
+                $timestamp = $message->time()
+                    ->setTimezone(new DateTimeZone(date_default_timezone_get()))
+                    ->format('Y-m-d H:i:s');
+                $level = strtoupper($message->level());
+                $category = $message->category();
+                $text = trim((string) preg_replace('/\s+/', ' ', $message->message()));
+                $line = "[{$timestamp}] [{$level}] [{$category}] {$text}";
+
+                $exception = $message->context('exception');
+                if ($exception instanceof Throwable) {
+                    $exMessage = trim((string) preg_replace('/\s+/', ' ', $exception->getMessage()));
+                    $line .= sprintf(
+                        ' | Exception: %s: %s in %s:%d',
+                        $exception::class,
+                        $exMessage,
+                        $exception->getFile(),
+                        $exception->getLine(),
+                    );
+                    $trace = trim($exception->getTraceAsString());
+                    if ($trace !== '') {
+                        $line .= "\nStack trace:\n" . $trace;
+                    }
+                }
+
+                return $line;
+            },
         ],
     ],
 

@@ -7,6 +7,7 @@ namespace App\Web\Hooks\Action;
 use App\Domain\Chat\ChatMessage;
 use App\Domain\Chat\ChatRepositoryInterface;
 use App\Domain\Review\Sync\ReviewSyncServiceInterface;
+use App\Domain\SocialConnection\Api;
 use App\Domain\SocialConnection\ServiceConfig;
 use App\Domain\SocialConnection\SocialConnectionRepositoryInterface;
 use App\Domain\WhatsApp\WhatsAppQueue;
@@ -121,10 +122,10 @@ final class HooksMessagesAction
     {
         $body = (string) $request->getBody();
 
-        // 1. Verify Meta HMAC SHA-256 signature
-        $appSecret = Environment::facebookAppSecret();
-        if ($appSecret === '') {
-            $this->logger->error('Facebook Webhook rejected: FACEBOOK_APP_SECRET is not configured on server');
+        // 1. Verify Meta HMAC SHA-256 signature (DB api table first, .env fallback)
+        $candidateSecrets = $this->resolveFacebookAppSecrets();
+        if (empty($candidateSecrets)) {
+            $this->logger->error('Facebook Webhook rejected: Facebook App Secret is not configured in database or environment');
             $response = $this->responseFactory->createResponse(403)
                 ->withHeader('Content-Type', 'text/plain');
             $response->getBody()->write('Forbidden: Webhook signature secret not configured.');
@@ -143,9 +144,16 @@ final class HooksMessagesAction
         }
 
         $receivedHash = substr($hubSignature, 7);
-        $expectedHash = hash_hmac('sha256', $body, $appSecret);
+        $signatureValid = false;
+        foreach ($candidateSecrets as $appSecret) {
+            $expectedHash = hash_hmac('sha256', $body, $appSecret);
+            if (hash_equals($expectedHash, $receivedHash)) {
+                $signatureValid = true;
+                break;
+            }
+        }
 
-        if (!hash_equals($expectedHash, $receivedHash)) {
+        if (!$signatureValid) {
             $this->logger->warning('Facebook Webhook rejected: X-Hub-Signature-256 hash mismatch');
             $response = $this->responseFactory->createResponse(403)
                 ->withHeader('Content-Type', 'text/plain');
@@ -212,6 +220,32 @@ final class HooksMessagesAction
             ->withHeader('Content-Type', 'text/plain');
         $response->getBody()->write('EVENT_RECEIVED');
         return $response;
+    }
+
+    /**
+     * Resolves Facebook App Secrets from the database `api` table first, falling back to `.env`.
+     *
+     * @return list<string>
+     */
+    private function resolveFacebookAppSecrets(): array
+    {
+        $secrets = [];
+        try {
+            foreach ($this->socialConnectionRepository->findApisByService(Api::SERVICE_FACEBOOK) as $api) {
+                $secret = trim((string) $api->getApiKey());
+                if ($secret !== '' && !in_array($secret, $secrets, true)) {
+                    $secrets[] = $secret;
+                }
+            }
+        } catch (Throwable) {
+        }
+
+        $envSecret = trim(Environment::facebookAppSecret());
+        if ($envSecret !== '' && !in_array($envSecret, $secrets, true)) {
+            $secrets[] = $envSecret;
+        }
+
+        return $secrets;
     }
 
     /**

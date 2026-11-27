@@ -53,16 +53,12 @@ final class GoogleReviewSyncClient implements GoogleReviewSyncClientInterface
         $label = $config instanceof ServiceConfig ? $config->getLabel() : (string) ($config['label'] ?? "Location #{$configId}");
 
         if (trim($pageToken) === '') {
-            $msg = "Google location {$label} has no OAuth credentials configured. Please connect Google in Settings.";
-            $this->logger->warning("[GoogleReviewSync] ServiceConfig #{$configId} ({$label}): {$msg}");
-            throw new ReviewSyncException($msg);
+            throw new ReviewSyncException("Google location {$label} has no OAuth credentials configured. Please connect Google in Settings.");
         }
 
         $tokenData = json_decode($pageToken, true);
         if (!is_array($tokenData) || empty($tokenData['access_token'])) {
-            $msg = "Google location {$label} has invalid or malformed OAuth token data. Please reconnect Google in Settings.";
-            $this->logger->warning("[GoogleReviewSync] ServiceConfig #{$configId} ({$label}): {$msg}");
-            throw new ReviewSyncException($msg);
+            throw new ReviewSyncException("Google location {$label} has invalid or malformed OAuth token data. Please reconnect Google in Settings.");
         }
 
         $accessToken = (string) $tokenData['access_token'];
@@ -75,9 +71,7 @@ final class GoogleReviewSyncClient implements GoogleReviewSyncClientInterface
 
         if ($isExpired) {
             if (empty($tokenData['refresh_token'])) {
-                $msg = "Google access token has expired and no refresh token is available for {$label}. Please reconnect Google in Settings.";
-                $this->logger->error("[GoogleReviewSync] ServiceConfig #{$configId} ({$label}): {$msg}");
-                throw new ReviewSyncException($msg);
+                throw new ReviewSyncException("Google access token has expired and no refresh token is available for {$label}. Please reconnect Google in Settings.");
             }
 
             $refreshed = $this->refreshAccessToken((string) $tokenData['refresh_token'], $config);
@@ -89,9 +83,7 @@ final class GoogleReviewSyncClient implements GoogleReviewSyncClientInterface
                     $this->connectionRepo->updatePageToken($configId, (string) json_encode($tokenData));
                 }
             } else {
-                $msg = "Google OAuth token refresh failed for {$label}. Please reconnect Google in Settings.";
-                $this->logger->error("[GoogleReviewSync] ServiceConfig #{$configId} ({$label}): {$msg}");
-                throw new ReviewSyncException($msg);
+                throw new ReviewSyncException("Google OAuth token refresh failed for {$label}. Please reconnect Google in Settings.");
             }
         }
 
@@ -124,16 +116,12 @@ final class GoogleReviewSyncClient implements GoogleReviewSyncClientInterface
 
                 $statusCode = $response->getStatusCode();
                 if ($statusCode !== 200) {
-                    $msg = "Google API returned HTTP status {$statusCode} for {$label} on page {$pageCounter}.";
-                    $this->logger->warning("[GoogleReviewSync] {$msg}");
-                    throw new ReviewSyncException($msg);
+                    throw new ReviewSyncException("Google API returned HTTP status {$statusCode} for {$label} on page {$pageCounter}.");
                 }
 
                 $body = json_decode((string) $response->getBody(), true);
                 if (!is_array($body)) {
-                    $msg = "Google API returned invalid non-JSON response for {$label} on page {$pageCounter}.";
-                    $this->logger->warning("[GoogleReviewSync] {$msg}");
-                    throw new ReviewSyncException($msg);
+                    throw new ReviewSyncException("Google API returned invalid non-JSON response for {$label} on page {$pageCounter}.");
                 }
 
                 $rawReviews = (array) ($body['reviews'] ?? []);
@@ -160,7 +148,7 @@ final class GoogleReviewSyncClient implements GoogleReviewSyncClientInterface
                 // If 401 Unauthorized, attempt exactly one in-flight token refresh and retry
                 if ($statusCode === 401 && !$retried401 && !empty($tokenData['refresh_token'])) {
                     $retried401 = true;
-                    $this->logger->warning("[GoogleReviewSync] Received HTTP 401 for {$label}; attempting in-flight token refresh and retry...");
+                    $this->logger->debug("[GoogleReviewSync] Received HTTP 401 for {$label}; attempting in-flight token refresh and retry...");
                     try {
                         $refreshed = $this->refreshAccessToken((string) $tokenData['refresh_token'], $config);
                         if ($refreshed !== null) {
@@ -198,7 +186,6 @@ final class GoogleReviewSyncClient implements GoogleReviewSyncClientInterface
                     } catch (ReviewSyncException $retryE) {
                         throw $retryE;
                     } catch (Throwable $retryE) {
-                        $this->logger->error("[GoogleReviewSync] In-flight token refresh / retry after 401 failed for {$label}: " . $retryE->getMessage());
                         throw new ReviewSyncException("Google API 401 Unauthorized retry failed for {$label}: " . $retryE->getMessage() . ". Please reconnect Google in Settings.", 401, $retryE);
                     }
                 }
@@ -215,14 +202,11 @@ final class GoogleReviewSyncClient implements GoogleReviewSyncClientInterface
                 } else {
                     $msg = "Google API request error for {$label} on page {$pageCounter}: {$errMsg}";
                 }
-                $this->logger->error("[GoogleReviewSync] {$msg}");
                 throw new ReviewSyncException($msg, $e->getCode(), $e);
             } catch (ReviewSyncException $e) {
                 throw $e;
             } catch (Throwable $e) {
-                $msg = "Unexpected error fetching Google reviews for {$label}: " . $e->getMessage();
-                $this->logger->error("[GoogleReviewSync] {$msg}");
-                throw new ReviewSyncException($msg, 0, $e);
+                throw new ReviewSyncException("Unexpected error fetching Google reviews for {$label}: " . $e->getMessage(), 0, $e);
             }
         } while ($nextPageToken !== null && $nextPageToken !== '');
 
@@ -342,9 +326,7 @@ final class GoogleReviewSyncClient implements GoogleReviewSyncClientInterface
         }
 
         if ($clientId === '' || $clientSecret === '') {
-            $msg = 'Missing Google client_id or client_secret for token refresh. Please configure Google API credentials in Settings.';
-            $this->logger->warning("[GoogleReviewSync] {$msg}");
-            throw new ReviewSyncException($msg);
+            throw new ReviewSyncException('Missing Google client_id or client_secret for token refresh. Please configure Google API credentials in Settings.');
         }
 
         try {
@@ -379,12 +361,9 @@ final class GoogleReviewSyncClient implements GoogleReviewSyncClientInterface
                 }
             }
             $msg = "Google OAuth token refresh rejected ({$errDetail}). Please reconnect Google in Settings.";
-            $this->logger->warning("[GoogleReviewSync] {$msg}");
             throw new ReviewSyncException($msg, $e->getCode(), $e);
         } catch (Throwable $e) {
-            $msg = 'OAuth token refresh request failed: ' . $e->getMessage();
-            $this->logger->warning("[GoogleReviewSync] {$msg}");
-            throw new ReviewSyncException($msg, 0, $e);
+            throw new ReviewSyncException('OAuth token refresh request failed: ' . $e->getMessage(), 0, $e);
         }
 
         throw new ReviewSyncException('Google OAuth token refresh returned invalid response. Please reconnect Google in Settings.');

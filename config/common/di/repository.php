@@ -107,26 +107,18 @@ return [
     \App\Domain\Email\Provider\MailgunClient::class => static function (
         \Psr\Log\LoggerInterface $logger,
     ): \App\Domain\Email\Provider\MailgunClient {
-        $isProd = \App\Environment::isProd();
-        $enabled = \App\Environment::mailgunEnabled();
-        $apiKey = \App\Environment::mailgunApiKey();
+        $apiKey = trim(\App\Environment::mailgunApiKey());
         $domain = \App\Environment::mailgunDomain();
         $endpoint = \App\Environment::mailgunEndpoint();
         $defaultFrom = (string) \App\Environment::get('MAIL_FROM_ADDRESS', 'noreply@reviewssorted.com');
-
-        // Production safety: fail fast if live sending is requested in production but credentials are missing
-        if ($isProd && $enabled && (empty($apiKey) || $apiKey === 'disabled')) {
-            throw new \RuntimeException(
-                '[MailgunClient] Live email sending is enabled (MAILGUN_ENABLED=true) in production, but MAILGUN_API_KEY is missing or invalid.'
-            );
-        }
+        $isConfigured = $apiKey !== '' && $apiKey !== 'disabled';
 
         return new \App\Domain\Email\Provider\MailgunClient(
             apiKey: $apiKey,
             domain: $domain,
             endpoint: $endpoint,
             defaultFrom: $defaultFrom,
-            enabled: $enabled,
+            enabled: $isConfigured,
             logger: $logger,
         );
     },
@@ -137,24 +129,16 @@ return [
     \App\Domain\WhatsApp\Provider\MetaWhatsAppClient::class => static function (
         \Psr\Log\LoggerInterface $logger,
     ): \App\Domain\WhatsApp\Provider\MetaWhatsAppClient {
-        $isProd = \App\Environment::isProd();
-        $enabled = \App\Environment::whatsappEnabled();
-        $token = \App\Environment::whatsappToken();
-        $phoneNumberId = \App\Environment::whatsappPhoneNumberId();
+        $token = trim(\App\Environment::whatsappToken());
+        $phoneNumberId = trim(\App\Environment::whatsappPhoneNumberId());
         $apiVersion = \App\Environment::whatsappApiVersion();
-
-        // Production safety: fail fast if live messaging is requested in production but credentials are missing
-        if ($isProd && $enabled && (empty($token) || empty($phoneNumberId))) {
-            throw new \RuntimeException(
-                '[MetaWhatsAppClient] Live WhatsApp messaging is enabled (WHATSAPP_ENABLED=true) in production, but WHATSAPP_TOKEN or WHATSAPP_PHONE_NUMBER_ID is missing.'
-            );
-        }
+        $isConfigured = $token !== '' && $phoneNumberId !== '';
 
         return new \App\Domain\WhatsApp\Provider\MetaWhatsAppClient(
             token: $token,
             phoneNumberId: $phoneNumberId,
             apiVersion: $apiVersion,
-            enabled: $enabled,
+            enabled: $isConfigured,
             logger: $logger,
         );
     },
