@@ -102,7 +102,7 @@ final class FacebookReviewSyncClient implements FacebookReviewSyncClientInterfac
                 // Safety guard against exceeding requested pagination limit
                 if ($pageCounter >= $maxPages) {
                     if ($nextUrl !== null) {
-                        $this->logger->info("[FacebookReviewSync] Reached pagination limit ({$maxPages} page(s)) for {$label}. Additional historical reviews remain available.");
+                        $this->logger->debug("[FacebookReviewSync] Reached pagination limit ({$maxPages} page(s)) for {$label}. Additional historical reviews remain available.");
                     }
                     break;
                 }
@@ -139,7 +139,7 @@ final class FacebookReviewSyncClient implements FacebookReviewSyncClientInterfac
             }
         } while ($nextUrl !== null && $nextUrl !== '');
 
-        $this->logger->info(sprintf(
+        $this->logger->debug(sprintf(
             '[FacebookReviewSync] Fetched %d review(s) across %d page(s) for %s.',
             count($reviews),
             $pageCounter,

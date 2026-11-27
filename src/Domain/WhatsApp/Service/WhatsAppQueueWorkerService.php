@@ -31,6 +31,25 @@ final class WhatsAppQueueWorkerService
      */
     public function processBatch(int $batchSize = 100): int
     {
+        $stats = $this->processBatchDetailed($batchSize);
+        return $stats['dispatched'];
+    }
+
+    /**
+     * Processes a batch of pending WhatsApp messages atomically with detailed outcome statistics.
+     *
+     * @param int $batchSize Number of pending messages to claim per iteration
+     * @return array{claimed: int, dispatched: int, failed: int, recovered_stale: int}
+     */
+    public function processBatchDetailed(int $batchSize = 100): array
+    {
+        $stats = [
+            'claimed' => 0,
+            'dispatched' => 0,
+            'failed' => 0,
+            'recovered_stale' => 0,
+        ];
+
         // Fail-fast guard in production: refuse to process/claim queue items if live provider is not configured
         if (\App\Environment::isProd() && !$this->metaWhatsAppClient->isConfigured()) {
             throw new RuntimeException(
@@ -40,6 +59,7 @@ final class WhatsAppQueueWorkerService
 
         // 1. Recover stale processing jobs older than 15 minutes
         $recovered = $this->whatsappRepo->recoverStaleQueueJobs(15);
+        $stats['recovered_stale'] = $recovered;
         if ($recovered > 0) {
             $this->logger?->warning(sprintf('[WhatsAppQueueWorker] Recovered %d stale processing jobs.', $recovered));
         }
@@ -47,11 +67,10 @@ final class WhatsAppQueueWorkerService
         // 2. Fetch pending queue items
         $pendingItems = $this->whatsappRepo->findPendingQueue($batchSize);
         if (empty($pendingItems)) {
-            return 0;
+            return $stats;
         }
 
         $now = date('Y-m-d H:i:s');
-        $successCount = 0;
 
         foreach ($pendingItems as $item) {
             if (!$item->isTimeToSend()) {
@@ -62,6 +81,8 @@ final class WhatsAppQueueWorkerService
             if (!$this->whatsappRepo->claimQueueJob($item->getId(), $now)) {
                 continue; // Job was concurrently claimed
             }
+
+            $stats['claimed']++;
 
             try {
                 $rawMessage = $item->getMessage();
@@ -130,19 +151,42 @@ final class WhatsAppQueueWorkerService
                 }
 
                 $this->whatsappRepo->markQueueSent($item->getId(), $providerMessageId);
-                $this->logger?->info(sprintf('[WhatsAppQueueWorker] Sent message #%d to %s', $item->getId(), $item->getPhone()));
-                $successCount++;
+                $this->logger?->info(sprintf('[WhatsAppQueueWorker] Sent message #%d', $item->getId()));
+                $stats['dispatched']++;
             } catch (Throwable $e) {
                 $this->whatsappRepo->markQueueFailed($item->getId());
                 $this->logger?->error(sprintf(
-                    '[WhatsAppQueueWorker] Failed sending WhatsApp message #%d to %s: %s',
+                    '[WhatsAppQueueWorker] Failed sending WhatsApp message #%d (%s): %s',
                     $item->getId(),
-                    $item->getPhone(),
-                    $e->getMessage()
+                    $e::class,
+                    $this->sanitizeErrorMessage($e->getMessage(), $item->getPhone(), $item->getMessage())
                 ));
+                $stats['failed']++;
             }
         }
 
-        return $successCount;
+        return $stats;
+    }
+
+    /**
+     * Redacts recipient PII, message content, and credentials from provider exception messages.
+     */
+    private function sanitizeErrorMessage(string $message, string $recipientPhone, string $rawMessage): string
+    {
+        if ($recipientPhone !== '') {
+            $message = str_replace($recipientPhone, '[redacted-phone]', $message);
+        }
+        if ($rawMessage !== '' && strlen($rawMessage) > 4) {
+            $message = str_replace($rawMessage, '[redacted-content]', $message);
+        }
+
+        $message = (string) preg_replace('/\+?\d[\d\-\s\(\)]{6,}\d/', '[redacted-phone]', $message);
+        $message = (string) preg_replace('/\b(Bearer\s+|EAA[a-zA-Z0-9]+|access_token[=:\s]+|api[_-]?key[=:\s]+|token[=:\s]+|secret[=:\s]+)[^\s,;"\']*/i', '$1[redacted]', $message);
+
+        if (strlen($message) > 250) {
+            $message = substr($message, 0, 250) . '... [truncated]';
+        }
+
+        return $message;
     }
 }

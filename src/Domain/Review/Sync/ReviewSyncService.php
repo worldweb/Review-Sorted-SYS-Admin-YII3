@@ -40,7 +40,7 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
     public function syncGoogleReviews(?int $accountId = null, ?int $serviceConfigId = null, int $maxPages = 50): ReviewSyncResult
     {
         $result = new ReviewSyncResult();
-        $this->logger->info('[ReviewSync] Starting Google review synchronization...');
+        $this->logger->debug('[ReviewSync] Starting Google review synchronization...');
 
         $query = (new Query($this->db))
             ->from('{{%service_config}}')
@@ -56,7 +56,7 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
 
         $configs = $query->orderBy(['id' => SORT_ASC])->all();
         if (empty($configs)) {
-            $this->logger->info('[ReviewSync] No linked Google locations found for synchronization.');
+            $this->logger->debug('[ReviewSync] No linked Google locations found for synchronization.');
             return $result;
         }
 
@@ -64,7 +64,7 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
             $this->processSingleChannel($configRow, $maxPages, $result);
         }
 
-        $this->logger->info(sprintf(
+        $summaryMsg = sprintf(
             '[ReviewSync] Google synchronization finished: %d channel(s) processed (%d successful, %d failed), %d review(s) fetched, %d inserted, %d updated, %d unchanged.',
             $result->getChannelsProcessed(),
             $result->getChannelsSuccessful(),
@@ -73,7 +73,13 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
             $result->getReviewsInserted(),
             $result->getReviewsUpdated(),
             $result->getReviewsUnchanged()
-        ));
+        );
+
+        if ($result->getReviewsInserted() > 0 || $result->getReviewsUpdated() > 0 || $result->hasErrors()) {
+            $this->logger->info($summaryMsg);
+        } else {
+            $this->logger->debug($summaryMsg);
+        }
 
         return $result;
     }
@@ -81,7 +87,7 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
     public function syncFacebookReviews(?int $accountId = null, ?int $serviceConfigId = null, int $maxPages = 50): ReviewSyncResult
     {
         $result = new ReviewSyncResult();
-        $this->logger->info('[ReviewSync] Starting Facebook review synchronization...');
+        $this->logger->debug('[ReviewSync] Starting Facebook review synchronization...');
 
         $query = (new Query($this->db))
             ->from('{{%service_config}}')
@@ -97,7 +103,7 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
 
         $configs = $query->orderBy(['id' => SORT_ASC])->all();
         if (empty($configs)) {
-            $this->logger->info('[ReviewSync] No linked Facebook Pages found for synchronization.');
+            $this->logger->debug('[ReviewSync] No linked Facebook Pages found for synchronization.');
             return $result;
         }
 
@@ -105,7 +111,7 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
             $this->processSingleChannel($configRow, $maxPages, $result);
         }
 
-        $this->logger->info(sprintf(
+        $summaryMsg = sprintf(
             '[ReviewSync] Facebook synchronization finished: %d channel(s) processed (%d successful, %d failed), %d review(s) fetched, %d inserted, %d updated, %d unchanged.',
             $result->getChannelsProcessed(),
             $result->getChannelsSuccessful(),
@@ -114,7 +120,13 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
             $result->getReviewsInserted(),
             $result->getReviewsUpdated(),
             $result->getReviewsUnchanged()
-        ));
+        );
+
+        if ($result->getReviewsInserted() > 0 || $result->getReviewsUpdated() > 0 || $result->hasErrors()) {
+            $this->logger->info($summaryMsg);
+        } else {
+            $this->logger->debug($summaryMsg);
+        }
 
         return $result;
     }
@@ -204,7 +216,7 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
             return;
         }
 
-        $this->logger->info("[ReviewSync] Syncing {$platformName}: {$label} (ID: {$scId}, Account: {$accountId})");
+        $this->logger->debug("[ReviewSync] Syncing {$platformName}: {$label} (ID: {$scId}, Account: {$accountId})");
 
         try {
             if ($isGoogle) {
@@ -324,7 +336,7 @@ final class ReviewSyncService implements ReviewSyncServiceInterface
         $missing = array_diff($existingObjIds, $returnedObjIds);
 
         if (!empty($missing)) {
-            $this->logger->info(sprintf(
+            $this->logger->debug(sprintf(
                 '[ReviewSync] Non-destructive check for %s: %d review(s) in local database are no longer returned by Google API: [%s]. Preserving records in database.',
                 $label,
                 count($missing),

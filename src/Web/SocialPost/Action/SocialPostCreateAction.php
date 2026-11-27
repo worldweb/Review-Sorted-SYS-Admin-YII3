@@ -194,6 +194,36 @@ final class SocialPostCreateAction
                 }
 
                 if ($mediaType !== 'none' && empty($validationErrors)) {
+                    $tmpPath = $mediaFile->getStream()->getMetadata('uri');
+                    if (!is_string($tmpPath) || !is_file($tmpPath) || !function_exists('finfo_open')) {
+                        $validationErrors[] = 'Unable to verify uploaded media file type.';
+                    } else {
+                        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                        $detectedMime = $finfo !== false ? finfo_file($finfo, $tmpPath) : false;
+                        if ($finfo !== false) {
+                            finfo_close($finfo);
+                        }
+
+                        $extMimeMap = [
+                            'jpg'  => ['image/jpeg', 'image/pjpeg'],
+                            'jpeg' => ['image/jpeg', 'image/pjpeg'],
+                            'png'  => ['image/png'],
+                            'gif'  => ['image/gif'],
+                            'webp' => ['image/webp'],
+                            'mp4'  => ['video/mp4', 'application/mp4'],
+                            'mov'  => ['video/quicktime'],
+                            'webm' => ['video/webm', 'audio/webm'],
+                            'ogg'  => ['video/ogg', 'audio/ogg', 'application/ogg'],
+                        ];
+                        $allowedMimes = $extMimeMap[$ext] ?? [];
+
+                        if (!is_string($detectedMime) || !in_array($detectedMime, $allowedMimes, true)) {
+                            $validationErrors[] = 'Uploaded file content does not match the expected MIME type for .' . $ext . ' files.';
+                        }
+                    }
+                }
+
+                if ($mediaType !== 'none' && empty($validationErrors)) {
                     $uploadDir = dirname(__DIR__, 4) . '/public/uploads/social-post';
                     if (!is_dir($uploadDir)) {
                         @mkdir($uploadDir, 0775, true);

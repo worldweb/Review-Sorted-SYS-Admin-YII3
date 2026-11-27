@@ -48,7 +48,9 @@ final class ReviewSyncCommand extends Command
         }
 
         $now = date('Y-m-d H:i:s');
-        $output->writeln("<info>[ReviewSync] Starting review synchronization at {$now}...</info>");
+        if ($output->isVerbose()) {
+            $output->writeln("<info>[ReviewSync] Starting review synchronization at {$now}...</info>");
+        }
 
         try {
             if ($channelId !== null || $accountId !== null) {
@@ -60,14 +62,17 @@ final class ReviewSyncCommand extends Command
                 $result = $this->syncService->syncAll();
             }
 
-            $output->writeln(sprintf(
-                '<info>[ReviewSync] Processed %d channel(s): %d fetched, %d inserted, %d updated, %d unchanged.</info>',
-                $result->getChannelsProcessed(),
-                $result->getReviewsFetched(),
-                $result->getReviewsInserted(),
-                $result->getReviewsUpdated(),
-                $result->getReviewsUnchanged()
-            ));
+            $hasChanges = ($result->getReviewsInserted() > 0 || $result->getReviewsUpdated() > 0);
+            if ($hasChanges || $result->hasErrors() || $output->isVerbose()) {
+                $output->writeln(sprintf(
+                    '<info>[ReviewSync] Processed %d channel(s): %d fetched, %d inserted, %d updated, %d unchanged.</info>',
+                    $result->getChannelsProcessed(),
+                    $result->getReviewsFetched(),
+                    $result->getReviewsInserted(),
+                    $result->getReviewsUpdated(),
+                    $result->getReviewsUnchanged()
+                ));
+            }
 
             if ($result->hasErrors()) {
                 foreach ($result->getErrors() as $err) {

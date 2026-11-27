@@ -33,12 +33,16 @@ final class SubscriptionExpireCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $today = date('Y-m-d H:i:s');
-        $output->writeln("[SubscriptionExpire] Running subscription expiration check at {$today}");
+        if ($output->isVerbose()) {
+            $output->writeln("[SubscriptionExpire] Running subscription expiration check at {$today}");
+        }
 
         $graceDays = $this->settingRepo->getInt('subscription_grace_period_days', 3);
         $graceCutoff = date('Y-m-d H:i:s', strtotime("-{$graceDays} days"));
 
-        $output->writeln("[SubscriptionExpire] Grace period: {$graceDays} days (cutoff: {$graceCutoff})");
+        if ($output->isVerbose()) {
+            $output->writeln("[SubscriptionExpire] Grace period: {$graceDays} days (cutoff: {$graceCutoff})");
+        }
 
         try {
             $distinctUserIds = $this->subscriptionRepo->findDistinctSubscribedUserIds();
@@ -58,18 +62,31 @@ final class SubscriptionExpireCommand extends Command
 
                 $periodEnd = $sub->getPlanPeriodEnd();
                 if ($periodEnd !== null && $periodEnd !== '' && $periodEnd < $graceCutoff && $sub->getStatus() === 'active') {
-                    $this->subscriptionRepo->updateSubscription($sub->getId(), [
-                        'status' => 'inactive',
-                        'stripe_status' => 'past_due',
-                        'expire_at' => $today,
-                    ]);
+                    $deactivatedAccountId = null;
+                    $transaction = $this->db->beginTransaction();
+                    try {
+                        $this->subscriptionRepo->updateSubscription($sub->getId(), [
+                            'status' => 'inactive',
+                            'stripe_status' => 'past_due',
+                            'expire_at' => $today,
+                        ]);
 
-                    // Resolve account ID
-                    $userRow = $this->db->createCommand('SELECT account_id FROM {{%user}} WHERE id = :id', [':id' => $userId])->queryOne();
-                    if ($userRow && !empty($userRow['account_id'])) {
-                        $accountId = (int) $userRow['account_id'];
-                        $this->accountRepo->updateSubscriptionEntitlements($accountId, 0, false);
-                        $output->writeln("<info>[SubscriptionExpire] Deactivated expired account #{$accountId} (User #{$userId}, Sub #{$sub->getId()})</info>");
+                        // Resolve account ID
+                        $userRow = $this->db->createCommand('SELECT account_id FROM {{%user}} WHERE id = :id', [':id' => $userId])->queryOne();
+                        if ($userRow && !empty($userRow['account_id'])) {
+                            $accountId = (int) $userRow['account_id'];
+                            $this->accountRepo->updateSubscriptionEntitlements($accountId, 0, false);
+                            $deactivatedAccountId = $accountId;
+                        }
+
+                        $transaction->commit();
+                    } catch (Throwable $e) {
+                        $transaction->rollBack();
+                        throw $e;
+                    }
+
+                    if ($deactivatedAccountId !== null) {
+                        $output->writeln("<info>[SubscriptionExpire] Deactivated expired account #{$deactivatedAccountId} (User #{$userId}, Sub #{$sub->getId()})</info>");
                     }
 
                     $expiredCount++;
@@ -79,7 +96,9 @@ final class SubscriptionExpireCommand extends Command
             }
         }
 
-        $output->writeln("[SubscriptionExpire] Processed completed. Deactivated {$expiredCount} expired subscriptions.");
+        if ($expiredCount > 0 || $output->isVerbose()) {
+            $output->writeln("[SubscriptionExpire] Processed completed. Deactivated {$expiredCount} expired subscriptions.");
+        }
         return ExitCode::OK;
     }
 }

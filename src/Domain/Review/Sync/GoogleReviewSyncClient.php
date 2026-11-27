@@ -149,7 +149,7 @@ final class GoogleReviewSyncClient implements GoogleReviewSyncClientInterface
                 // Safety guard against exceeding requested pagination limit
                 if ($pageCounter >= $maxPages) {
                     if ($nextPageToken !== null) {
-                        $this->logger->info("[GoogleReviewSync] Reached pagination limit ({$maxPages} page(s)) for {$label}. Additional historical reviews remain available.");
+                        $this->logger->debug("[GoogleReviewSync] Reached pagination limit ({$maxPages} page(s)) for {$label}. Additional historical reviews remain available.");
                     }
                     break;
                 }
@@ -226,7 +226,7 @@ final class GoogleReviewSyncClient implements GoogleReviewSyncClientInterface
             }
         } while ($nextPageToken !== null && $nextPageToken !== '');
 
-        $this->logger->info(sprintf(
+        $this->logger->debug(sprintf(
             '[GoogleReviewSync] Fetched %d review(s) across %d page(s) for %s.',
             count($reviews),
             $pageCounter,

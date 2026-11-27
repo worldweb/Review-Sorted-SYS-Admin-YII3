@@ -10,6 +10,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 use Yiisoft\Yii\Console\ExitCode;
 
 #[AsCommand(
@@ -38,11 +39,29 @@ final class EmailQueueProcessCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $batchSize = max(1, (int) $input->getOption('batch-size'));
-        $output->writeln(sprintf('<info>Starting email queue worker (batch size: %d)...</info>', $batchSize));
+        if ($output->isVerbose()) {
+            $output->writeln(sprintf('<info>Starting email queue worker (batch size: %d)...</info>', $batchSize));
+        }
 
-        $dispatched = $this->workerService->processBatch($batchSize);
-        $output->writeln(sprintf('<info>Completed. Successfully processed %d emails.</info>', $dispatched));
+        try {
+            $stats = $this->workerService->processBatchDetailed($batchSize);
 
-        return ExitCode::OK;
+            if ($stats['recovered_stale'] > 0) {
+                $output->writeln(sprintf('<comment>[EmailQueue] Recovered %d stale processing email job(s).</comment>', $stats['recovered_stale']));
+            }
+
+            if ($stats['failed'] > 0) {
+                $output->writeln(sprintf('<error>[EmailQueue] %d email(s) failed delivery. Check app.log for details.</error>', $stats['failed']));
+            }
+
+            if ($stats['dispatched'] > 0 || $output->isVerbose()) {
+                $output->writeln(sprintf('<info>Completed. Successfully processed %d emails.</info>', $stats['dispatched']));
+            }
+
+            return ExitCode::OK;
+        } catch (Throwable $e) {
+            $output->writeln(sprintf('<error>[EmailQueue Error] %s</error>', $e->getMessage()));
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
     }
 }

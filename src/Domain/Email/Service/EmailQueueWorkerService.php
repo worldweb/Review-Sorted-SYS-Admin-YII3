@@ -31,6 +31,25 @@ final class EmailQueueWorkerService
      */
     public function processBatch(int $batchSize = 100): int
     {
+        $stats = $this->processBatchDetailed($batchSize);
+        return $stats['dispatched'];
+    }
+
+    /**
+     * Processes a batch of pending emails atomically with detailed outcome statistics.
+     *
+     * @param int $batchSize Number of pending messages to claim per iteration
+     * @return array{claimed: int, dispatched: int, failed: int, recovered_stale: int}
+     */
+    public function processBatchDetailed(int $batchSize = 100): array
+    {
+        $stats = [
+            'claimed' => 0,
+            'dispatched' => 0,
+            'failed' => 0,
+            'recovered_stale' => 0,
+        ];
+
         // Fail-fast guard in production: refuse to process/claim queue items if live provider is not configured
         if (\App\Environment::isProd() && !$this->mailgunClient->isConfigured()) {
             throw new RuntimeException(
@@ -40,6 +59,7 @@ final class EmailQueueWorkerService
 
         // 1. Recover stale processing jobs older than 15 minutes
         $recovered = $this->emailRepo->recoverStaleQueueJobs(15);
+        $stats['recovered_stale'] = $recovered;
         if ($recovered > 0) {
             $this->logger?->warning(sprintf('[EmailQueueWorker] Recovered %d stale processing email jobs.', $recovered));
         }
@@ -47,11 +67,10 @@ final class EmailQueueWorkerService
         // 2. Fetch pending queue items
         $pendingItems = $this->emailRepo->findPendingQueue($batchSize);
         if (empty($pendingItems)) {
-            return 0;
+            return $stats;
         }
 
         $now = date('Y-m-d H:i:s');
-        $successCount = 0;
 
         foreach ($pendingItems as $item) {
             if (!$item->isTimeToSend()) {
@@ -62,6 +81,8 @@ final class EmailQueueWorkerService
             if (!$this->emailRepo->claimQueueJob($item->getId(), $now)) {
                 continue; // Job was concurrently claimed by another worker
             }
+
+            $stats['claimed']++;
 
             try {
                 $bccList = [];
@@ -81,19 +102,42 @@ final class EmailQueueWorkerService
                 );
 
                 $this->emailRepo->markQueueSent($item->getId(), $externalId);
-                $this->logger?->info(sprintf('[EmailQueueWorker] Sent email #%d to %s', $item->getId(), $item->getEmail()));
-                $successCount++;
+                $this->logger?->info(sprintf('[EmailQueueWorker] Sent email #%d', $item->getId()));
+                $stats['dispatched']++;
             } catch (Throwable $e) {
                 $this->emailRepo->markQueueFailed($item->getId());
                 $this->logger?->error(sprintf(
-                    '[EmailQueueWorker] Failed sending email #%d to %s: %s',
+                    '[EmailQueueWorker] Failed sending email #%d (%s): %s',
                     $item->getId(),
-                    $item->getEmail(),
-                    $e->getMessage()
+                    $e::class,
+                    $this->sanitizeErrorMessage($e->getMessage(), $item->getEmail(), $item->getBody())
                 ));
+                $stats['failed']++;
             }
         }
 
-        return $successCount;
+        return $stats;
+    }
+
+    /**
+     * Redacts recipient PII, message content, and credentials from provider exception messages.
+     */
+    private function sanitizeErrorMessage(string $message, string $recipientEmail, string $body): string
+    {
+        if ($recipientEmail !== '') {
+            $message = str_ireplace($recipientEmail, '[redacted-email]', $message);
+        }
+        if ($body !== '' && strlen($body) > 4) {
+            $message = str_replace($body, '[redacted-content]', $message);
+        }
+
+        $message = (string) preg_replace('/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/', '[redacted-email]', $message);
+        $message = (string) preg_replace('/\b(Bearer\s+|Basic\s+|api[_-]?key[=:\s]+|token[=:\s]+|secret[=:\s]+|key-[a-zA-Z0-9]+)[^\s,;"\']*/i', '$1[redacted]', $message);
+
+        if (strlen($message) > 250) {
+            $message = substr($message, 0, 250) . '... [truncated]';
+        }
+
+        return $message;
     }
 }
