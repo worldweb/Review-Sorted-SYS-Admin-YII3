@@ -12,17 +12,17 @@ use Yiisoft\Log\StreamTarget;
 
 /** @var array $params */
 
+$logDir = dirname(__DIR__, 3) . '/runtime/logs';
+if (!is_dir($logDir)) {
+    @mkdir($logDir, 0775, true);
+}
+$isLogDirWritable = is_writable($logDir);
+
 return [
     StreamTarget::class => [
         'class' => StreamTarget::class,
         '__construct()' => [
-            'stream' => (function (): string {
-                $logDir = dirname(__DIR__, 3) . '/runtime/logs';
-                if (!is_dir($logDir)) {
-                    @mkdir($logDir, 0775, true);
-                }
-                return is_writable($logDir) ? $logDir . '/app.log' : 'php://stderr';
-            })(),
+            'stream' => $isLogDirWritable ? $logDir . '/app.log' : 'php://stderr',
             'levels' => Environment::appDebug()
                 ? []
                 : [
@@ -32,6 +32,26 @@ return [
                     LogLevel::ERROR,
                     LogLevel::WARNING,
                 ],
+        ],
+        'setEnabled()' => [
+            static function () use ($isLogDirWritable): bool {
+                if ($isLogDirWritable || PHP_SAPI !== 'cli' || Environment::cronLogEnabled()) {
+                    return true;
+                }
+
+                $isInteractive = function_exists('stream_isatty') && defined('STDOUT') && @stream_isatty(STDOUT);
+                if ($isInteractive) {
+                    return true;
+                }
+
+                foreach ($_SERVER['argv'] ?? [] as $arg) {
+                    if ($arg === '--verbose' || $arg === '-v' || $arg === '-vv' || $arg === '-vvv' || str_starts_with((string) $arg, '--verbose=')) {
+                        return true;
+                    }
+                }
+
+                return false;
+            },
         ],
         'setFormat()' => [
             static function (Message $message): string {

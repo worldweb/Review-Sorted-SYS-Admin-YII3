@@ -103,6 +103,9 @@ final class Environment
         self::setBoolean('SESSION_COOKIE_HTTPONLY', true);
         self::setString('SESSION_COOKIE_SAMESITE', 'lax');
 
+        // Cron Logging
+        self::setBoolean('CRON_LOG_ENABLED', true);
+
         // Validate production secrets if running in genuine production
         self::validateProductionConfig();
     }
@@ -289,6 +292,11 @@ final class Environment
     public static function appC3(): bool
     {
         return (bool) (self::$values['APP_C3'] ?? false);
+    }
+
+    public static function cronLogEnabled(): bool
+    {
+        return (bool) (self::$values['CRON_LOG_ENABLED'] ?? true);
     }
 
     public static function appKey(): string
